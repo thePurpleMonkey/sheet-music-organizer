@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Michael Humphrey">
+
+    <title>Sign in - Sheet Music Organizer</title>
+
+    <!-- Custom styles for this template -->
+	<link href="css/signin.css" rel="stylesheet">
+	
+	<!-- Scripts -->
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  </head>
+
+  <body class="text-center">
+		<!-- Alert -->
+		<div class="alert alert-danger alert-dismissible" role="alert" style="display:none;">
+			<strong>There was a problem logging in:</strong><br>
+			<span id="reason"></span>
+			<button type="button" class="close" aria-label="Close" id="alert-close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+
+		<!-- Form -->
+		<form class="form-signin">
+			<h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+			<input type="email" id="email" class="form-control" placeholder="Email address" required autofocus>
+			<input type="password" id="password" class="form-control" placeholder="Password" required>
+			<button class="btn btn-lg btn-primary btn-block" type="button" id="login">Sign in</button>
+			<p class="mt-5 mb-3 text-muted">&copy; 2019 Michael Humphrey<br>All Rights Reserved</p>
+		</form>
+
+		<!-- Modal -->
+		<div class="modal fade in" tabindex="-1" role="dialog" id="wait">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Logging in...</h5>
+				</div>
+				<div class="modal-body">
+					<p>Please wait while we authenticate you...</p>
+				</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Script -->
+		<script>
+			$("#login").click(function() {
+				$("#wait").modal();
+				$('#wait').on('shown.bs.modal', function (e) {
+					$.post("/user/login", JSON.stringify({email: $("#email").val(), password: $("#password").val()}))
+						.done(function( data ) {
+							window.location.href = "/collections.html";
+						})
+						.fail(function( data ) {
+							$("#reason").text(data.responseJSON.error);
+							$(".alert").show()
+							console.log(data.responseJSON)
+						})
+						.always(function() {
+							console.log("Hiding modal...")
+							$("#wait").modal("hide")
+						});
+				});
+			});
+
+			$("#alert-close").click(function() {
+				$(".alert").hide()
+			})
+		</script>
+  </body>
+</html>
