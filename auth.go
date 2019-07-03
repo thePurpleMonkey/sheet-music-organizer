@@ -63,7 +63,6 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if checkPasswordHash(user.Password, hashedPassword) {
-
 		// Set user as authenticated
 		session.Values["authenticated"] = true
 		session.Values["name"] = name
@@ -74,6 +73,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}
 	} else {
+		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte(`{"error": "Incorrect email or password"}`))
 	}
@@ -111,6 +111,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 	// Create user in database
 	if _, err = db.Exec("INSERT INTO users VALUES ($1, $2, $3)", user.Email, hashedPass, user.Name); err != nil {
 		if err.(*pq.Error).Code == "23505" {
+			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(`{"error": "Email already registered"}`))
 		} else {
