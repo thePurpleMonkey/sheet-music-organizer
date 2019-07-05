@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Michael Humphrey">
+
+    <title>Songs - Sheet Music Organizer</title>
+	
+	<!-- Scripts -->
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  </head>
+
+  <body>
+	  <div class="container">
+			<!-- Header -->
+		  <h1>Songs:</h1>
+		  <hr>
+
+			<!-- Alert -->
+			<div class="alert alert-success alert-dismissible" role="alert" style="display:none;">
+				<strong>Song added!</strong><br>
+				The song was successfully added to your collection.
+				<button type="button" class="close" aria-label="Close" id="alert-close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+			<!-- All songs list -->
+			<div id="all_songs">
+					<ul id="songs">
+					</ul>
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_song_modal" id="new_collection">Add song</button>
+			</div>
+	  </div>
+
+	  <!-- New collection modal -->
+	  <div class="modal fade" id="add_song_modal" tabindex="-1" role="dialog">
+			<div class="modal-dialog modal-lg" role="document">
+			  <div class="modal-content">
+				<div class="modal-header">
+				  <h5 class="modal-title" id="exampleModalLabel">Add song</h5>
+				  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				  </button>
+				</div>
+				<div class="modal-body">
+				  <form>
+					<div class="form-group">
+					  <label for="name" class="col-form-label">Name:</label>
+					  <input type="text" class="form-control" id="name">
+					</div>
+					<div class="form-group">
+					  <label for="artist" class="col-form-label">Artist:</label>
+					  <input type="text" class="form-control" id="artist">
+					</div>
+					<div class="form-group">
+					  <label for="location" class="col-form-label">Location:</label>
+					  <input type="text" class="form-control" id="location">
+					</div>
+					<div class="form-group">
+					  <label for="last_performed" class="col-form-label">Last Performed:</label>
+					  <input type="date" class="form-control" id="last_performed">
+					</div>
+					<div class="form-group">
+					  <label for="notes" class="col-form-label">Notes:</label>
+					  <textarea class="form-control" id="notes"></textarea>
+					</div>
+				  </form>
+				</div>
+				<div class="modal-footer">
+				  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				  <button type="button" class="btn btn-primary" id="add_song">Add song</button>
+				</div>
+			  </div>
+			</div>
+		</div>
+
+		<!-- Wait modal -->
+		<div class="modal fade in" tabindex="-1" role="dialog" id="wait">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Adding song...</h5>
+					</div>
+					<div class="modal-body">
+						<p>Please wait while we add this song to your collection...</p>
+					</div>
+					</div>
+				</div>
+			</div>
+		
+		<!-- Script -->
+		<script>
+			'strict';
+
+			// Code snippet pulled from https://stackoverflow.com/questions/19491336/get-url-parameter-jquery-or-how-to-get-query-string-values-in-js
+			var getUrlParameter = function getUrlParameter(sParam) {
+				var sPageURL = window.location.search.substring(1),
+						sURLVariables = sPageURL.split('&'),
+						sParameterName,
+						i;
+
+				for (i = 0; i < sURLVariables.length; i++) {
+					sParameterName = sURLVariables[i].split('=');
+
+					if (sParameterName[0] === sParam) {
+							return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+					}
+				}
+			};
+			
+			// Parse collection ID from URL parameter
+			let collection_id = getUrlParameter("collection_id")
+
+			function reloadSongs() {
+				$("#songs").empty();
+				$("#songs").append("<li>Loading songs, please wait...</li>");
+				$.get(`/collections/${collection_id}/songs`)
+				.done(function(data) {
+					console.log(data);
+					$("#songs").empty();
+
+					data.forEach(song => {
+						let li = $("<li>");
+						let a = $("<a>");
+						a.attr("href", `/song.html?name=${encodeURIComponent(song.name)}&collection_id=${collection_id}`);
+						a.text(song.name);
+						li.append(a);
+						$("#songs").append(li);
+					});
+				})
+				.fail(function(data) {
+					alert("Unable to get songs.\n" + data.responseJSON.error);
+				})
+				.always(function() {
+					$("#loading").remove();
+				});
+			};
+
+			reloadSongs();
+
+			// Make API call after wait dialog is shown
+			$('#wait').on('shown.bs.modal', function (e) {
+				let payload = JSON.stringify({
+					name: $("#name").val(), 
+					artist: $("#artist").val(),
+					location: $("#location").val(),
+					last_performed: $("#last_performed").val(),
+					notes: $("#notes").val(),
+				});
+				$.post(`/collections/${collection_id}/songs`, payload)
+				.done(function(data) {
+					console.log(data);
+					$(".alert").show();
+				})
+				.fail(function(data) {
+					alert("Unable to add song.\n" + data.responseJSON.error);
+				})
+				.always(function() {
+					$("#wait").modal("hide");
+					reloadSongs();
+				});
+			});
+			
+			// Show wait dialog after add song modal is closed
+			$('#add_song_modal').on('hidden.bs.modal', function (e) {
+				$("#wait").modal("show");
+			});
+
+			$("#add_song").click(function() {
+				$("#add_song_modal").modal("hide");
+			});
+			
+			// Close alert
+			$("#alert-close").click(function() {
+				$(".alert").hide()
+			});
+		</script>
+  </body>
+</html>

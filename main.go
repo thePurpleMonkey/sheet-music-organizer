@@ -14,27 +14,19 @@ import (
 
 var db *sql.DB
 
-func secret(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "session")
-
-	// Check if user is authenticated
-	if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
-	}
-
-	// Print secret message
-	fmt.Fprintln(w, "The cake is a lie!")
-}
-
 func makeRouter() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/secret", secret)
 
-	// Authentication layer
+	// Users
 	r.HandleFunc("/user/login", login).Methods("POST")
 	r.HandleFunc("/user/logout", logout)
 	r.HandleFunc("/user/register", register).Methods("POST")
+
+	// Collections
+	r.HandleFunc("/collections", RequireAuthentication(CollectionsHandler)).Methods("GET", "POST")
+	r.HandleFunc("/collections/{collection_id}", RequireAuthentication(CollectionHandler)).Methods("GET", "POST")
+	r.HandleFunc("/collections/{collection_id}/songs", RequireAuthentication(SongsHandler)).Methods("GET", "POST")
+	r.HandleFunc("/collections/{collection_id}/songs/{song_name}", RequireAuthentication(SongHandler)).Methods("GET", "POST")
 
 	r.HandleFunc("/books/{title}/page/{page}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -57,8 +49,6 @@ func main() {
 	} else {
 		fmt.Println(os.Getenv("SESSION_KEY"))
 	}
-	// Parse templates
-	// tmpl := template.Must(template.ParseFiles("templates/layout.html"))
 
 	// Initialize router
 	r := makeRouter()

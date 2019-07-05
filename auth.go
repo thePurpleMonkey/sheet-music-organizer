@@ -66,6 +66,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		// Set user as authenticated
 		session.Values["authenticated"] = true
 		session.Values["name"] = name
+		session.Values["email"] = user.Email
 		if err := session.Save(r, w); err != nil {
 			log.Fatal(err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -124,5 +125,28 @@ func register(w http.ResponseWriter, r *http.Request) {
 
 	// Set user as authenticated
 	session.Values["authenticated"] = true
+	session.Values["name"] = user.Name
+	session.Values["email"] = user.Email
 	session.Save(r, w)
+}
+
+// RequireAuthentication is a middleware that checks if the user is authenticated,
+// and returns a 403 Forbidden error if not.
+func RequireAuthentication(f http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, err := store.Get(r, "session")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Fatal(err)
+			return
+		}
+
+		// Check if user is authenticated
+		if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+
+		f(w, r)
+	}
 }

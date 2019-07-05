@@ -62,11 +62,11 @@
 					})
 					.fail(function( data ) {
 						$("#reason").text(data.responseJSON.error);
-						$(".alert").show()
-						console.log(data.responseJSON)
+						$(".alert").show();
+						console.log(data.responseJSON);
 					})
 					.always(function() {
-						$("#wait").modal("hide")
+						$("#wait").modal("hide");
 					});
 			});
 
