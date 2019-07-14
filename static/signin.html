@@ -57,7 +57,11 @@
 				$('#wait').on('shown.bs.modal', function (e) {
 					$.post("/user/login", JSON.stringify({email: $("#email").val(), password: $("#password").val()}))
 						.done(function( data ) {
-							window.location.href = "/collections.html";
+							let redirect = new URL(window.location.href).searchParams.get("redirect");
+							if (redirect === null) {
+								redirect = "/collections.html";
+							}
+							window.location.href = redirect;
 						})
 						.fail(function( data ) {
 							$("#reason").text(data.responseJSON.error);
@@ -73,7 +77,14 @@
 
 			$("#alert-close").click(function() {
 				$(".alert").hide()
-			})
+			});
+
+			$('#password').keypress(function (e) {
+				if (e.which === 13) {
+					$('#login').click();
+					return false;
+				}
+			});
 		</script>
   </body>
 </html>

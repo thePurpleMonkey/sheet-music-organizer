@@ -6,7 +6,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
@@ -62,21 +64,53 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if checkPasswordHash(user.Password, hashedPassword) {
-		// Set user as authenticated
-		session.Values["authenticated"] = true
-		session.Values["name"] = name
-		session.Values["email"] = user.Email
-		if err := session.Save(r, w); err != nil {
-			log.Fatal(err)
-			w.WriteHeader(http.StatusInternalServerError)
-		} else {
-			w.WriteHeader(http.StatusOK)
-		}
-	} else {
+	if !checkPasswordHash(user.Password, hashedPassword) {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte(`{"error": "Incorrect email or password"}`))
+		return
+	}
+
+	// Get a list of all user's collections
+	rows, err := db.Query("SELECT collection_id FROM collection_members WHERE user_email = $1", user.Email)
+	if err != nil {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"error": "Error retrieving your collections from database."}`))
+		log.Fatalf("Login - Unable to retrieve collection ids from database: %v\n", err)
+		return
+	}
+	defer rows.Close()
+
+	// Retrieve rows from database
+	IDs := make([]int64, 0)
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			log.Printf("Login - Error scanning rows: %v\n", err)
+		}
+		IDs = append(IDs, id)
+	}
+
+	// Check for errors from iterating over rows.
+	if err := rows.Err(); err != nil {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"error": "Error retrieving collections from database."}`))
+		log.Fatalf("Login - Unable to read collection IDs from database: %v\n", err)
+		return
+	}
+
+	// Set user as authenticated
+	session.Values["authenticated"] = true
+	session.Values["name"] = name
+	session.Values["email"] = user.Email
+	session.Values["ids"] = IDs
+	if err := session.Save(r, w); err != nil {
+		log.Fatal(err)
+		w.WriteHeader(http.StatusInternalServerError)
+	} else {
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
@@ -93,7 +127,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 func register(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session")
 
-	// Parse and decode the request body into a new `Credentials` instance
+	// Parse and decode the request body into a new `User` instance
 	user := &User{}
 	err := json.NewDecoder(r.Body).Decode(user)
 	if err != nil {
@@ -148,5 +182,39 @@ func RequireAuthentication(f http.HandlerFunc) http.HandlerFunc {
 		}
 
 		f(w, r)
+	}
+}
+
+// VerifyCollectionID is a middleware that checks if the user is authorized
+// to access a collection, and returns a 403 Forbidden error if not.
+func VerifyCollectionID(f http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, err := store.Get(r, "session")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Fatal(err)
+			return
+		}
+
+		acceptableIDs := session.Values["ids"].([]int)
+
+		// Get URL parameter
+		collectionID, err := strconv.Atoi(mux.Vars(r)["collection_id"])
+		if err != nil {
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`{"error": "Unable to parse collection id."}`))
+			log.Printf("Collection ID middleware - Unable to get collection id: %v\n", err)
+			return
+		}
+
+		for _, id := range acceptableIDs {
+			if collectionID == id {
+				f(w, r)
+				return
+			}
+		}
+
+		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 }

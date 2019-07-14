@@ -116,6 +116,15 @@ func SongsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Input validation
+		if song.Name == "" {
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`{"error": "Cannot add a song with a blank name."}`))
+			log.Println("Songs POST - Cannot create a song with a blank name.")
+			return
+		}
+
 		// Create collection in database
 		if _, err = db.Exec("INSERT INTO songs(name, artist, location, last_performed, notes, added_by, collection_id) VALUES ($1, $2, $3, $4, $5, $6, $7)",
 			song.Name, song.Artist, song.Location, song.LastPerformed.Time, song.Notes, session.Values["email"], collectionID); err != nil {
