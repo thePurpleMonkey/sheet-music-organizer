@@ -39,6 +39,7 @@ $(function() {
         collection.name = data.name;
         collection.description = data.description;
 
+        $("#page_header").text(collection.name);
         $("#collection_name").val(collection.name);
         $("#collection_description").val(collection.description);
     })
@@ -72,7 +73,12 @@ function reloadSongs() {
         if (data.status == 403) {
             window.location.replace("/404.html");
         }
-        alert("Unable to get songs.\n" + data.responseJSON.error);
+
+        let message = "Unable to get songs.";
+        if (data.responseJSON !== undefined) {
+            message += "\n" + data.responseJSON.error;
+        }
+        alert(message);
     })
     .always(function() {
         $("#loading").remove();
@@ -111,16 +117,25 @@ $('#song_wait').on('shown.bs.modal', function (e) {
         name: $("#name").val(), 
         artist: $("#artist").val(),
         location: $("#location").val(),
-        last_performed: $("#last_performed").val(),
         notes: $("#notes").val(),
     });
+
+    let last_performed = $("#last_performed").val();
+    if (last_performed !== "") {
+        payload.last_performed = new Date(last_performed).toISOString();
+    }
+
     $.post(`/collections/${collection.id}/songs`, payload)
     .done(function(data) {
         console.log(data);
         $("#song_added_alert").show();
     })
     .fail(function(data) {
-        alert("Unable to add song.\n" + data.responseJSON.error);
+        let message = "Unable to add song.";
+        if (data.responseJSON !== undefined) {
+            message += "\n" + data.responseJSON.error
+        }
+        alert(message);
     })
     .always(function() {
         add_song = false;
@@ -175,7 +190,7 @@ $('#edit_collection_wait').on('shown.bs.modal', function (e) {
     });
 });
 
-// Delete collection collection
+// Delete collection
 $("#delete_collection").click(function() {
     delete_collection = true;
     $("#delete_collection_modal").modal("hide");

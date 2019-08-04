@@ -196,10 +196,10 @@ func VerifyCollectionID(f http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		acceptableIDs := session.Values["ids"].([]int)
+		acceptableIDs := session.Values["ids"].([]int64)
 
 		// Get URL parameter
-		collectionID, err := strconv.Atoi(mux.Vars(r)["collection_id"])
+		collectionID, err := strconv.ParseInt(mux.Vars(r)["collection_id"], 10, 64)
 		if err != nil {
 			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)

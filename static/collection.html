@@ -7,11 +7,11 @@
 
     <title>Songs - Sheet Music Organizer</title>
   
-  <!-- Scripts -->
-  <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
   </head>
 
   <body>
@@ -50,7 +50,7 @@
 
     <div class="container">
       <!-- Header -->
-      <h1>Songs:</h1>
+      <h1 id="page_header">Loading...</h1>
       <hr>
 
       <!-- Song added alert -->
@@ -84,14 +84,14 @@
       <div class="row">
         <!-- All songs list -->
         <div id="all_songs" class="col-sm">
-          <h2>All songs in collection</h2>
+          <h3>Songs</h3>
           <div id="songs" class="list-group"></div>
           <div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_song_modal" style="width: 10em;">Add song</button></div>
         </div>
   
         <!-- Tags -->
         <div id="all_tags" class="col-sm">
-          <h2>All Tags in collection</h2>
+          <h3>Tags</h3>
           <div id="tags" class="list-group"></div>
           <div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_tag_modal" style="width: 10em;">Add Tag</button></div>
         </div>
