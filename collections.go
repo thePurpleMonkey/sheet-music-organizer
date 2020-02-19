@@ -125,7 +125,13 @@ func CollectionsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		log.Printf("%v | Adding %v to authorized session IDs.", session.Values["email"], collection.CollectionID)
 		session.Values["ids"] = append(session.Values["ids"].([]int64), collection.CollectionID)
+		if err = session.Save(r, w); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Println(err)
+			return
+		}
 
 		w.WriteHeader(http.StatusCreated)
 	}

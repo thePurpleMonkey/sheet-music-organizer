@@ -215,6 +215,7 @@ func VerifyCollectionID(f http.HandlerFunc) http.HandlerFunc {
 			}
 		}
 
+		log.Printf("%v | %v not found in authorized collection IDs: %v", session.Values["email"], collectionID, acceptableIDs)
 		http.Error(w, "Forbidden", http.StatusForbidden)
 	}
 }
