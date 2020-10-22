@@ -2,14 +2,18 @@
 
 let url = new URL(window.location.href);
 let delete_song = false;
+let add_tag = false;
+let delete_tag = undefined;
+let edit_mode = false;
 
 let song = {
     // Parse name and collection ID from URL parameter
-	name: url.searchParams.get("name"),
+    song_id: url.searchParams.get("song_id"),
 	collection_id: url.searchParams.get("collection_id"),
 	
 
     // These attributes get set after an AJAX call to server
+    name: undefined,
     artist: undefined,
     date_added: undefined,
     location: undefined,
@@ -18,16 +22,98 @@ let song = {
     added_by: undefined
 };
 
+function tag_button_handler(e)
+{
+    let tag_id = $(e.target).data("tag_id");
+
+    if (edit_mode) {
+        $("#delete_tag_wait_modal").modal("show");
+        delete_tag = tag_id;
+    } else {
+        // Link to tag
+        window.location.href = `tag.html?tag_id=${tag_id}&collection_id=${song.collection_id}`;
+    }
+}
+
+// Get all tags for this song
+function refresh_tags() {
+    $.get(`/collections/${song.collection_id}/songs/${song.song_id}/tags`)
+    .done(function(song_tags) {
+        console.log("Tags this song has been tagged with:");
+        console.log(song_tags);
+
+        // Add tags to page
+        $("#tag_container").children().not("#add_tag_button").remove();
+        if (song_tags != null) {
+            song_tags.forEach(tag => {
+                let tag_button = $("<button>")
+                    .attr("type", "button")
+                    .data("tag_id", tag.tag_id)
+                    .addClass("btn btn-secondary")
+                    .text(tag.name)
+                    .click(tag_button_handler);
+                $("#tag_container").children().last().before(tag_button);
+            });
+        }
+
+        // Calculate what tags can be added to this song
+        refresh_available_tags(song_tags);
+    })
+    .fail(function(data) {
+        alert("Unable to get song tags information.\n" + data.responseJSON.error);
+    });
+}
+
+// Populate the list of tags that can be added to a song
+function refresh_available_tags(song_tags) {
+    $.get(`/collections/${song.collection_id}/tags`)
+    .done(function(data) {
+        let used_tag_ids = [];
+        let available_tags = [];
+
+        console.log("All tags in this collection:");
+        console.log(data);
+
+        if (song_tags == null) {
+            song_tags = [];
+        }
+
+        // Get a list of tag IDs that have already been used
+        song_tags.forEach(tag => used_tag_ids.push(tag.tag_id));
+
+        // Generate a list of tags that are have not already been used
+        data.forEach(tag => {
+            if (!used_tag_ids.includes(tag.tag_id)) {
+                available_tags.push(tag);
+            }
+        });
+
+        console.log("Available tags:");
+        console.log(available_tags);
+        
+        // Add tags to option list
+        $("#tag_list").empty();
+        $("#tag_list").append($("<option>").attr("value", "").attr("selected", "selected").attr("disabled", true).attr("hidden", true).text("Please select a tag"));
+        available_tags.forEach(item => {
+            $("#tag_list").append($("<option>").attr("value", item.tag_id).text(item.name))
+        });
+    })
+    .fail(function(data) {
+        alert("Unable to get your tags.\n" + data.responseJSON.error);
+    });
+}
+
 // Get song info when document becomes ready
 $(function() {
     // Replace link for collection
     $("#collection_link").attr("href", "/collection.html?collection_id=" + song.collection_id);
 
     // Handler for .ready() called.
-    $.get(`/collections/${song.collection_id}/songs/${encodeURIComponent(song.name)}`)
+    $.get(`/collections/${song.collection_id}/songs/${encodeURIComponent(song.song_id)}`)
     .done(function(data) {
 		console.log("Loading song result:");
         console.log(data);
+        song.name = data.name;
         song.artist = data.artist;
         song.date_added = new Date(data.date_added);
         song.location = data.location;
@@ -56,42 +142,91 @@ $(function() {
     .fail(function(data) {
         alert("Unable to get song information.\n" + data.responseJSON.error);
     });
+
+    // Load tags for song
+    refresh_tags();
 });
 
 // Cancel edits
 $("#edit_cancel").click(function() {
+    edit_mode = false;
     $("#page_header").text(song.name);
     $("#song_name").val(song.name);
     $("#song_artist").val(song.artist);
     $("#song_date_added").val(song.date_added.toISOString().substring(0, 10));
     $("#song_location").val(song.location);
-    $("#song_last_performed").val(song.last_performed.toISOString().substring(0, 10));
+    if (song.last_performed)
+        $("#song_last_performed").val(song.last_performed.toISOString().substring(0, 10));
     $("#song_notes").val(song.notes);
     $("#song_added_by").val(song.added_by);
     
     // Disable inputs
-	$("#song_artist").prop("disabled", true);
-	$("#song_location").prop("disabled", true);
-	$("#song_last_performed").prop("disabled", true);
-    $("#song_notes").prop("disabled", true);
-    $("#edit_buttons").hide(500);
-})
+    set_editing_mode(false);
+});
+
+// Add tag button clicked
+$("#add_tag").click(function() {
+    add_tag = true
+    $("#add_tag_modal").modal("hide");
+});
+
+// Show tag wait dialog after add tag modal is closed
+$('#add_tag_modal').on('hidden.bs.modal', function (e) {
+    if (add_tag) {
+        $("#tag_wait").modal("show");
+    }
+});
+$('#tag_wait').on('shown.bs.modal', function (e) {
+    let payload = JSON.stringify({song_id: parseInt(song.song_id, 10), tag_id: parseInt($("#tag_list").val(), 10)});
+    $.post(`/collections/${song.collection_id}/songs/${song.song_id}/tags`, payload)
+    .done(function(data) {
+        console.log(data);
+        $("#add_tag_alert").show();
+        refresh_tags();
+        set_editing_mode(false);
+    })
+    .fail(function(data) {
+        alert("Unable to add tag.\n" + data.responseJSON.error);
+    })
+    .always(function() {
+        add_tag = false;
+        $("#tag_wait").modal("hide");
+    });
+});
+
+function set_editing_mode(is_editing) {
+    edit_mode = is_editing;
+	$("#song_artist").prop("disabled", !is_editing);
+	$("#song_location").prop("disabled", !is_editing);
+	$("#song_last_performed").prop("disabled", !is_editing);
+    $("#song_notes").prop("disabled", !is_editing);
+
+    if (is_editing) {
+        $("#edit_buttons").show(500);
+        $("#add_tag_button").show(500);
+    
+        $("#tag_container").children().not($("#add_tag_button")).addClass("deletable");
+    } else {
+        $("#edit_buttons").hide(500);
+        $("#add_tag_button").hide(500);
+
+        $("#tag_container").children().not($("#add_tag_button")).removeClass("deletable");
+    }
+}
+
 
 // Saves changes to song
 $("#edit_button").click(function() {
-	$("#song_artist").prop("disabled", false);
-	$("#song_location").prop("disabled", false);
-	$("#song_last_performed").prop("disabled", false);
-    $("#song_notes").prop("disabled", false);
-    $("#edit_buttons").show(500);
+    set_editing_mode(true);
 });
 $("#song_save").click(function() {
     $("#edit_song_wait").modal("show");
 });
 $('#edit_song_wait').on('shown.bs.modal', function (e) {
     let payload = JSON.stringify({
+        name: $("#song_name").val(),
 		artist: $("#song_artist").val(), 
-		date_added: $("#song_date_added").val(),
+		//date_added: $("#song_date_added").val(),
 		location: $("#song_location").val(),
 		last_performed: $("#song_last_performed").val(),
 		notes: $("#song_notes").val(),
@@ -99,7 +234,7 @@ $('#edit_song_wait').on('shown.bs.modal', function (e) {
 	});
     $.ajax({
         method: "PUT",
-        url: `/collections/${song.collection_id}/songs/${encodeURIComponent(song.name)}`,
+        url: `/collections/${song.collection_id}/songs/${song.song_id}`,
         data: payload,
         headers: {
             "Content-Type": "application/json"
@@ -116,6 +251,7 @@ $('#edit_song_wait').on('shown.bs.modal', function (e) {
     })
     .always(function() {
         $("#edit_song_wait").modal("hide");
+        set_editing_mode(false);
     });
 });
 
@@ -148,12 +284,44 @@ $('#delete_song_wait').on('shown.bs.modal', function (e) {
     });
 });
 
+// Remove tag
+$('#delete_tag_wait_modal').on('shown.bs.modal', function (e) {
+    let payload = JSON.stringify({
+        tag_id: delete_tag
+    });
+    $.ajax({
+        method: "DELETE",
+        url: `/collections/${song.collection_id}/songs/${song.song_id}/tags`,
+        data: payload,
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .done(function(data) {
+        console.log("Remove tag result:");
+        console.log(data);
+        $("#delete_tag_alert").show();
+
+    })
+    .fail(function(data) {
+        alert("Unable to remove tag.\n" + data.responseJSON.error);
+    })
+    .always(function() {
+        $("#delete_tag_wait_modal").modal("hide");
+        delete_tag = undefined;
+        refresh_tags();
+    });
+});
+
 // Close alerts
 $("#alert-close").click(function() {
-    $("#song_added_alert").hide()
+    $("#tag_added_alert").hide()
 });
 $("#edit_alert_close").click(function() {
     $("#edit_song_alert").hide()
+});
+$("#delete_tag_alert_close").click(function() {
+    $("#delete_tag_alert").hide()
 });
 
 // Logout button

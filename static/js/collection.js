@@ -64,7 +64,7 @@ function reloadSongs() {
             let a = $("<a>");
             a.addClass("list-group-item");
             a.addClass("list-group-item-action");
-            a.attr("href", `/song.html?name=${encodeURIComponent(song.name)}&collection_id=${collection.id}`);
+            a.attr("href", `/song.html?song_id=${encodeURIComponent(song.song_id)}&collection_id=${collection.id}`);
             a.text(song.name);
             $("#songs").append(a);
         });
@@ -94,12 +94,12 @@ function reloadTags() {
         console.log(data);
         $("#tags").empty();
 
-        data.forEach(song => {
+        data.forEach(tag => {
             let a = $("<a>");
             a.addClass("list-group-item");
             a.addClass("list-group-item-action");
-            a.attr("href", `/tag.html?name=${encodeURIComponent(song.name)}&collection_id=${collection.id}`);
-            a.text(song.name);
+            a.attr("href", `/tag.html?tag_id=${encodeURIComponent(tag.tag_id)}&collection_id=${collection.id}`);
+            a.text(tag.name);
             $("#tags").append(a);
         });
     })
@@ -148,8 +148,9 @@ $('#song_wait').on('shown.bs.modal', function (e) {
 $('#tag_wait').on('shown.bs.modal', function (e) {
     let payload = JSON.stringify({
         name: $("#tag_name").val(),
-        notes: $("#tag_description").val(),
+        description: $("#tag_description").val(),
     });
+    console.log("Adding tag: " + payload);
     $.post(`/collections/${collection.id}/tags`, payload)
     .done(function(data) {
         console.log(data);
@@ -176,10 +177,18 @@ $('#edit_collection_modal').on('hidden.bs.modal', function (e) {
 });
 $('#edit_collection_wait').on('shown.bs.modal', function (e) {
     let payload = JSON.stringify({name: $("#collection_name").val(), description: $("#collection_description").val()});
-    $.post(`/collections/${collection.id}`, payload)
+    $.ajax({
+        url: `/collections/${collection.id}`,
+        type: 'PUT',
+        data: payload,
+        // success: function(result) {
+        //     // Do something with the result
+        // }
+    })
     .done(function(data) {
         console.log(data);
         $("#edit_collection_alert").show();
+        $("#page_header").text($("#collection_name").val());
     })
     .fail(function(data) {
         alert("Unable to save collection.\n" + data.responseJSON.error);
@@ -230,9 +239,12 @@ $('#add_song_modal').on('hidden.bs.modal', function (e) {
 
 // Show tag wait dialog after add tag modal is closed
 $('#add_tag_modal').on('hidden.bs.modal', function (e) {
-    $("#tag_wait").modal("show");
+    if (add_tag) {
+        $("#tag_wait").modal("show");
+    }
 });
 $("#add_tag").click(function() {
+    add_tag = true
     $("#add_tag_modal").modal("hide");
 });
 

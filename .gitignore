@@ -10,3 +10,8 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+__debug_bin
+
+# API keys
+key.txt
+SendGrid_API_key.txt

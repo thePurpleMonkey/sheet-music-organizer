@@ -28,12 +28,13 @@ func makeRouter() *mux.Router {
 
 	// Songs
 	r.HandleFunc("/collections/{collection_id}/songs", VerifyCollectionID(RequireAuthentication(SongsHandler))).Methods("GET", "POST")
-	r.HandleFunc("/collections/{collection_id}/songs/{song_name}", VerifyCollectionID(RequireAuthentication(SongHandler))).Methods("GET", "PUT", "DELETE")
-	r.HandleFunc("/collections/{collection_id}/songs/{song_name}/tags", VerifyCollectionID(RequireAuthentication(SongTagsHandler))).Methods("GET", "POST")
+	r.HandleFunc("/collections/{collection_id}/songs/{song_id}", VerifyCollectionID(RequireAuthentication(SongHandler))).Methods("GET", "PUT", "DELETE")
+	r.HandleFunc("/collections/{collection_id}/songs/{song_id}/tags", VerifyCollectionID(RequireAuthentication(SongTagsHandler))).Methods("GET", "POST", "DELETE")
 
 	// Tags
 	r.HandleFunc("/collections/{collection_id}/tags", VerifyCollectionID(RequireAuthentication(TagsHandler))).Methods("GET", "POST")
-	r.HandleFunc("/collections/{collection_id}/tags/{tag_name}", VerifyCollectionID(RequireAuthentication(TagHandler))).Methods("GET", "POST")
+	r.HandleFunc("/collections/{collection_id}/tags/{tag_id}", VerifyCollectionID(RequireAuthentication(TagHandler))).Methods("GET", "PUT", "DELETE")
+	r.HandleFunc("/collections/{collection_id}/tags/{tag_id}/songs", VerifyCollectionID(RequireAuthentication(TagSongsHandler))).Methods("GET")
 
 	r.HandleFunc("/books/{title}/page/{page}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)

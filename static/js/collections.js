@@ -11,12 +11,11 @@ function refreshCollections() {
 		$("#collections").empty();
 
 		data.forEach(collection => {
-			let li = $("<li>");
-			let a = $("<a>");
-			a.attr("href", "/collection.html?collection_id=" + collection.collection_id);
-			a.text(collection.name);
-			li.append(a);
-			$("#collections").append(li);
+			let a = $("<a>")
+				.attr("href", "/collection.html?collection_id=" + collection.collection_id)
+				.addClass("list-group-item list-group-item-action")
+				.text(collection.name);
+			$("#collections").append(a);
 		});
 	})
 	.fail(function(data) {
