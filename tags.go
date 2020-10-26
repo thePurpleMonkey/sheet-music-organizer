@@ -19,6 +19,7 @@ type Tag struct {
 	CollectionID int64  `json:"collection_id" db:"collection_id"`
 }
 
+// TagsHandler handles GETting all tags or POSTing a new tag.
 func TagsHandler(w http.ResponseWriter, r *http.Request) {
 	// session, err := store.Get(r, "session")
 	// if err != nil {
@@ -118,6 +119,7 @@ func TagsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// TagHandler handles creating, updating, or deleting a single tag.
 func TagHandler(w http.ResponseWriter, r *http.Request) {
 	var tag Tag
 	var err error
@@ -250,6 +252,7 @@ func TagHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// TagSongsHandler handles associating and disassociating a tag with a song.
 func TagSongsHandler(w http.ResponseWriter, r *http.Request) {
 	var tag Tag
 	var err error

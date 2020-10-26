@@ -20,11 +20,12 @@ import (
 
 // User is a struct that models the structure of a user, both in the request body, and in the DB
 type User struct {
-	Password string `json:"password", db:"password"`
-	Email    string `json:"email", db:"email"`
-	Name     string `json:"name", db:"name"`
+	Password string `json:"password" db:"password"`
+	Email    string `json:"email" db:"email"`
+	Name     string `json:"name" db:"name"`
 }
 
+// PasswordResetRequest is a data structure to model incoming parameters of a password reset POST request
 type PasswordResetRequest struct {
 	Email    string `json:"email"`
 	Token    string `json:"token"`

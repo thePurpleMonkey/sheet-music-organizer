@@ -49,23 +49,24 @@ import (
 
 // Song is a struct that models the structure of a song, both in the request body, and in the DB
 type Song struct {
-	SongID        int64      `json:"song_id", db:"song_id"`
-	Name          string     `json:"name", db:"name"`
-	Artist        string     `json:"artist", db:"artist"`
-	DateAdded     *time.Time `json:"date_added", db:"date_added"`
-	Location      string     `json:"location", db:"location"`
-	LastPerformed *string    `json:"last_performed,omitempty", db:"last_performed"`
-	Notes         string     `json:"notes", db:"notes"`
-	AddedBy       string     `json:"added_by", db:"added_by"`
-	CollectionID  int64      `json:"collection_id", db:"collection_id"`
+	SongID        int64      `json:"song_id" db:"song_id"`
+	Name          string     `json:"name" db:"name"`
+	Artist        string     `json:"artist" db:"artist"`
+	DateAdded     *time.Time `json:"date_added" db:"date_added"`
+	Location      string     `json:"location" db:"location"`
+	LastPerformed *string    `json:"last_performed,omitempty" db:"last_performed"`
+	Notes         string     `json:"notes" db:"notes"`
+	AddedBy       string     `json:"added_by" db:"added_by"`
+	CollectionID  int64      `json:"collection_id" db:"collection_id"`
 }
 
 // TaggedSong is a struct that models tagging a song
 type TaggedSong struct {
-	TagID  int64 `json:"tag_id", db:"tag_id"`
-	SongID int64 `json:"song_id", db:"song_id"`
+	TagID  int64 `json:"tag_id" db:"tag_id"`
+	SongID int64 `json:"song_id" db:"song_id"`
 }
 
+// SongsHandler handles GETting all songs and POSTing a new song
 func SongsHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "session")
 	if err != nil {
@@ -165,6 +166,7 @@ func SongsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// SongHandler handles creating, updating, and deleting a single song.
 func SongHandler(w http.ResponseWriter, r *http.Request) {
 	// session, err := store.Get(r, "session")
 	// if err != nil {
@@ -303,6 +305,7 @@ func SongHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// SongTagsHandler handles getting all tags from a particular song.
 func SongTagsHandler(w http.ResponseWriter, r *http.Request) {
 	var tags []Tag
 	var songID, collectionID int64

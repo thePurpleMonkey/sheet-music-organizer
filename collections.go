@@ -13,11 +13,12 @@ var DATABASE_ERROR_MESSAGE = []byte(`{"error": "Error communicating with databas
 
 // Collection is a struct that models the structure of a collection, both in the request body, and in the DB
 type Collection struct {
-	CollectionID int64  `json:"collection_id", db:"collection_id"`
-	Name         string `json:"name", db:"name"`
-	Description  string `json:"description", db:"description"`
+	CollectionID int64  `json:"collection_id" db:"collection_id"`
+	Name         string `json:"name" db:"name"`
+	Description  string `json:"description" db:"description"`
 }
 
+// CollectionsHandler handles GETting all of the user's collections and POSTing a new collection.
 func CollectionsHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "session")
 	if err != nil {
@@ -137,6 +138,7 @@ func CollectionsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// CollectionHandler handles getting, updating, and deleting a single collection.
 func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 	// session, err := store.Get(r, "session")
 	// if err != nil {
