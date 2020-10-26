@@ -1,5 +1,7 @@
 "use strict";
 
+import { add_alert } from "./utilities.js";
+
 let url = new URL(window.location.href);
 let delete_song = false;
 let add_tag = false;
@@ -60,7 +62,7 @@ function refresh_tags() {
         refresh_available_tags(song_tags);
     })
     .fail(function(data) {
-        alert("Unable to get song tags information.\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to get song tags information!", data);
     });
 }
 
@@ -99,7 +101,7 @@ function refresh_available_tags(song_tags) {
         });
     })
     .fail(function(data) {
-        alert("Unable to get your tags.\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to get your tags!", data);
     });
 }
 
@@ -140,7 +142,7 @@ $(function() {
         }
     })
     .fail(function(data) {
-        alert("Unable to get song information.\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to get song information!", data);
     });
 
     // Load tags for song
@@ -181,12 +183,12 @@ $('#tag_wait').on('shown.bs.modal', function (e) {
     $.post(`/collections/${song.collection_id}/songs/${song.song_id}/tags`, payload)
     .done(function(data) {
         console.log(data);
-        $("#add_tag_alert").show();
+        add_alert("Tag created!", "The tag was successfully created. You may now start tagging your songs with it.", "success");
         refresh_tags();
         set_editing_mode(false);
     })
     .fail(function(data) {
-        alert("Unable to add tag.\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to add tag.", data);
     })
     .always(function() {
         add_tag = false;
@@ -243,11 +245,10 @@ $('#edit_song_wait').on('shown.bs.modal', function (e) {
     .done(function(data) {
 		console.log("Edit song result:");
         console.log(data);
-        $("#edit_song_alert").show();
-
+        add_alert("Changes saved!", "Changes to this song have been successfully saved.");
     })
     .fail(function(data) {
-        alert("Unable to save song.\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to save song.", data);
     })
     .always(function() {
         $("#edit_song_wait").modal("hide");
@@ -277,7 +278,7 @@ $('#delete_song_wait').on('shown.bs.modal', function (e) {
     })
     .fail(function(data) {
         $("#delete_song_wait").modal("hide");
-        alert("Unable to delete song!\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to delete song!", data);
     })
     .always(function() {
         delete_song = false;
@@ -300,28 +301,17 @@ $('#delete_tag_wait_modal').on('shown.bs.modal', function (e) {
     .done(function(data) {
         console.log("Remove tag result:");
         console.log(data);
-        $("#delete_tag_alert").show();
+        add_alert("Tag removed!", "The tag was successfully removed.", "success");
 
     })
     .fail(function(data) {
-        alert("Unable to remove tag.\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to remove tag.", data);
     })
     .always(function() {
         $("#delete_tag_wait_modal").modal("hide");
         delete_tag = undefined;
         refresh_tags();
     });
-});
-
-// Close alerts
-$("#alert-close").click(function() {
-    $("#tag_added_alert").hide()
-});
-$("#edit_alert_close").click(function() {
-    $("#edit_song_alert").hide()
-});
-$("#delete_tag_alert_close").click(function() {
-    $("#delete_tag_alert").hide()
 });
 
 // Logout button

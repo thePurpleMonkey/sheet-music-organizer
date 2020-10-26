@@ -37,9 +37,6 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a class="nav-link" href="#">Home</a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link" href="/collections.html">Collections</a>
           </li>
           <li class="nav-item">
@@ -70,36 +67,7 @@
       <h1 id="page_header">Loading...</h1>
       <hr>
 
-      <!-- #region Alerts -->
-
-      <!-- Tag added alert -->
-      <div class="alert alert-success alert-dismissible" role="alert" style="display:none;" id="tag_added_alert">
-        <strong>Tag created!</strong><br>
-        The tag was successfully created. You may now start tagging your songs with it.
-        <button type="button" class="close" aria-label="Close" id="alert-close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <!-- Tag removed alert -->
-      <div class="alert alert-success alert-dismissible" role="alert" style="display:none;" id="delete_tag_alert">
-        <strong>Tag removed!</strong><br>
-        The tag was successfully removed.
-        <button type="button" class="close" aria-label="Close" id="delete_tag_alert_close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      
-      <!-- Collection updated alert -->
-      <div class="alert alert-success alert-dismissible" role="alert" style="display:none;" id="edit_collection_alert">
-        <strong>Changes saved!</strong><br>
-        The changes you made to the collection were successfully saved.
-        <button type="button" class="close" aria-label="Close" id="edit_alert_close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <!-- #endregion -->
+      <div id="alerts"></div>
 
       <!-- Main view -->
       <form>
@@ -281,6 +249,6 @@
     <!-- #endregion -->
   
     <!-- Script -->
-    <script src="/js/song.js"></script>
+    <script src="/js/song.js" type="module"></script>
   </body>
 </html>

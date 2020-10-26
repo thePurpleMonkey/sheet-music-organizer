@@ -1,5 +1,7 @@
 "use strict";
 
+import { add_alert, alert_ajax_failure } from "./utilities.js";
+
 let url = new URL(window.location.href);
 let delete_tag = undefined;
 let songs = [];
@@ -33,7 +35,7 @@ function refresh_tag() {
         $("#description").text(tag.description);
     })
     .fail(function(data) {
-        alert("Unable to get tag information.\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to get tag information.", data);
     });
 }
 
@@ -66,7 +68,7 @@ $(function() {
         });
     })
     .fail(function(data) {
-        alert("Unable to get songs.\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to get songs.", data);
     });
 });
 
@@ -116,11 +118,10 @@ $('#edit_tag_wait').on('shown.bs.modal', function (e) {
     .done(function(data) {
 		console.log("Edit tag result:");
         console.log(data);
-        $("#edit_tag_alert").show();
-
+        add_alert("Changes saved.", "Changes to this tag have been saved.", "success");
     })
     .fail(function(data) {
-        alert("Unable to save tag.\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to save tag.", data);
     })
     .always(function() {
         $("#edit_tag_wait").modal("hide");
@@ -150,19 +151,11 @@ $('#delete_tag_wait').on('shown.bs.modal', function (e) {
     })
     .fail(function(data) {
         $("#delete_tag_wait").modal("hide");
-        alert("Unable to delete tag!\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to delete tag!", data);
     })
     .always(function() {
         delete_tag = false;
     });
-});
-
-// Close alerts
-$("#alert-close").click(function() {
-    $("#tag_added_alert").hide()
-});
-$("#edit_alert_close").click(function() {
-    $("#edit_tag_alert").hide()
 });
 
 // Logout button

@@ -1,5 +1,7 @@
 "use strict";
 
+import { add_alert, alert_ajax_failure } from "./utilities.js";
+
 let create_collection = false;
 
 function refreshCollections() {
@@ -20,9 +22,11 @@ function refreshCollections() {
 	})
 	.fail(function(data) {
 		if (data.status == 403) {
+			console.log("Not authorized to access collections. Redirecting to sign in page...");
 			window.location.replace("/signin.html");
 		}
-		alert("Unable to get collections.\n" + data.responseJSON.error);
+
+		alert_ajax_failure("Unable to get collections.", data);
 	})
 	.always(function() {
 		$("#loading").remove();
@@ -45,21 +49,16 @@ $('#wait').on('shown.bs.modal', function (e) {
 	$.post("/collections", payload)
 	.done(function(data) {
 		console.log(data);
-		$(".alert").show();
+		add_alert("Collection created!", "The collection was successfully created.", "success");
 	})
 	.fail(function(data) {
-		alert("Unable to create collection.\n" + data.responseJSON.error);
+		alert_ajax_failure("Unable to create collection!", data);
 	})
 	.always(function() {
 		create_collection = false;
 		$("#wait").modal("hide");
 		refreshCollections();
 	});
-});
-
-// Close alert
-$("#alert-close").click(function() {
-	$(".alert").hide();
 });
 
 // Logout button

@@ -17,7 +17,7 @@
   </head>
 
   <body>
-    <!-- Navbar -->
+    <!-- #region Navbar -->
     <nav class="navbar navbar-expand-sm navbar-light bg-light">
       <a class="navbar-brand" href="#">Navbar</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,9 +26,6 @@
     
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="#">Home</a>
-          </li>
           <li class="nav-item">
             <a class="nav-link" href="/collections.html">Collections</a>
           </li>
@@ -49,38 +46,14 @@
         </ul>
       </div>
     </nav>
+    <!-- #endregion -->
 
     <div class="container">
       <!-- Header -->
       <h1 id="page_header">Loading...</h1>
       <hr>
 
-      <!-- Song added alert -->
-      <div class="alert alert-success alert-dismissible" role="alert" style="display:none;" id="song_added_alert">
-        <strong>Song added!</strong><br>
-        The song was successfully added to your collection.
-        <button type="button" class="close" aria-label="Close" id="alert-close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-
-      <!-- Tag added alert -->
-      <div class="alert alert-success alert-dismissible" role="alert" style="display:none;" id="tag_added_alert">
-        <strong>Tag created!</strong><br>
-        The tag was successfully created. You may now start tagging your songs with it.
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      
-      <!-- Collection updated alert -->
-      <div class="alert alert-success alert-dismissible" role="alert" style="display:none;" id="edit_collection_alert">
-        <strong>Changes saved!</strong><br>
-        The changes you made to the collection were successfully saved.
-        <button type="button" class="close" aria-label="Close" id="edit_alert_close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
+      <div id="alerts"></div>
 
       <!-- Main view -->
       <div class="row">
@@ -292,6 +265,6 @@
     </div>
   
     <!-- Script -->
-    <script src="/js/collection.js"></script>
+    <script src="/js/collection.js" type="module"></script>
   </body>
 </html>

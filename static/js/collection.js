@@ -1,25 +1,11 @@
 "use strict";
 
+import { add_alert, getUrlParameter, alert_ajax_failure } from "./utilities.js";
+
 let add_song = false;
 let add_tag = false;
 let edit_collection = false;
 let delete_collection = false;
-
-// Code snippet pulled from https://stackoverflow.com/questions/19491336/get-url-parameter-jquery-or-how-to-get-query-string-values-in-js
-var getUrlParameter = function getUrlParameter(sParam) {
-    var sPageURL = window.location.search.substring(1),
-            sURLVariables = sPageURL.split('&'),
-            sParameterName,
-            i;
-
-    for (i = 0; i < sURLVariables.length; i++) {
-        sParameterName = sURLVariables[i].split('=');
-
-        if (sParameterName[0] === sParam) {
-                return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
-        }
-    }
-};
 
 let collection = {
     // Parse collection ID from URL parameter
@@ -44,7 +30,7 @@ $(function() {
         $("#collection_description").val(collection.description);
     })
     .fail(function(data) {
-        alert("Unable to get collection information.\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to get collection information!", data);
     });
 
     reloadSongs();
@@ -74,11 +60,7 @@ function reloadSongs() {
             window.location.replace("/404.html");
         }
 
-        let message = "Unable to get songs.";
-        if (data.responseJSON !== undefined) {
-            message += "\n" + data.responseJSON.error;
-        }
-        alert(message);
+        alert_ajax_failure("Unable to get songs!", data);
     })
     .always(function() {
         $("#loading").remove();
@@ -104,7 +86,7 @@ function reloadTags() {
         });
     })
     .fail(function(data) {
-        alert("Unable to get tags.\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to get tags!", data);
     })
     .always(function() {
         $("#loading").remove();
@@ -128,14 +110,10 @@ $('#song_wait').on('shown.bs.modal', function (e) {
     $.post(`/collections/${collection.id}/songs`, payload)
     .done(function(data) {
         console.log(data);
-        $("#song_added_alert").show();
+        add_alert("Song added!", "The song was successfully added to your collection.", "success");
     })
     .fail(function(data) {
-        let message = "Unable to add song.";
-        if (data.responseJSON !== undefined) {
-            message += "\n" + data.responseJSON.error
-        }
-        alert(message);
+        alert_ajax_failure("Unable to add song!", data);
     })
     .always(function() {
         add_song = false;
@@ -154,10 +132,10 @@ $('#tag_wait').on('shown.bs.modal', function (e) {
     $.post(`/collections/${collection.id}/tags`, payload)
     .done(function(data) {
         console.log(data);
-        $("#tag_added_alert").show();
+        add_alert("Tag created!", "The tag was successfully created. You may now start tagging your songs with it.", "success");
     })
     .fail(function(data) {
-        alert("Unable to add tag.\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to add tag!", data);
     })
     .always(function() {
         $("#tag_wait").modal("hide");
@@ -187,11 +165,11 @@ $('#edit_collection_wait').on('shown.bs.modal', function (e) {
     })
     .done(function(data) {
         console.log(data);
-        $("#edit_collection_alert").show();
+        add_alert("Changes saved!", "The changes you made to the collection were successfully saved.", "success");
         $("#page_header").text($("#collection_name").val());
     })
     .fail(function(data) {
-        alert("Unable to save collection.\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to save collection.", data);
     })
     .always(function() {
         edit_collection = false;
@@ -222,7 +200,7 @@ $('#delete_collection_wait').on('shown.bs.modal', function (e) {
     .fail(function(data) {
         delete_collection = false;
         $("#delete_collection_wait").modal("hide");
-        alert("Unable to delete collection!\n" + data.responseJSON.error);
+        alert_ajax_failure("Unable to delete collection!", data);
     });
 });
 
@@ -246,14 +224,6 @@ $('#add_tag_modal').on('hidden.bs.modal', function (e) {
 $("#add_tag").click(function() {
     add_tag = true
     $("#add_tag_modal").modal("hide");
-});
-
-// Close alerts
-$("#alert-close").click(function() {
-    $("#song_added_alert").hide()
-});
-$("#edit_alert_close").click(function() {
-    $("#edit_collection_alert").hide()
 });
 
 // Logout button
