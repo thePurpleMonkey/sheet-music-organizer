@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -21,6 +22,8 @@ func makeRouter() *mux.Router {
 	r.HandleFunc("/user/login", login).Methods("POST")
 	r.HandleFunc("/user/logout", logout)
 	r.HandleFunc("/user/register", register).Methods("POST")
+	r.HandleFunc("/user/password/forgot", requestPasswordResetEmail).Methods("POST")
+	r.HandleFunc("/user/password/reset", resetPassword)
 
 	// Collections
 	r.HandleFunc("/collections", RequireAuthentication(CollectionsHandler)).Methods("GET", "POST")
@@ -36,13 +39,13 @@ func makeRouter() *mux.Router {
 	r.HandleFunc("/collections/{collection_id}/tags/{tag_id}", VerifyCollectionID(RequireAuthentication(TagHandler))).Methods("GET", "PUT", "DELETE")
 	r.HandleFunc("/collections/{collection_id}/tags/{tag_id}/songs", VerifyCollectionID(RequireAuthentication(TagSongsHandler))).Methods("GET")
 
-	r.HandleFunc("/books/{title}/page/{page}", func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		title := vars["title"]
-		page := vars["page"]
+	// r.HandleFunc("/books/{title}/page/{page}", func(w http.ResponseWriter, r *http.Request) {
+	// 	vars := mux.Vars(r)
+	// 	title := vars["title"]
+	// 	page := vars["page"]
 
-		fmt.Fprintf(w, "You've requested the book: %s on page %s\n", title, page)
-	})
+	// 	fmt.Fprintf(w, "You've requested the book: %s on page %s\n", title, page)
+	// })
 
 	// Static files
 	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("static"))))
@@ -69,6 +72,7 @@ func main() {
 
 	// Launch server
 	fmt.Println("Running on port 8000")
-	// log.Fatal(http.ListenAndServe(":8000", r))
-	log.Fatal(http.ListenAndServe(":8000", handlers.RecoveryHandler()(r)))
+	certPath := os.Getenv("CERT_PATH")
+	// log.Fatal(http.ListenAndServe(":8000", handlers.RecoveryHandler()(r)))
+	log.Fatal(http.ListenAndServeTLS(":8000", filepath.Join(certPath, "localhost.crt"), filepath.Join(certPath, "localhost.key"), handlers.RecoveryHandler()(r)))
 }

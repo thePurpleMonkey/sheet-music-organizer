@@ -3,6 +3,8 @@
 echo Building...
 set /P SESSION_KEY=<key.txt
 set /P SENDGRID_API_KEY=<SendGrid_API_key.txt
+set HOST=localhost:8000
+set CERT_PATH=C:\Users\mhump\.ssh
 go build -ldflags="-linkmode=internal -extld=none"
 if /I "%ERRORLEVEL%" NEQ "0" (
 	echo Build failed.

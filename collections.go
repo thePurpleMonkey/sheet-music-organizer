@@ -50,10 +50,10 @@ func CollectionsHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Check for errors from iterating over rows.
 		if err := rows.Err(); err != nil {
+			log.Printf("Error retrieving collections from database: %v\n", err)
 			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(`{"error": "Error retrieving collections from database."}`))
-			log.Fatal(err)
+			w.Write(DATABASE_ERROR_MESSAGE)
 			return
 		}
 
