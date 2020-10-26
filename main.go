@@ -67,6 +67,14 @@ func main() {
 		panic("Certificate base filename not set!")
 	}
 
+	if os.Getenv("DB_USERNAME") == "" {
+		panic("Database username not set!")
+	}
+
+	if os.Getenv("DB_PASSWORD") == "" {
+		panic("Database password not set!")
+	}
+
 	var port string
 	if port = os.Getenv("PORT"); port == "" {
 		port = "8000"
@@ -77,7 +85,7 @@ func main() {
 
 	// Connect to database
 	var err error
-	db, err = sql.Open("postgres", "user=smo dbname=smo password=smo-test sslmode=disable")
+	db, err = sql.Open("postgres", "user="+os.Getenv("DB_USERNAME")+" dbname=smo password="+os.Getenv("DB_PASSWORD")+" sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
