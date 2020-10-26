@@ -73,6 +73,7 @@ func main() {
 	// Launch server
 	fmt.Println("Running on port 8000")
 	certPath := os.Getenv("CERT_PATH")
+	certBaseName := os.Getenv("CERT_BASE_NAME")
 	// log.Fatal(http.ListenAndServe(":8000", handlers.RecoveryHandler()(r)))
-	log.Fatal(http.ListenAndServeTLS(":8000", filepath.Join(certPath, "localhost.crt"), filepath.Join(certPath, "localhost.key"), handlers.RecoveryHandler()(r)))
+	log.Fatal(http.ListenAndServeTLS(":8000", filepath.Join(certPath, certBaseName+".crt"), filepath.Join(certPath, certBaseName+".key"), handlers.RecoveryHandler()(r)))
 }
