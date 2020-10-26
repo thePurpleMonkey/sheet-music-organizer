@@ -59,6 +59,19 @@ func main() {
 		panic("Session key environment variable not set!")
 	}
 
+	if os.Getenv("CERT_PATH") == "" {
+		panic("Certificate path not set!")
+	}
+
+	if os.Getenv("CERT_BASE_NAME") == "" {
+		panic("Certificate base filename not set!")
+	}
+
+	var port string
+	if port = os.Getenv("PORT"); port == "" {
+		port = "8000"
+	}
+
 	// Initialize router
 	r := makeRouter()
 
@@ -75,5 +88,5 @@ func main() {
 	certPath := os.Getenv("CERT_PATH")
 	certBaseName := os.Getenv("CERT_BASE_NAME")
 	// log.Fatal(http.ListenAndServe(":8000", handlers.RecoveryHandler()(r)))
-	log.Fatal(http.ListenAndServeTLS(":8000", filepath.Join(certPath, certBaseName+".crt"), filepath.Join(certPath, certBaseName+".key"), handlers.RecoveryHandler()(r)))
+	log.Fatal(http.ListenAndServeTLS(":"+port, filepath.Join(certPath, certBaseName+".crt"), filepath.Join(certPath, certBaseName+".key"), handlers.RecoveryHandler()(r)))
 }
