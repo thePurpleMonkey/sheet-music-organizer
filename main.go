@@ -84,7 +84,7 @@ func main() {
 	defer db.Close()
 
 	// Launch server
-	fmt.Println("Running on port 8000")
+	fmt.Println("Running on port " + port)
 	certPath := os.Getenv("CERT_PATH")
 	certBaseName := os.Getenv("CERT_BASE_NAME")
 	// log.Fatal(http.ListenAndServe(":8000", handlers.RecoveryHandler()(r)))
