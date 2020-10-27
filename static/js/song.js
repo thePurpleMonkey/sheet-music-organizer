@@ -183,7 +183,7 @@ $('#tag_wait').on('shown.bs.modal', function (e) {
     $.post(`/collections/${song.collection_id}/songs/${song.song_id}/tags`, payload)
     .done(function(data) {
         console.log(data);
-        add_alert("Tag created!", "The tag was successfully created. You may now start tagging your songs with it.", "success");
+        add_alert("Tag added!", "The tag was successfully added to this song.", "success");
         refresh_tags();
         set_editing_mode(false);
     })
