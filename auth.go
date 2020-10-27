@@ -20,6 +20,7 @@ import (
 
 // User is a struct that models the structure of a user, both in the request body, and in the DB
 type User struct {
+	UserID   string `json:"user_id" db:"user_id"`
 	Password string `json:"password" db:"password"`
 	Email    string `json:"email" db:"email"`
 	Name     string `json:"name" db:"name"`
@@ -27,7 +28,6 @@ type User struct {
 
 // PasswordResetRequest is a data structure to model incoming parameters of a password reset POST request
 type PasswordResetRequest struct {
-	Email    string `json:"email"`
 	Token    string `json:"token"`
 	Password string `json:"password"`
 }
@@ -48,8 +48,8 @@ func checkPasswordHash(password, hash string) bool {
 func login(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "session")
 	if err != nil {
+		log.Printf("Login - Unable to retrieve session store: %v\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Fatal(err)
 		return
 	}
 
@@ -57,8 +57,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 	user := &User{}
 	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
 		// If there is something wrong with the request body, return a 400 status
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
+		log.Printf("Login - Error decoding request body: %v\n", err)
+		log.Printf("Body: %v\n", r.Body)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 
@@ -67,28 +68,26 @@ func login(w http.ResponseWriter, r *http.Request) {
 	if err := db.QueryRow("SELECT password, name FROM users WHERE email = $1", user.Email).Scan(&hashedPassword, &name); err != nil {
 		if err == sql.ErrNoRows {
 			w.Header().Add("Content-Type", "application/json")
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte(`{"error": "Incorrect email or password"}`))
+			http.Error(w, `{"error": "Incorrect email or password"}`, http.StatusUnauthorized)
 		} else {
-			log.Fatal(err)
+			log.Printf("Login - Unable to retrieve username and password from database: %v\n", err)
+			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		}
 		return
 	}
 
 	if !checkPasswordHash(user.Password, hashedPassword) {
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(`{"error": "Incorrect email or password"}`))
+		http.Error(w, `{"error": "Incorrect email or password"}`, http.StatusUnauthorized)
 		return
 	}
 
 	// Get a list of all user's collections
 	rows, err := db.Query("SELECT collection_id FROM collection_members WHERE user_email = $1", user.Email)
 	if err != nil {
+		log.Printf("Login - Unable to retrieve collection ids from database: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error": "Error retrieving your collections from database."}`))
-		log.Fatalf("Login - Unable to retrieve collection ids from database: %v\n", err)
+		http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -98,17 +97,17 @@ func login(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var id int64
 		if err := rows.Scan(&id); err != nil {
-			log.Printf("Login - Error scanning rows: %v\n", err)
+			log.Printf("Login - Error parsing collection IDs from database result: %v\n", err)
+			continue
 		}
 		IDs = append(IDs, id)
 	}
 
 	// Check for errors from iterating over rows.
 	if err := rows.Err(); err != nil {
+		log.Printf("Login - Unable to read collection IDs from database: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error": "Error retrieving collections from database."}`))
-		log.Fatalf("Login - Unable to read collection IDs from database: %v\n", err)
+		http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
@@ -118,8 +117,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 	session.Values["email"] = user.Email
 	session.Values["ids"] = IDs
 	if err := session.Save(r, w); err != nil {
-		log.Fatal(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		log.Printf("Login - Unable to save session state: %v\n", err)
+		http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 	} else {
 		w.WriteHeader(http.StatusOK)
 	}
@@ -136,15 +135,20 @@ func logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func register(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "session")
+	session, err := store.Get(r, "session")
+	if err != nil {
+		log.Printf("Register - Unable to retrieve session store: %v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	// Parse and decode the request body into a new `User` instance
 	user := &User{}
-	err := json.NewDecoder(r.Body).Decode(user)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
 		// If there is something wrong with the request body, return a 400 status
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
+		log.Printf("Register - Unable to decode request body: %v", err)
+		log.Printf("Body: %v\n", r.Body)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 
@@ -157,22 +161,28 @@ func register(w http.ResponseWriter, r *http.Request) {
 	// Create user in database
 	if _, err = db.Exec("INSERT INTO users VALUES ($1, $2, $3)", user.Email, hashedPass, user.Name); err != nil {
 		if err.(*pq.Error).Code == "23505" {
+			log.Printf("Register - Email already regsitered: %v\n", user.Email)
 			w.Header().Add("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(`{"error": "Email already registered"}`))
+			http.Error(w, `{"error": "Email already registered"}`, http.StatusBadRequest)
 		} else {
-			log.Fatal(err)
+			log.Printf("Register - Unable to insert new user into database: %v\n", err)
+			w.Header().Add("Content-Type", "application/json")
+			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		}
 		return
 	}
-
-	w.WriteHeader(http.StatusCreated)
 
 	// Set user as authenticated
 	session.Values["authenticated"] = true
 	session.Values["name"] = user.Name
 	session.Values["email"] = user.Email
-	session.Save(r, w)
+	if err := session.Save(r, w); err != nil {
+		log.Printf("Login - Unable to save session state: %v\n", err)
+		w.Header().Add("Content-Type", "application/json")
+		http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+	} else {
+		w.WriteHeader(http.StatusCreated)
+	}
 }
 
 func requestPasswordResetEmail(w http.ResponseWriter, r *http.Request) {
@@ -180,37 +190,39 @@ func requestPasswordResetEmail(w http.ResponseWriter, r *http.Request) {
 	user := &User{}
 	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
 		// If there is something wrong with the request body, return a 400 status
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"error": "Malformed request"}`))
+		log.Printf("Password Reset Request - Unable to decode request body: %v\n", err)
+		log.Printf("Body: %v\n", r.Body)
+		w.Header().Add("Content-Type", "application/json")
+		http.Error(w, `{"error": "Malformed request"}`, http.StatusBadRequest)
 		return
 	}
 
 	if len(user.Email) == 0 {
-		log.Println("Email not provided in reset email request")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"error": "Email not provided"}`))
+		log.Println("Password Reset Request - Email not provided in reset email request")
+		w.Header().Add("Content-Type", "application/json")
+		http.Error(w, `{"error": "Email not provided"}`, http.StatusBadRequest)
 		return
 	}
 
 	// Check for the user in the database
-	if err := db.QueryRow("SELECT email FROM users WHERE email = $1", user.Email).Scan(&user.Name); err != nil {
+	if err := db.QueryRow("SELECT user_id, name FROM users WHERE email = $1", user.Email).Scan(&user.UserID, &user.Name); err != nil {
 		if err == sql.ErrNoRows {
-			log.Printf("Password reset for non-existent user %s\n", user.Email)
+			log.Printf("Password Reset Request - Password reset requested for non-existent user %s\n", user.Email)
 			w.WriteHeader(http.StatusOK)
 		} else {
+			log.Printf("Password Reset Request - Unable to retrieve user from database: %v\n", err)
 			w.Header().Add("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(`{"error": "Error retrieving email from database."}`))
-			log.Fatalf("Password Reset - Unable to retrieve  email from database: %v\n", err)
+			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		}
 		return
 	}
 
 	// Create password reset record in database
 	token := uniuri.NewLen(64)
-	if _, err := db.Exec("INSERT INTO password_reset VALUES ($1, $2, $3) ON CONFLICT (email) DO UPDATE SET email = $1, token = $2, expires = $3", user.Email, token, time.Now().Add(time.Hour)); err != nil {
-		log.Fatal(err)
+	if _, err := db.Exec("INSERT INTO password_reset VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET user_id = $1, token = $2, expires = $3", user.UserID, token, time.Now().Add(time.Hour)); err != nil {
+		log.Printf("Password Reset Request - Unable to insert password reset request into database: %v\n", err)
+		w.Header().Add("Content-Type", "application/json")
+		http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
@@ -219,18 +231,30 @@ func requestPasswordResetEmail(w http.ResponseWriter, r *http.Request) {
 	textTemplate := template.Must(template.New("password_reset_email.txt").ParseFiles("templates/password_reset_email.txt"))
 
 	var htmlBuffer, textBuffer bytes.Buffer
-	url := "https://" + os.Getenv("HOST") + "/reset_password.html?token=" + token + "&email=" + user.Email
-	data := struct{ Href string }{url}
+	url := "https://" + os.Getenv("HOST") + "/reset_password.html?token=" + token // + "&user_id=" + user.UserID
+	data := struct {
+		Href string
+		Name string
+	}{url, user.Name}
 
-	htmlTemplate.Execute(&htmlBuffer, data)
-	textTemplate.Execute(&textBuffer, data)
+	if err := htmlTemplate.Execute(&htmlBuffer, data); err != nil {
+		log.Printf("Password Reset Request - Unable to execute html template: %v\n", err)
+		w.Header().Add("Content-Type", "application/json")
+		http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+		return
+	}
+	if err := textTemplate.Execute(&textBuffer, data); err != nil {
+		log.Printf("Password Reset Request - Unable to execute text template: %v\n", err)
+		w.Header().Add("Content-Type", "application/json")
+		http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+		return
+	}
 
 	// Send email
 	if err := SendEmail(user.Name, user.Email, "Password Reset Email", htmlBuffer.String(), textBuffer.String()); err != nil {
+		log.Printf("Password Reset Request - Failed to send password reset email: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error": "Unable to send password reset email."}`))
-		log.Fatalf("Password Reset - Failed to send email: %v\n", err)
+		http.Error(w, `{"error": "Unable to send password reset email."}`, http.StatusInternalServerError)
 		return
 	}
 
@@ -242,87 +266,79 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 	req := &PasswordResetRequest{}
 	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
 		// If there is something wrong with the request body, return a 400 status
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"error": "Malformed request"}`))
-		return
-	}
-
-	if len(req.Email) == 0 {
-		log.Println("Email not provided in reset email request")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"error": "Email not provided"}`))
+		log.Printf("Password Reset - Unable to decode request body: %v\n", err)
+		log.Printf("Body: %v\n", r.Body)
+		w.Header().Add("Content-Type", "application/json")
+		http.Error(w, `{"error": "Malformed request"}`, http.StatusBadRequest)
 		return
 	}
 
 	if len(req.Token) == 0 {
-		log.Println("Token not provided in reset email request")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"error": "Token not provided"}`))
+		log.Println("Password Reset - Token not provided in reset email request")
+		w.Header().Add("Content-Type", "application/json")
+		http.Error(w, `{"error": "Token not provided"}`, http.StatusBadRequest)
 		return
 	}
 
 	// Retrieve password reset request from database
 	var expires time.Time
-	var name string
-	if err := db.QueryRow("SELECT expires, name FROM password_reset JOIN users ON users.email = password_reset.email WHERE password_reset.email = $1 AND token = $2", req.Email, req.Token).Scan(&expires, &name); err != nil {
+	var name, email, userID string
+	if err := db.QueryRow("SELECT expires, name, email, user_id FROM password_reset JOIN users ON users.user_id = password_reset.user_id WHERE token = $1", req.Token).Scan(&expires, &name, &email); err != nil {
 		if err == sql.ErrNoRows {
-			log.Printf("Password reset not found for user %s\n", req.Email)
+			log.Printf("Password reset not found for token %s\n", req.Token)
 			w.WriteHeader(http.StatusNotFound)
 		} else {
+			log.Printf("Password Reset - Unable to retrieve password reset request from database: %v\n", err)
 			w.Header().Add("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(`{"error": "Error retrieving password reset request from database."}`))
-			log.Fatalf("Password Reset - Unable to retrieve password reset request from database: %v\n", err)
+			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		}
 		return
 	}
 
 	if expires.Before(time.Now()) {
 		// Password reset request expired
-		log.Printf("User %v attempt to use expired password reset, which expired on %v\n", req.Email, expires)
+		log.Printf("User %v attempt to use expired password reset, which expired on %v\n", email, expires)
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusForbidden)
-		w.Write([]byte(`{"error": "That password reset request has expired. Please request a new password reset email."}`))
+		http.Error(w, `{"error": "That password reset request has expired. Please request a new password reset email."}`, http.StatusForbidden)
 		return
 	}
 
 	// User has valid password reset token. Let's reset the password!
 	hashedPass, err := hashPassword(req.Password)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Password Reset - Unable to hash password: %v\n", err)
+		w.Header().Add("Content-Type", "application/json")
+		http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
 	// Update user in database
 	if _, err = db.Exec("UPDATE users SET password = $1", hashedPass); err != nil {
-		log.Printf("Reset Password - Unable to update user %v password! %v\n", req.Email, err)
+		log.Printf("Reset Password - Unable to update user %v password! %v\n", email, err)
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(DATABASE_ERROR_MESSAGE)
+		http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
 	// Delete password request from database
-	if _, err := db.Exec("DELETE FROM password_reset WHERE email = $1", req.Email); err != nil {
-		log.Printf("Unable to clear expired credentials from database: %v\n", err)
+	if _, err := db.Exec("DELETE FROM password_reset WHERE user_id = $1", userID); err != nil {
+		log.Printf("Password Reset - Unable to clear expired credentials from database: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(DATABASE_ERROR_MESSAGE)
+		http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+		return
 	}
 
 	// Set user as authenticated
 	var session *sessions.Session
 	if session, err = store.Get(r, "session"); err != nil {
-		log.Printf("Unable to get session variables: %v\n", err)
+		log.Printf("Password Reset - Unable to get session variables: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(DATABASE_ERROR_MESSAGE)
+		http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 	session.Values["authenticated"] = true
 	session.Values["name"] = name
-	session.Values["email"] = req.Email
+	session.Values["email"] = email
 	session.Save(r, w)
 
 	w.WriteHeader(http.StatusOK)
@@ -335,7 +351,8 @@ func RequireAuthentication(f http.HandlerFunc) http.HandlerFunc {
 		session, err := store.Get(r, "session")
 		if err != nil {
 			log.Printf("Require Authentication - Unable to get session: %v\n", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			w.Header().Add("Content-Type", "application/json")
+			http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
@@ -356,8 +373,9 @@ func VerifyCollectionID(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, err := store.Get(r, "session")
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			log.Fatal(err)
+			log.Printf("Verify Collection ID - Unable to get session: %v\n", err)
+			w.Header().Add("Content-Type", "application/json")
+			http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
@@ -366,10 +384,9 @@ func VerifyCollectionID(f http.HandlerFunc) http.HandlerFunc {
 		// Get URL parameter
 		collectionID, err := strconv.ParseInt(mux.Vars(r)["collection_id"], 10, 64)
 		if err != nil {
-			w.Header().Add("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(`{"error": "Unable to parse collection id."}`))
 			log.Printf("Collection ID middleware - Unable to get collection id: %v\n", err)
+			w.Header().Add("Content-Type", "application/json")
+			http.Error(w, `{"error": "Unable to parse collection id."}`, http.StatusBadRequest)
 			return
 		}
 

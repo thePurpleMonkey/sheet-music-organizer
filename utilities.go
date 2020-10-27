@@ -8,6 +8,15 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
+// Generic error message for database errors
+var DATABASE_ERROR_MESSAGE = `{"error": "Error communicating with database."}`
+
+// Generic error message for server errors
+var SERVER_ERROR_MESSAGE = `{"error": "There was an error attempting to complete this operation. Please try again later."}`
+
+// Generic error message for parsing URLs
+var URL_ERROR_MESSAGE = `{"error": "Unable to parse URL."}`
+
 // SendEmail ...
 func SendEmail(name string, address string, subject string, htmlContent string, plainTextContent string) error {
 	from := mail.NewEmail("Sheet Music Organizer", "sheetmusicorganizer@michaelhumphrey.dev")
