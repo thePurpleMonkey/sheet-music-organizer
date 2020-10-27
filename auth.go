@@ -161,7 +161,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create user in database
-	if _, err = db.Exec("INSERT INTO users (email, password, name) VALUES ($1, $2, $3)", user.Email, hashedPass, user.Name); err != nil {
+	if err = db.QueryRow("INSERT INTO users (email, password, name) VALUES ($1, $2, $3) RETURNING user_id", user.Email, hashedPass, user.Name).Scan(&user.UserID); err != nil {
 		if err.(*pq.Error).Code == "23505" {
 			log.Printf("Register - Email already regsitered: %v\n", user.Email)
 			w.Header().Add("Content-Type", "application/json")
