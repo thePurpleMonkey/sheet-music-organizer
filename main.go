@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -59,20 +58,20 @@ func main() {
 		panic("Session key environment variable not set!")
 	}
 
-	if os.Getenv("CERT_PATH") == "" {
-		panic("Certificate path not set!")
-	}
-
-	if os.Getenv("CERT_BASE_NAME") == "" {
-		panic("Certificate base filename not set!")
-	}
-
 	if os.Getenv("DB_USERNAME") == "" {
 		panic("Database username not set!")
 	}
 
 	if os.Getenv("DB_PASSWORD") == "" {
 		panic("Database password not set!")
+	}
+
+	if os.Getenv("CERT_FILE") == "" {
+		panic("Certificate path not set!")
+	}
+
+	if os.Getenv("KEY_FILE") == "" {
+		panic("Key path not set!")
 	}
 
 	var port string
@@ -93,8 +92,6 @@ func main() {
 
 	// Launch server
 	fmt.Println("Running on port " + port)
-	certPath := os.Getenv("CERT_PATH")
-	certBaseName := os.Getenv("CERT_BASE_NAME")
 	// log.Fatal(http.ListenAndServe(":8000", handlers.RecoveryHandler()(r)))
-	log.Fatal(http.ListenAndServeTLS(":"+port, filepath.Join(certPath, certBaseName+".crt"), filepath.Join(certPath, certBaseName+".key"), handlers.RecoveryHandler()(r)))
+	log.Fatal(http.ListenAndServeTLS(":"+port, os.Getenv("CERT_FILE"), os.Getenv("KEY_FILE"), handlers.RecoveryHandler()(r)))
 }
