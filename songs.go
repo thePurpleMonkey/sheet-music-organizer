@@ -71,8 +71,7 @@ func SongsHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "session")
 	if err != nil {
 		log.Printf("Songs handler - Unable to get session: %v\n", err)
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
@@ -81,8 +80,7 @@ func SongsHandler(w http.ResponseWriter, r *http.Request) {
 	collectionID, err = strconv.Atoi(mux.Vars(r)["collection_id"])
 	if err != nil {
 		log.Printf("Songs handler - Unable to parse collection ID from URL: %v\n", err)
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Unable to parse URL."}`, http.StatusBadRequest)
+		SendError(w, `{"error": "Unable to parse URL."}`, http.StatusBadRequest)
 		return
 	}
 
@@ -91,8 +89,7 @@ func SongsHandler(w http.ResponseWriter, r *http.Request) {
 		rows, err := db.Query("SELECT song_id, name FROM songs WHERE collection_id = $1", collectionID)
 		if err != nil {
 			log.Printf("Songs GET - Unable to get songs from database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 		defer rows.Close()
@@ -110,8 +107,7 @@ func SongsHandler(w http.ResponseWriter, r *http.Request) {
 		// Check for errors from iterating over rows.
 		if err := rows.Err(); err != nil {
 			log.Printf("Songs GET - Unable to get songs from database result: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
@@ -128,31 +124,28 @@ func SongsHandler(w http.ResponseWriter, r *http.Request) {
 			// If there is something wrong with the request body, return a 400 status
 			log.Printf("Songs POST - Unable to decode request body: %v\n", err)
 			log.Printf("Body: %v\n", r.Body)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Unable to decode request body."}`, http.StatusBadRequest)
+			SendError(w, `{"error": "Unable to decode request body."}`, http.StatusBadRequest)
 			return
 		}
 
 		// Input validation
 		if song.Name == "" {
 			log.Println("Songs POST - Cannot create a song with a blank name.")
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Cannot add a song with a blank name."}`, http.StatusBadRequest)
+			SendError(w, `{"error": "Cannot add a song with a blank name."}`, http.StatusBadRequest)
 			return
 		}
 
 		// Create collection in database
 		if _, err = db.Exec("INSERT INTO songs(name, artist, location, last_performed, notes, added_by, collection_id) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-			song.Name, song.Artist, song.Location, song.LastPerformed, song.Notes, session.Values["email"], collectionID); err != nil {
+			song.Name, song.Artist, song.Location, song.LastPerformed, song.Notes, session.Values["user_id"], collectionID); err != nil {
 			if err.(*pq.Error).Code == "23505" {
 				// Song already exists
 				w.Header().Add("Content-Type", "application/json")
-				http.Error(w, `{"error": "Song already exists."}`, http.StatusBadRequest)
+				SendError(w, `{"error": "Song already exists."}`, http.StatusBadRequest)
 				return
 			}
 			log.Printf("Songs POST - Unable to insert song record in database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
@@ -165,7 +158,7 @@ func SongsHandler(w http.ResponseWriter, r *http.Request) {
 func SongHandler(w http.ResponseWriter, r *http.Request) {
 	// session, err := store.Get(r, "session")
 	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	SendError(w, err.Error(), http.StatusInternalServerError)
 	// 	log.Fatal(err)
 	// 	return
 	// }
@@ -177,8 +170,7 @@ func SongHandler(w http.ResponseWriter, r *http.Request) {
 	song.CollectionID, err = strconv.ParseInt(mux.Vars(r)["collection_id"], 10, 64)
 	if err != nil {
 		log.Printf("Song handler - Unable to parse collection id from URL: %v\n", err)
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Unable to parse URL."}`, http.StatusBadRequest)
+		SendError(w, `{"error": "Unable to parse URL."}`, http.StatusBadRequest)
 		return
 	}
 
@@ -186,20 +178,18 @@ func SongHandler(w http.ResponseWriter, r *http.Request) {
 	song.SongID, err = strconv.ParseInt(mux.Vars(r)["song_id"], 10, 64)
 	if err != nil {
 		log.Printf("Song handler - Unable to parse song id from URL: %v\n", err)
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Unable to parse URL."}`, http.StatusBadRequest)
+		SendError(w, `{"error": "Unable to parse URL."}`, http.StatusBadRequest)
 		return
 	}
 
 	if r.Method == "GET" {
 		// Find the song in the database
-		if err = db.QueryRow("SELECT songs.name, artist, location, last_performed, date_added, users.name, notes FROM songs JOIN users ON added_by = email WHERE collection_id = $1 AND songs.song_id = $2", song.CollectionID, song.SongID).Scan(&song.Name, &song.Artist, &song.Location, &song.LastPerformed, &song.DateAdded, &song.AddedBy, &song.Notes); err != nil {
+		if err = db.QueryRow("SELECT songs.name, artist, location, last_performed, date_added, users.name, notes FROM songs JOIN users ON added_by = user_id WHERE collection_id = $1 AND songs.song_id = $2", song.CollectionID, song.SongID).Scan(&song.Name, &song.Artist, &song.Location, &song.LastPerformed, &song.DateAdded, &song.AddedBy, &song.Notes); err != nil {
 			if err == sql.ErrNoRows {
 				w.WriteHeader(http.StatusNotFound)
 			} else {
 				log.Printf("Song GET - Unable to get song from database: %v\n", err)
-				w.Header().Add("Content-Type", "application/json")
-				http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+				SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			}
 			return
 		}
@@ -218,8 +208,7 @@ func SongHandler(w http.ResponseWriter, r *http.Request) {
 			// If there is something wrong with the request body, return a 400 status
 			log.Printf("Song PUT - Unable to parse request body: %v\n", err)
 			log.Printf("Body: %v\n", r.Body)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Unable to parse request."}`, http.StatusBadRequest)
+			SendError(w, `{"error": "Unable to parse request."}`, http.StatusBadRequest)
 			return
 		}
 
@@ -229,8 +218,7 @@ func SongHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		if _, err = db.Exec("UPDATE songs SET artist = $1, location = $2, last_performed = $3, notes = $4 WHERE collection_id = $5 AND name = $6", song.Artist, song.Location, song.LastPerformed, song.Notes, collectionID, song.Name); err != nil {
 			log.Printf("Song PUT - Unable to update song in database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
@@ -241,23 +229,20 @@ func SongHandler(w http.ResponseWriter, r *http.Request) {
 		tx, err := db.Begin()
 		if err != nil {
 			log.Printf("Song DELETE - Unable to start database transaction: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		}
 
 		// Delete song
 		if _, err = tx.Exec("DELETE FROM songs WHERE collection_id = $1 AND name = $2", song.CollectionID, song.Name); err != nil {
 			log.Printf("Song DELETE - Unable to delete song from database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
 		// Save changes
 		if err = tx.Commit(); err != nil {
 			log.Printf("Song DELETE - Unable to commit database transaction: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
@@ -276,8 +261,7 @@ func SongTagsHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "session")
 	if err != nil {
 		log.Printf("SongTags handler - Unable to get session: %v\n", err)
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
@@ -285,8 +269,7 @@ func SongTagsHandler(w http.ResponseWriter, r *http.Request) {
 	collectionID, err = strconv.ParseInt(mux.Vars(r)["collection_id"], 10, 64)
 	if err != nil {
 		log.Printf("SongTags handler - Unable to parse collection id from URL: %v\n", err)
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, URL_ERROR_MESSAGE, http.StatusBadRequest)
+		SendError(w, URL_ERROR_MESSAGE, http.StatusBadRequest)
 		return
 	}
 
@@ -294,8 +277,7 @@ func SongTagsHandler(w http.ResponseWriter, r *http.Request) {
 	songID, err = strconv.ParseInt(mux.Vars(r)["song_id"], 10, 64)
 	if err != nil {
 		log.Printf("SongTags handler - Unable to parse song id from URL: %v\n", err)
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, URL_ERROR_MESSAGE, http.StatusBadRequest)
+		SendError(w, URL_ERROR_MESSAGE, http.StatusBadRequest)
 		return
 	}
 
@@ -304,8 +286,7 @@ func SongTagsHandler(w http.ResponseWriter, r *http.Request) {
 		if rows, err = db.Query("SELECT tags.tag_id, name, description FROM tags JOIN tagged_songs ON tags.tag_id = tagged_songs.tag_id WHERE collection_id = $1 AND song_id = $2", collectionID, songID); err != nil {
 			if err != sql.ErrNoRows {
 				log.Printf("Tagged song GET - Unable to get tagged songs from database: %v\n", err)
-				w.Header().Add("Content-Type", "application/json")
-				http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+				SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			}
 			return
 		}
@@ -314,8 +295,7 @@ func SongTagsHandler(w http.ResponseWriter, r *http.Request) {
 			var tag Tag
 			if err = rows.Scan(&tag.TagID, &tag.Name, &tag.Description); err != nil {
 				log.Printf("Tagged song GET - Unable to parse tagged song from database: %v\n", err)
-				w.Header().Add("Content-Type", "application/json")
-				http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+				SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			}
 
 			tags = append(tags, tag)
@@ -323,8 +303,7 @@ func SongTagsHandler(w http.ResponseWriter, r *http.Request) {
 
 		if err = rows.Err(); err != nil {
 			log.Printf("Tagged song GET - Unable to get next tagged song from database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		}
 
 		// Send response
@@ -340,35 +319,30 @@ func SongTagsHandler(w http.ResponseWriter, r *http.Request) {
 			// If there is something wrong with the request body, return a 400 status
 			log.Printf("TaggedSong POST - Unable to parse request body: %v\n", err)
 			log.Printf("Body: %v\n", r.Body)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, URL_ERROR_MESSAGE, http.StatusBadRequest)
+			SendError(w, URL_ERROR_MESSAGE, http.StatusBadRequest)
 			return
 		}
 
 		// Song ID Validation
 		var targetCollectionID int64
 		if err = db.QueryRow("SELECT collection_id FROM songs WHERE song_id = $1", songID).Scan(&targetCollectionID); err != nil {
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Song not found."}`, http.StatusNotFound)
+			SendError(w, `{"error": "Song not found."}`, http.StatusNotFound)
 		}
 
 		if targetCollectionID != collectionID {
 			log.Printf("Tagged song POST - User %s (%s) attempted to tag song %d that they didn't own! Error %v\n", session.Values["name"], session.Values["email"], songID, err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Song not found."}`, http.StatusNotFound)
+			SendError(w, `{"error": "Song not found."}`, http.StatusNotFound)
 			return
 		}
 
 		// Tag ID Validation
 		if err = db.QueryRow("SELECT collection_id FROM tags WHERE tag_id = $1", taggedSong.TagID).Scan(&targetCollectionID); err != nil {
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Tag not found."}`, http.StatusNotFound)
+			SendError(w, `{"error": "Tag not found."}`, http.StatusNotFound)
 		}
 
 		if targetCollectionID != collectionID {
 			log.Printf("Tagged song POST - User %s (%s) attempted to use tag %d that they didn't own! Error %v\n", session.Values["name"], session.Values["email"], taggedSong.TagID, err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Tag not found."}`, http.StatusNotFound)
+			SendError(w, `{"error": "Tag not found."}`, http.StatusNotFound)
 			return
 		}
 
@@ -377,13 +351,11 @@ func SongTagsHandler(w http.ResponseWriter, r *http.Request) {
 			taggedSong.TagID, taggedSong.SongID); err != nil {
 			if err.(*pq.Error).Code == "23505" {
 				// Song is already tagged with this tag
-				w.Header().Add("Content-Type", "application/json")
-				http.Error(w, `{"error": "Song already has this tag."}`, http.StatusBadRequest)
+				SendError(w, `{"error": "Song already has this tag."}`, http.StatusBadRequest)
 				return
 			}
 			log.Printf("Tagged song POST - Unable to add tag to song record in database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
@@ -398,35 +370,31 @@ func SongTagsHandler(w http.ResponseWriter, r *http.Request) {
 			// If there is something wrong with the request body, return a 400 status
 			log.Printf("TaggedSong POST - Unable to parse request body: %v\n", err)
 			log.Printf("Body: %v\n", r.Body)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Unable to parse request."}`, http.StatusBadRequest)
+			SendError(w, `{"error": "Unable to parse request."}`, http.StatusBadRequest)
 			return
 		}
 
 		// Song ID Validation
 		var targetCollectionID int64
 		if err = db.QueryRow("SELECT collection_id FROM songs WHERE song_id = $1", songID).Scan(&targetCollectionID); err != nil {
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Song not found."}`, http.StatusNotFound)
+			SendError(w, `{"error": "Song not found."}`, http.StatusNotFound)
 		}
 
 		if targetCollectionID != collectionID {
 			log.Printf("Tagged song POST - User %s (%s) attempted to untag song %d that they didn't own! Error %v\n", session.Values["name"], session.Values["email"], songID, err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Song not found."}`, http.StatusNotFound)
+			SendError(w, `{"error": "Song not found."}`, http.StatusNotFound)
 			return
 		}
 
 		// Tag ID Validation
 		if err = db.QueryRow("SELECT collection_id FROM tags WHERE tag_id = $1", taggedSong.TagID).Scan(&targetCollectionID); err != nil {
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Tag not found."}`, http.StatusNotFound)
+			log.Printf("Tagged song POST - Unable to retreive tag from database: %v\n", err)
+			SendError(w, `{"error": "Tag not found."}`, http.StatusNotFound)
 		}
 
 		if targetCollectionID != collectionID {
 			log.Printf("Tagged song POST - User %s (%s) attempted to untag %d that they didn't own! Error %v\n", session.Values["name"], session.Values["email"], taggedSong.TagID, err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Tag not found."}`, http.StatusNotFound)
+			SendError(w, `{"error": "Tag not found."}`, http.StatusNotFound)
 			return
 		}
 
@@ -434,8 +402,7 @@ func SongTagsHandler(w http.ResponseWriter, r *http.Request) {
 		if _, err = db.Exec("DELETE FROM tagged_songs WHERE tag_id = $1 AND song_id = $2",
 			taggedSong.TagID, songID); err != nil {
 			log.Printf("Tagged song POST - Unable to delete song tag record from database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 

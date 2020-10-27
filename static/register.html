@@ -18,23 +18,17 @@
   </head>
 
   <body class="text-center">
-		<!-- Alert -->
-		<div class="alert alert-danger alert-dismissible" role="alert" style="display:none;">
-			<strong>There was a problem processing your registration:</strong><br>
-			<span id="reason"></span>
-			<button type="button" class="close" aria-label="Close" id="alert-close">
-				<span aria-hidden="true">&times;</span>
-			</button>
-		</div>
+		<div id="alerts"></div>
 
 		<!-- Form -->
 		<form class="form-signin">
 			<h1 class="h3 mb-3 font-weight-normal">Registration</h1>
 			<input type="email" id="email" class="form-control" placeholder="Email address" required autofocus>
 			<input type="password" id="password" class="form-control" placeholder="Password" required>
-			<input type="text" id="name" class="form-control" placeholder="Display name">
+			<input type="password" id="confirm" class="form-control" placeholder="Re-enter password" required>
+			<input type="text" id="name" class="form-control" placeholder="Name">
 			<button class="btn btn-lg btn-primary btn-block" type="button" id="register">Register</button>
-			<p class="mt-5 mb-3 text-muted">&copy; 2019 Michael Humphrey<br>All Rights Reserved</p>
+			<p class="mt-5 mb-3 text-muted">&copy; 2020 Michael Humphrey<br>All Rights Reserved</p>
 		</form>
 
 		<!-- Modal -->
@@ -52,27 +46,6 @@
 		</div>
 		
 		<!-- Script -->
-		<script>
-			$("#register").click(function() {
-				$("#wait").modal();
-				
-				$.post( "/user/register", JSON.stringify({ email: $("#email").val(), password: $("#password").val(), name: $("#name").val() }) )
-					.done(function( data ) {
-						window.location.href = "/collections.html";
-					})
-					.fail(function( data ) {
-						$("#reason").text(data.responseJSON.error);
-						$(".alert").show();
-						console.log(data.responseJSON);
-					})
-					.always(function() {
-						$("#wait").modal("hide");
-					});
-			});
-
-			$("#alert-close").click(function() {
-				$(".alert").hide()
-			})
-		</script>
+		<script src="js/register.js" type="module"></script>
   </body>
 </html>

@@ -1,6 +1,6 @@
 "use strict";
 
-import { add_alert } from "./utilities.js";
+import { add_alert, alert_ajax_failure } from "./utilities.js";
 
 let url = new URL(window.location.href);
 let delete_song = false;

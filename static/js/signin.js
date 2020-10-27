@@ -5,24 +5,28 @@ import { add_alert, alert_ajax_failure } from "./utilities.js";
 
 $("#login").click(function() {
 	$("#wait").modal();
-	$('#wait').on('shown.bs.modal', function (e) {
-		$.post("/user/login", JSON.stringify({email: $("#email").val(), password: $("#password").val()}))
-			.done(function( data ) {
-				let redirect = new URL(window.location.href).searchParams.get("redirect");
-				if (redirect === null) {
-					redirect = "/collections.html";
-				}
-				window.location.href = redirect;
-			})
-			.fail(function( data ) {
+});
+$('#wait').on('shown.bs.modal', function (e) {
+	$.post("/user/login", JSON.stringify({email: $("#email").val(), password: $("#password").val()}))
+		.done(function( data ) {
+			let redirect = new URL(window.location.href).searchParams.get("redirect");
+			if (redirect === null) {
+				redirect = "/collections.html";
+			}
+			window.location.href = redirect;
+		})
+		.fail(function( data ) {
+			if (data.status === 401) {
+				add_alert("Sign in failed.", "Username or password incorrect.", "danger");
+			} else {
 				alert_ajax_failure("Sign in failed.", data);
-				console.log(data)
-			})
-			.always(function() {
-				console.log("Hiding modal...")
-				$("#wait").modal("hide")
-			});
-	});
+			}
+			console.log(data)
+		})
+		.always(function() {
+			console.log("Hiding modal...")
+			$("#wait").modal("hide")
+		});
 });
 
 $('#password').keypress(function (e) {

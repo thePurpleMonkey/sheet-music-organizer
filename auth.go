@@ -49,7 +49,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "session")
 	if err != nil {
 		log.Printf("Login - Unable to retrieve session store: %v\n", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		SendError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -59,35 +59,35 @@ func login(w http.ResponseWriter, r *http.Request) {
 		// If there is something wrong with the request body, return a 400 status
 		log.Printf("Login - Error decoding request body: %v\n", err)
 		log.Printf("Body: %v\n", r.Body)
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+		SendError(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 
 	// Pull user with email from
-	var hashedPassword, name string
-	if err := db.QueryRow("SELECT password, name FROM users WHERE email = $1", user.Email).Scan(&hashedPassword, &name); err != nil {
+	var hashedPassword, name, userID string
+	if err := db.QueryRow("SELECT password, name, user_id FROM users WHERE email = $1", user.Email).Scan(&hashedPassword, &name, &userID); err != nil {
 		if err == sql.ErrNoRows {
 			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Incorrect email or password"}`, http.StatusUnauthorized)
+			SendError(w, `{"error": "Incorrect email or password"}`, http.StatusUnauthorized)
 		} else {
 			log.Printf("Login - Unable to retrieve username and password from database: %v\n", err)
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		}
 		return
 	}
 
 	if !checkPasswordHash(user.Password, hashedPassword) {
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Incorrect email or password"}`, http.StatusUnauthorized)
+		SendError(w, `{"error": "Incorrect email or password"}`, http.StatusUnauthorized)
 		return
 	}
 
 	// Get a list of all user's collections
-	rows, err := db.Query("SELECT collection_id FROM collection_members WHERE user_email = $1", user.Email)
+	rows, err := db.Query("SELECT collection_id FROM collection_members WHERE user_id = $1", userID)
 	if err != nil {
 		log.Printf("Login - Unable to retrieve collection ids from database: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+		SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -107,7 +107,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	if err := rows.Err(); err != nil {
 		log.Printf("Login - Unable to read collection IDs from database: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+		SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
@@ -115,10 +115,11 @@ func login(w http.ResponseWriter, r *http.Request) {
 	session.Values["authenticated"] = true
 	session.Values["name"] = name
 	session.Values["email"] = user.Email
+	session.Values["user_id"] = userID
 	session.Values["ids"] = IDs
 	if err := session.Save(r, w); err != nil {
 		log.Printf("Login - Unable to save session state: %v\n", err)
-		http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+		SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 	} else {
 		w.WriteHeader(http.StatusOK)
 	}
@@ -138,7 +139,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "session")
 	if err != nil {
 		log.Printf("Register - Unable to retrieve session store: %v\n", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
@@ -148,26 +149,26 @@ func register(w http.ResponseWriter, r *http.Request) {
 		// If there is something wrong with the request body, return a 400 status
 		log.Printf("Register - Unable to decode request body: %v", err)
 		log.Printf("Body: %v\n", r.Body)
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+		SendError(w, `{"error": "Unable to decode request body."}`, http.StatusBadRequest)
 		return
 	}
 
 	hashedPass, err := hashPassword(user.Password)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Register - Unable to hash password: %v\n", err)
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
 	// Create user in database
-	if _, err = db.Exec("INSERT INTO users VALUES ($1, $2, $3)", user.Email, hashedPass, user.Name); err != nil {
+	if _, err = db.Exec("INSERT INTO users (email, password, name) VALUES ($1, $2, $3)", user.Email, hashedPass, user.Name); err != nil {
 		if err.(*pq.Error).Code == "23505" {
 			log.Printf("Register - Email already regsitered: %v\n", user.Email)
 			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Email already registered"}`, http.StatusBadRequest)
+			SendError(w, `{"error": "Email already registered"}`, http.StatusBadRequest)
 		} else {
 			log.Printf("Register - Unable to insert new user into database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		}
 		return
 	}
@@ -176,10 +177,11 @@ func register(w http.ResponseWriter, r *http.Request) {
 	session.Values["authenticated"] = true
 	session.Values["name"] = user.Name
 	session.Values["email"] = user.Email
+	session.Values["user_id"] = user.UserID
 	if err := session.Save(r, w); err != nil {
 		log.Printf("Login - Unable to save session state: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+		SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 	} else {
 		w.WriteHeader(http.StatusCreated)
 	}
@@ -193,14 +195,14 @@ func requestPasswordResetEmail(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Password Reset Request - Unable to decode request body: %v\n", err)
 		log.Printf("Body: %v\n", r.Body)
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Malformed request"}`, http.StatusBadRequest)
+		SendError(w, `{"error": "Malformed request"}`, http.StatusBadRequest)
 		return
 	}
 
 	if len(user.Email) == 0 {
 		log.Println("Password Reset Request - Email not provided in reset email request")
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Email not provided"}`, http.StatusBadRequest)
+		SendError(w, `{"error": "Email not provided"}`, http.StatusBadRequest)
 		return
 	}
 
@@ -212,7 +214,7 @@ func requestPasswordResetEmail(w http.ResponseWriter, r *http.Request) {
 		} else {
 			log.Printf("Password Reset Request - Unable to retrieve user from database: %v\n", err)
 			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		}
 		return
 	}
@@ -222,7 +224,7 @@ func requestPasswordResetEmail(w http.ResponseWriter, r *http.Request) {
 	if _, err := db.Exec("INSERT INTO password_reset VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET user_id = $1, token = $2, expires = $3", user.UserID, token, time.Now().Add(time.Hour)); err != nil {
 		log.Printf("Password Reset Request - Unable to insert password reset request into database: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+		SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
@@ -240,13 +242,13 @@ func requestPasswordResetEmail(w http.ResponseWriter, r *http.Request) {
 	if err := htmlTemplate.Execute(&htmlBuffer, data); err != nil {
 		log.Printf("Password Reset Request - Unable to execute html template: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 	if err := textTemplate.Execute(&textBuffer, data); err != nil {
 		log.Printf("Password Reset Request - Unable to execute text template: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
@@ -254,7 +256,7 @@ func requestPasswordResetEmail(w http.ResponseWriter, r *http.Request) {
 	if err := SendEmail(user.Name, user.Email, "Password Reset Email", htmlBuffer.String(), textBuffer.String()); err != nil {
 		log.Printf("Password Reset Request - Failed to send password reset email: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Unable to send password reset email."}`, http.StatusInternalServerError)
+		SendError(w, `{"error": "Unable to send password reset email."}`, http.StatusInternalServerError)
 		return
 	}
 
@@ -269,14 +271,14 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Password Reset - Unable to decode request body: %v\n", err)
 		log.Printf("Body: %v\n", r.Body)
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Malformed request"}`, http.StatusBadRequest)
+		SendError(w, `{"error": "Malformed request"}`, http.StatusBadRequest)
 		return
 	}
 
 	if len(req.Token) == 0 {
 		log.Println("Password Reset - Token not provided in reset email request")
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Token not provided"}`, http.StatusBadRequest)
+		SendError(w, `{"error": "Token not provided"}`, http.StatusBadRequest)
 		return
 	}
 
@@ -290,7 +292,7 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 		} else {
 			log.Printf("Password Reset - Unable to retrieve password reset request from database: %v\n", err)
 			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		}
 		return
 	}
@@ -299,7 +301,7 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 		// Password reset request expired
 		log.Printf("User %v attempt to use expired password reset, which expired on %v\n", email, expires)
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "That password reset request has expired. Please request a new password reset email."}`, http.StatusForbidden)
+		SendError(w, `{"error": "That password reset request has expired. Please request a new password reset email."}`, http.StatusForbidden)
 		return
 	}
 
@@ -308,7 +310,7 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Password Reset - Unable to hash password: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
@@ -316,7 +318,7 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 	if _, err = db.Exec("UPDATE users SET password = $1", hashedPass); err != nil {
 		log.Printf("Reset Password - Unable to update user %v password! %v\n", email, err)
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+		SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
@@ -324,7 +326,7 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 	if _, err := db.Exec("DELETE FROM password_reset WHERE user_id = $1", userID); err != nil {
 		log.Printf("Password Reset - Unable to clear expired credentials from database: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+		SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
@@ -333,12 +335,13 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 	if session, err = store.Get(r, "session"); err != nil {
 		log.Printf("Password Reset - Unable to get session variables: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 	session.Values["authenticated"] = true
 	session.Values["name"] = name
 	session.Values["email"] = email
+	session.Values["user_id"] = userID
 	session.Save(r, w)
 
 	w.WriteHeader(http.StatusOK)
@@ -352,14 +355,14 @@ func RequireAuthentication(f http.HandlerFunc) http.HandlerFunc {
 		if err != nil {
 			log.Printf("Require Authentication - Unable to get session: %v\n", err)
 			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
 		// Check if user is authenticated
 		if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
 			log.Println("Attempt to access restricted page denied")
-			http.Error(w, "Forbidden", http.StatusForbidden)
+			SendError(w, "Forbidden", http.StatusForbidden)
 			return
 		}
 
@@ -375,7 +378,7 @@ func VerifyCollectionID(f http.HandlerFunc) http.HandlerFunc {
 		if err != nil {
 			log.Printf("Verify Collection ID - Unable to get session: %v\n", err)
 			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
@@ -386,7 +389,7 @@ func VerifyCollectionID(f http.HandlerFunc) http.HandlerFunc {
 		if err != nil {
 			log.Printf("Collection ID middleware - Unable to get collection id: %v\n", err)
 			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Unable to parse collection id."}`, http.StatusBadRequest)
+			SendError(w, `{"error": "Unable to parse collection id."}`, http.StatusBadRequest)
 			return
 		}
 
@@ -398,6 +401,6 @@ func VerifyCollectionID(f http.HandlerFunc) http.HandlerFunc {
 		}
 
 		log.Printf("%v | %v not found in authorized collection IDs: %v", session.Values["email"], collectionID, acceptableIDs)
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		SendError(w, "Forbidden", http.StatusForbidden)
 	}
 }

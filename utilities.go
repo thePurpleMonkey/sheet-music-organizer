@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/sendgrid/sendgrid-go"
@@ -26,9 +27,12 @@ func SendEmail(name string, address string, subject string, htmlContent string, 
 	response, err := client.Send(message)
 	log.Printf("Email sent! Status code: %v\n", response.StatusCode)
 	log.Printf("Email body: %v\n", response.Body)
-	if err != nil {
-		return err
-	}
+	return err
+}
 
-	return nil
+// SendError ...
+func SendError(w http.ResponseWriter, message string, httpCode int) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(httpCode)
+	w.Write([]byte(message))
 }

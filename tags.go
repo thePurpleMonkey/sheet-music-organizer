@@ -25,7 +25,7 @@ func TagsHandler(w http.ResponseWriter, r *http.Request) {
 	// if err != nil {
 	// 	log.Printf("TagsHandler - Unable to get session: %v\n", err)
 	//	w.Header().Add("Content-Type", "application/json")
-	// 	http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+	// 	SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 	// 	return
 	// }
 
@@ -34,8 +34,7 @@ func TagsHandler(w http.ResponseWriter, r *http.Request) {
 	collectionID, err := strconv.Atoi(mux.Vars(r)["collection_id"])
 	if err != nil {
 		log.Printf("TagsHandler - Unable to parse collection ID: %v\n", err)
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Unable to parse collection id."}`, http.StatusBadRequest)
+		SendError(w, `{"error": "Unable to parse collection id."}`, http.StatusBadRequest)
 		return
 	}
 
@@ -44,8 +43,7 @@ func TagsHandler(w http.ResponseWriter, r *http.Request) {
 		rows, err := db.Query("SELECT tag_id, name, description FROM tags WHERE collection_id = $1", collectionID)
 		if err != nil {
 			log.Printf("Tags GET - Unable to retrieve tags from database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 		defer rows.Close()
@@ -64,8 +62,7 @@ func TagsHandler(w http.ResponseWriter, r *http.Request) {
 		// Check for errors from iterating over rows.
 		if err := rows.Err(); err != nil {
 			log.Printf("Tags GET - Unable to tags result from database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
@@ -82,16 +79,14 @@ func TagsHandler(w http.ResponseWriter, r *http.Request) {
 			// If there is something wrong with the request body, return a 400 status
 			log.Printf("Tags POST - Unable to decode request body: %v\n", err)
 			log.Printf("Body: %v\n", r.Body)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Unable to decode request body."}`, http.StatusBadRequest)
+			SendError(w, `{"error": "Unable to decode request body."}`, http.StatusBadRequest)
 			return
 		}
 
 		// Input validation
 		if len(tag.Name) == 0 {
 			log.Println("Tags POST - Tag name not provided.")
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "No tag name supplied."}`, http.StatusBadRequest)
+			SendError(w, `{"error": "No tag name supplied."}`, http.StatusBadRequest)
 			return
 		}
 
@@ -100,13 +95,11 @@ func TagsHandler(w http.ResponseWriter, r *http.Request) {
 			tag.Name, tag.Description, collectionID); err != nil {
 			if err.(*pq.Error).Code == "23505" {
 				// Tag already exists
-				w.Header().Add("Content-Type", "application/json")
-				http.Error(w, `{"error": "Tag already exists."}`, http.StatusBadRequest)
+				SendError(w, `{"error": "Tag already exists."}`, http.StatusBadRequest)
 				return
 			}
 			log.Printf("Tags POST - Unable to insert tag record in database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusBadRequest)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusBadRequest)
 			return
 		}
 
@@ -124,8 +117,7 @@ func TagHandler(w http.ResponseWriter, r *http.Request) {
 	tag.CollectionID, err = strconv.ParseInt(mux.Vars(r)["collection_id"], 10, 64)
 	if err != nil {
 		log.Printf("Tag handler - Unable to parse collection id from URL: %v\n", err)
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Unable to parse URL."}`, http.StatusBadRequest)
+		SendError(w, `{"error": "Unable to parse URL."}`, http.StatusBadRequest)
 		return
 	}
 
@@ -133,8 +125,7 @@ func TagHandler(w http.ResponseWriter, r *http.Request) {
 	tag.TagID, err = strconv.ParseInt(mux.Vars(r)["tag_id"], 10, 64)
 	if err != nil {
 		log.Printf("Tag handler - Unable to parse tag id from URL: %v\n", err)
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Unable to parse URL."}`, http.StatusBadRequest)
+		SendError(w, `{"error": "Unable to parse URL."}`, http.StatusBadRequest)
 		return
 	}
 
@@ -146,8 +137,7 @@ func TagHandler(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusNotFound)
 			} else {
 				log.Printf("Tag GET - Unable to get tag from database: %v\n", err)
-				w.Header().Add("Content-Type", "application/json")
-				http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+				SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			}
 			return
 		}
@@ -167,8 +157,7 @@ func TagHandler(w http.ResponseWriter, r *http.Request) {
 			// If there is something wrong with the request body, return a 400 status
 			log.Printf("Tag PUT - Unable to parse request body: %v\n", err)
 			log.Printf("Body: %v\n", r.Body)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Unable to parse request."}`, http.StatusBadRequest)
+			SendError(w, `{"error": "Unable to parse request."}`, http.StatusBadRequest)
 			return
 		}
 
@@ -176,8 +165,7 @@ func TagHandler(w http.ResponseWriter, r *http.Request) {
 		var result sql.Result
 		if result, err = db.Exec("UPDATE tags SET name = $1, description = $2 WHERE collection_id = $3 AND tag_id = $4", tag.Name, tag.Description, collectionID, tag.TagID); err != nil {
 			log.Printf("Tag PUT - Unable to update tag in database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
@@ -186,15 +174,13 @@ func TagHandler(w http.ResponseWriter, r *http.Request) {
 		rows, err = result.RowsAffected()
 		if err != nil {
 			log.Printf("Tag PUT - Database update unsuccessful: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
 		if rows == 0 {
 			log.Printf("Tag PUT - Tag id '%v' not found in database for collection %v: %v\n", tag.TagID, tag.CollectionID, err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, `{"error": "Tag not found."}`, http.StatusNotFound)
+			SendError(w, `{"error": "Tag not found."}`, http.StatusNotFound)
 			return
 		}
 
@@ -205,31 +191,27 @@ func TagHandler(w http.ResponseWriter, r *http.Request) {
 		tx, err := db.Begin()
 		if err != nil {
 			log.Printf("Tag DELETE - Unable to start database transaction: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		}
 
 		// Removed tagged songs
 		if _, err = tx.Exec("DELETE FROM tagged_songs WHERE tag_id = $1", tag.TagID); err != nil {
 			log.Printf("Tag DELETE - Unable to remove tagged songs from database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
 		// Delete tag
 		if _, err = tx.Exec("DELETE FROM tags WHERE collection_id = $1 AND tag_id = $2", tag.CollectionID, tag.TagID); err != nil {
 			log.Printf("Tag DELETE - Unable to delete tag from database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
 		// Save changes
 		if err = tx.Commit(); err != nil {
 			log.Printf("Tag DELETE - Unable to commit database transaction: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
@@ -246,8 +228,7 @@ func TagSongsHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "session")
 	if err != nil {
 		log.Printf("TagSongs handler - Unable to get session: %v\n", err)
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
@@ -255,8 +236,7 @@ func TagSongsHandler(w http.ResponseWriter, r *http.Request) {
 	tag.CollectionID, err = strconv.ParseInt(mux.Vars(r)["collection_id"], 10, 64)
 	if err != nil {
 		log.Printf("TagSongs handler - Unable to parse collection id from URL: %v\n", err)
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Unable to parse URL."}`, http.StatusBadRequest)
+		SendError(w, `{"error": "Unable to parse URL."}`, http.StatusBadRequest)
 		return
 	}
 
@@ -264,22 +244,19 @@ func TagSongsHandler(w http.ResponseWriter, r *http.Request) {
 	tag.TagID, err = strconv.ParseInt(mux.Vars(r)["tag_id"], 10, 64)
 	if err != nil {
 		log.Printf("TagSongs handler - Unable to parse tag_id from URL: %v\n", err)
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Unable to parse URL."}`, http.StatusBadRequest)
+		SendError(w, `{"error": "Unable to parse URL."}`, http.StatusBadRequest)
 		return
 	}
 
 	// Verify Tag ID
 	var targetCollectionID int64
 	if err = db.QueryRow("SELECT collection_id FROM tags WHERE tag_id = $1", tag.TagID).Scan(&targetCollectionID); err != nil {
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Tag not found."}`, http.StatusNotFound)
+		SendError(w, `{"error": "Tag not found."}`, http.StatusNotFound)
 	}
 
 	if targetCollectionID != tag.CollectionID {
 		log.Printf("TagSongs handler - User %s (%s) attempted to access tag %d that they didn't own! Error %v\n", session.Values["name"], session.Values["email"], tag.TagID, err)
-		w.Header().Add("Content-Type", "application/json")
-		http.Error(w, `{"error": "Tag not found."}`, http.StatusNotFound)
+		SendError(w, `{"error": "Tag not found."}`, http.StatusNotFound)
 		return
 	}
 
@@ -288,8 +265,7 @@ func TagSongsHandler(w http.ResponseWriter, r *http.Request) {
 		rows, err := db.Query("SELECT songs.song_id, songs.name FROM songs JOIN tagged_songs ON songs.song_id = tagged_songs.song_id WHERE collection_id = $1 AND tag_id = $2", tag.CollectionID, tag.TagID)
 		if err != nil {
 			log.Printf("TagSongs GET - Unable to get tagged songs from database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 		defer rows.Close()
@@ -307,8 +283,7 @@ func TagSongsHandler(w http.ResponseWriter, r *http.Request) {
 		// Check for errors from iterating over rows.
 		if err := rows.Err(); err != nil {
 			log.Printf("TagSongs GET - Unable to get songs from database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
-			http.Error(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
