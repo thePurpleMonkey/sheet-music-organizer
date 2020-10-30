@@ -178,6 +178,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 	session.Values["name"] = user.Name
 	session.Values["email"] = user.Email
 	session.Values["user_id"] = user.UserID
+	session.Values["ids"] = []int64{}
 	if err := session.Save(r, w); err != nil {
 		log.Printf("Login - Unable to save session state: %v\n", err)
 		w.Header().Add("Content-Type", "application/json")
