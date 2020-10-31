@@ -41,6 +41,8 @@
               Options
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="#" id="members_link">Members</a>
+              <div class="dropdown-divider"></div>
               <a class="dropdown-item" href="#" data-toggle="modal" data-target="#edit_collection_modal">Edit</a>
               <a class="dropdown-item text-danger" href="#" data-toggle="modal" data-target="#delete_collection_modal">Delete</a>
             </div>
@@ -63,16 +65,16 @@
       <div id="alerts"></div>
 
       <!-- Main view -->
-      <div class="row">
+      <div class="row row-cols-2">
         <!-- All songs list -->
-        <div id="all_songs" class="col-sm">
+        <div id="all_songs" class="col-sm-6">
           <h3>Songs</h3>
           <div id="songs" class="list-group"></div>
           <div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_song_modal" id="add_song">Add song</button></div>
         </div>
   
         <!-- Tags -->
-        <div id="all_tags" class="col-sm">
+        <div id="all_tags" class="col-sm-6">
           <h3>Tags</h3>
           <div id="tags" class="list-group"></div>
           <div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_tag_modal" id="add_tag">Add Tag</button></div>
@@ -87,7 +89,8 @@
         Icons made by <a href="https://www.flaticon.com/authors/prettycons" title="prettycons">prettycons</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
       </div>
       <!-- #endregion -->
-    </div>
+
+    <!-- #region Modals -->
 
     <!-- Add song modal -->
     <div class="modal fade" id="add_song_modal" tabindex="-1" role="dialog">
@@ -272,6 +275,8 @@
         </div>
       </div>
     </div>
+
+    <!-- #endregion -->
   
     <!-- Script -->
     <script src="/js/collection.js" type="module"></script>

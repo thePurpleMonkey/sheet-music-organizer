@@ -27,6 +27,7 @@ func makeRouter() *mux.Router {
 	// Collections
 	r.HandleFunc("/collections", RequireAuthentication(CollectionsHandler)).Methods("GET", "POST")
 	r.HandleFunc("/collections/{collection_id}", VerifyCollectionID(RequireAuthentication(CollectionHandler))).Methods("GET", "PUT", "DELETE")
+	r.HandleFunc("/collections/{collection_id}/members", VerifyCollectionID(RequireAuthentication(CollectionMembersHandler))).Methods("GET", "POST", "DELETE")
 
 	// Songs
 	r.HandleFunc("/collections/{collection_id}/songs", VerifyCollectionID(RequireAuthentication(SongsHandler))).Methods("GET", "POST")

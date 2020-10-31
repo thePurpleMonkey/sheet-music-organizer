@@ -18,6 +18,9 @@ let collection = {
 
 // Get collection info when document becomes ready
 $(function() {
+    // Replace link for members
+    $("#members_link").attr("href", "/members.html?collection_id=" + collection.id);
+    
     // Handler for .ready() called.
     $.get(`/collections/${collection.id}`)
     .done(function(data) {
