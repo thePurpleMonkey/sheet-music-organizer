@@ -307,8 +307,8 @@ func CollectionMembersHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(members)
 		return
 
-	} else if r.Method == "POST" {
-		log.Printf("Members POST - Not implemented.")
+	} else if r.Method == "PUT" {
+		log.Printf("Members PUT - Not implemented.")
 		SendError(w, "Not Found", http.StatusNotFound)
 		return
 

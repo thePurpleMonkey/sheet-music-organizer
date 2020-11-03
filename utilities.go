@@ -9,14 +9,14 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
-// Generic error message for database errors
-var DATABASE_ERROR_MESSAGE = `{"error": "Error communicating with database."}`
+// DATABASE_ERROR_MESSAGE is a generic error message for database errors
+const DATABASE_ERROR_MESSAGE string = `{"error": "Error communicating with database."}`
 
-// Generic error message for server errors
-var SERVER_ERROR_MESSAGE = `{"error": "There was an error attempting to complete this operation. Please try again later."}`
+// SERVER_ERROR_MESSAGE is a generic error message for server errors
+const SERVER_ERROR_MESSAGE string = `{"error": "There was an error attempting to complete this operation. Please try again later."}`
 
-// Generic error message for parsing URLs
-var URL_ERROR_MESSAGE = `{"error": "Unable to parse URL."}`
+// URL_ERROR_MESSAGE is a generic error message for parsing URLs
+const URL_ERROR_MESSAGE string = `{"error": "Unable to parse URL."}`
 
 // SendEmail ...
 func SendEmail(name string, address string, subject string, htmlContent string, plainTextContent string) error {
@@ -26,7 +26,7 @@ func SendEmail(name string, address string, subject string, htmlContent string, 
 	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 	response, err := client.Send(message)
 	log.Printf("Email sent! Status code: %v\n", response.StatusCode)
-	log.Printf("Email body: %v\n", response.Body)
+	log.Printf("Email response body: %v\n", response.Body)
 	return err
 }
 

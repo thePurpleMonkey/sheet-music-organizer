@@ -4,6 +4,33 @@ import { add_alert, alert_ajax_failure, getUrlParameter } from "./utilities.js";
 
 let collection_id = getUrlParameter("collection_id");
 
+function refresh_invitations() {
+	$("#invitations_list").empty();
+	$("#invitations_list").append("<li>Loading pending invitations, please wait...</li>");
+	$.get(`/collections/${collection_id}/invitations`)
+	.done(function(data) {
+		console.log(data);
+		$("#invitations_list").empty();
+
+		if (data.length === 0) {
+			let item = $("<li>").addClass("list-group-item disabled").attr("aria-disabled", "true").text("No pending invitations");
+			$("#invitations_list").append(item);
+		}
+
+		data.forEach(invite => {
+			let item = $("<li>")
+				.addClass("list-group-item");
+			item.append(invite.email);
+			$("#invitations_list").append(item);
+		});
+	})
+	.fail(function(data) {
+		alert_ajax_failure("Unable to get pending invitations.", data);
+		$("#invitations_list").empty();
+		$("#invitations_list").append($("<li>").addClass("list-group-item disabled").attr("aria-disabled", "true").text("Error retrieving pending invitations."));
+	});
+}
+
 $(function() {
     // Replace link for collection
 	$("#collection_link").attr("href", "/collection.html?collection_id=" + collection_id);
@@ -46,4 +73,13 @@ $(function() {
 	.fail(function(data) {
 		alert_ajax_failure("Unable to get collection name.", data);
 	});
+
+	// Refresh invitations
+	refresh_invitations();
+});
+
+// Logout button
+$("#logout").click(function() {
+	$.get("/user/logout");
+	window.location.href = "/"
 });

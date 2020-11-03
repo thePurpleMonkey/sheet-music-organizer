@@ -2,7 +2,6 @@
 
 import { add_alert, alert_ajax_failure } from "./utilities.js";
 
-
 $("#login").click(function() {
 	$("#wait").modal();
 });
@@ -13,6 +12,8 @@ $('#wait').on('shown.bs.modal', function (e) {
 			if (redirect === null) {
 				redirect = "/collections.html";
 			}
+			redirect = decodeURIComponent(redirect);
+			console.log("Redirecting to: " + redirect);
 			window.location.href = redirect;
 		})
 		.fail(function( data ) {

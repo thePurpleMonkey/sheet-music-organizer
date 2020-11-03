@@ -153,6 +153,21 @@ func register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate
+	if user.Email == "" {
+		log.Println("Register - Blank email provided")
+		SendError(w, `{"error": "No email provided."}`, http.StatusBadRequest)
+		return
+	} else if user.Name == "" {
+		log.Println("Register - Blank name provided")
+		SendError(w, `{"error": "No name provided."}`, http.StatusBadRequest)
+		return
+	} else if user.Password == "" {
+		log.Println("Register - Blank password provided")
+		SendError(w, `{"error": "No password provided."}`, http.StatusBadRequest)
+		return
+	}
+
 	hashedPass, err := hashPassword(user.Password)
 	if err != nil {
 		log.Printf("Register - Unable to hash password: %v\n", err)

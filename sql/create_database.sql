@@ -3,7 +3,9 @@ CREATE TABLE IF NOT EXISTS users
 	user_id SERIAL PRIMARY KEY,
 	email VARCHAR(255) UNIQUE NOT NULL,
 	password VARCHAR(127) NOT NULL,
-	name VARCHAR(127) NOT NULL
+	name VARCHAR(127) NOT NULL,
+	verified BOOLEAN DEFAULT false,
+	restricted BOOLEAN DEFAULT false
 );
 
 CREATE TABLE IF NOT EXISTS collections
@@ -26,6 +28,7 @@ CREATE TABLE IF NOT EXISTS invitations
 	invitation_id SERIAL PRIMARY KEY,
 	inviter_id INT REFERENCES users(user_id),
 	invitee_email VARCHAR(255) NOT NULL,
+	collection_id INT REFERENCES collections(collection_id),
 	admin_invite BOOLEAN,
 	invite_sent TIMESTAMP WITH TIME ZONE NOT NULL
 );
