@@ -208,7 +208,7 @@ $('#delete_collection_wait').on('shown.bs.modal', function (e) {
 });
 
 // Show wait dialog after add song modal is closed
-$("#add_song").click(function() {
+$("#add_song_modal_button").click(function() {
     add_song = true;
     $("#add_song_modal").modal("hide");
 });
@@ -224,7 +224,7 @@ $('#add_tag_modal').on('hidden.bs.modal', function (e) {
         $("#tag_wait").modal("show");
     }
 });
-$("#add_tag").click(function() {
+$("#add_tag_modal_button").click(function() {
     add_tag = true
     $("#add_tag_modal").modal("hide");
 });

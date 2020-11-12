@@ -29,8 +29,6 @@ function refresh_invitations() {
 			let item = $("<li>")
 				.addClass("list-group-item")
 				.attr("title", "Invite sent at " + datetime_format.format(invite_sent));
-			console.log(invite_sent);
-			console.log(datetime_format.format(invite_sent));
 			item.append(invite.invitee_email);
 			$("#invitations_list").append(item);
 		});
@@ -172,6 +170,7 @@ $('#invite_wait').on('shown.bs.modal', function (e) {
         alert_ajax_failure("Unable to send invite.", data);
     })
     .always(function() {
+		refresh_invitations();
         $("#invite_wait").modal("hide");
         send_invite = false;
     });

@@ -14,6 +14,7 @@ import (
 
 	"github.com/dchest/uniuri"
 	"github.com/gorilla/mux"
+	"github.com/lib/pq"
 )
 
 // Invite is a struct that models the invitations to a collection
@@ -229,11 +230,63 @@ func CollectionInvitationsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Update collection in database
+		// Check if user is an administrator on this collection
+		var admin bool
+		if err := db.QueryRow("SELECT admin FROM collection_members WHERE collection_id = $1 AND user_id = $2", collectionID, session.Values["user_id"]).Scan(&admin); err != nil {
+			log.Printf("Invitations POST - Unable to get collection member from database: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+		if !admin {
+			log.Printf("Invitations POST - Non-admin user %d attempted to send invite to %s\n", session.Values["user_id"], invite.InviteeEmail)
+			SendError(w, `{"error": "You are not authorized to perfrom this action for this collection."}`, http.StatusForbidden)
+			return
+		}
+
+		// Check for existing invitations
+		var invitationID int64
+		var sent time.Time
+		if err := db.QueryRow("SELECT invitation_id, invite_sent FROM invitations WHERE collection_id = $1 AND inviter_id = $2 AND invitee_email = $3", collectionID, session.Values["user_id"], invite.InviteeEmail).Scan(&invitationID, &sent); err != nil {
+			if err != sql.ErrNoRows {
+				log.Printf("Invitations POST - Unable to look up invitation for user")
+				SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+				return
+			}
+		} else {
+			// Invitation exists.
+			log.Printf("Invitations POST - Existing invitation %d sent at %v.\n", invitationID, sent)
+			if sent.Before(time.Now().AddDate(0, 0, -7)) {
+				// Delete existing expired invitation from database
+				if _, err = db.Exec("DELETE FROM invitations WHERE inviter_id = $1 AND invitee_email = $2, collection_id = $3", session.Values["user_id"], invite.InviteeEmail, collectionID); err != nil {
+					log.Printf("Invitations POST - Unable to delete expired invite from database: %v\n", err)
+					SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+					return
+				}
+				log.Printf("Invitations POST - Expired invitation deleted.")
+			}
+
+			// There was an invitation that has not expired yet.
+			// Continue to the next step, which will fail because of the
+			// UNIQUE constraint on the database table. That will
+			// cause an appropriate "already invited" message to be
+			// sent to the user.
+		}
+
+		// Add new invitation to database
 		token := uniuri.NewLen(64)
 		if _, err = db.Exec("INSERT INTO invitations (inviter_id, invitee_email, admin_invite, collection_id, token) VALUES ($1, $2, $3, $4, $5)", session.Values["user_id"], invite.InviteeEmail, invite.AdminInvite, collectionID, token); err != nil {
-			log.Printf("Invitations POST - Unable to create invite in database: %v\n", err)
-			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			if pgerr, ok := err.(*pq.Error); ok {
+				if pgerr.Code == "23505" {
+					log.Printf("Invitations POST - User %d attempted to re-invite user %s\n", session.Values["user_id"], invite.InviteeEmail)
+					SendError(w, `{"error": "There is already a pending invitation for this user."}`, http.StatusConflict)
+				} else {
+					log.Printf("Invitations POST - Unable to create invite in database: %v\n", err)
+					SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+				}
+			} else {
+				log.Printf("Invitations POST - Unable to create invite in database: %v\n", err)
+				SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			}
 			return
 		}
 
