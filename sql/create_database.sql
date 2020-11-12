@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS invitations
 	invitee_email VARCHAR(255) NOT NULL,
 	collection_id INT REFERENCES collections(collection_id),
 	admin_invite BOOLEAN,
-	invite_sent TIMESTAMP WITH TIME ZONE NOT NULL
+	invite_sent TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_DATE
 );
 
 CREATE TABLE IF NOT EXISTS password_reset

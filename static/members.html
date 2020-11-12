@@ -26,6 +26,13 @@
       #invite_button {
         margin-top: 10px;
       }
+
+      .user_img {
+        height: 1em;
+        float: right;
+        top: 4px;
+        position: relative;
+      }
     </style>
   
     <!-- Scripts -->
@@ -94,18 +101,17 @@
       <div id="invitations_container" class="col-sm-6">
         <h3>Pending invitations</h3>
         <ul id="invitations_list" class="list-group"></ul>
-        <!--div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_tag_modal" id="add_tag">Add Tag</button></div-->
       </div>
     </div>
 
-      <!-- #region Footer -->
-      <hr>
-      <div id="footer" style="font-size: x-small;">
-        <a href="/privacy.html">Privacy Policy</a>
-        &nbsp;-&nbsp;
-        Icons made by <a href="https://www.flaticon.com/authors/prettycons" title="prettycons">prettycons</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
-      </div>
-      <!-- #endregion -->
+    <!-- #region Footer -->
+    <hr>
+    <div id="footer" style="font-size: x-small;">
+      <a href="/privacy.html">Privacy Policy</a>
+      &nbsp;-&nbsp;
+      Icons made by <a href="https://www.flaticon.com/authors/prettycons" title="prettycons">prettycons</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+    </div>
+    <!-- #endregion -->
 
     <!-- #region Modals -->
 
@@ -123,7 +129,7 @@
             <form>
               <div class="form-group">
                 <label for="recipient_name" class="col-form-label">Recipient's name:</label>
-                <input type="text" class="form-control" id="recipient_name" placeholder="John Doe">
+                <input type="text" class="form-control" id="recipient_name" placeholder="John Doe" required>
               </div>
               <div class="form-group">
                 <label for="recipient_email" class="col-form-label">Recipient's email:</label>
@@ -131,7 +137,11 @@
               </div>
               <div class="form-group">
                 <label for="message" class="col-form-label" >Message: (optional)</label>
-                <textarea class="form-control" id="message" placeholder="An optional personal message to include with the invitation."></textarea>
+                <textarea class="form-control" id="message" placeholder="An optional message to include with the invitation."></textarea>
+              </div>
+              <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="admin_invite" checked>
+                <label for="admin_invite" class="form-check-label">Invite as administrator</label>
               </div>
             </form>
             <hr>

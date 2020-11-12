@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Michael Humphrey">
+
+    <link rel="icon" type="image/png" href="img/sheet-music-icon.png">
+
+    <title>Accept Invitation - Sheet Music Organizer</title>
+
+    <!-- Custom styles for this template -->
+	<link href="css/signin.css" rel="stylesheet">
+	
+	<!-- Scripts -->
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  </head>
+
+  <body class="container">
+		<div id="alerts"></div>
+
+		<!-- Form -->
+
+		<div id="loading">
+			<h1 class="row">Loading...</h1>
+			<p class="row">Please wait while your invitation is loaded...</p>
+		</div>
+
+		<div id="failed" style="display: none;">
+			<h1 class="row">Failure</h1>
+			<p class="row">There was a problem processing the invitation.</p>
+			<a href="#" id="logout" style="display: none;" class="row">Logout</a>
+		</div>
+
+		<div id="unauthorized" style="display: none;">
+			<h1 class="row">You're almost there!</h1>
+			<p class="row">
+				In order to join this collection, you must have an account.
+				Please login or register to finish.
+			</p>
+			<span class="row"><a href="/signin.html" class="needs_token">Login</a></span>
+			<span class="row"><a href="/register.html" class="needs_token">Register</a></span>
+		</div>
+
+		<div id="confirm_invite" style="display: none;">
+			<h1 class="row">Confirm</h1>
+			<p>Please confirm the following information before accepting the invitation:</p>
+			<hr>
+
+			<div class="row">
+				<p class="col-sm-4">Inviter name:</p>
+				<p class="col-sm-8" id="name"></p>
+			</div>
+
+			<div class="row">
+				<p class="col-sm-4">Inviter email:</p>
+				<p class="col-sm-8" id="email"></p>
+			</div>
+
+			<div class="row">
+				<p class="col-sm-4">Collection:</p>
+				<p class="col-sm-8" id="collection"></p>
+			</div>
+
+			<div class="row">
+				<p class="col-sm-4">Administrator:</p>
+				<p class="col-sm-8" id="admin"></p>
+			</div>
+
+			<p>If this information looks correct, click Join to join this collection.</p>
+			<div class="text-center"><button type="button" class="btn btn-primary" id="join">Join</button></div>
+		</div>
+
+		<!-- #region Modals -->
+		<!-- Joining wait modal -->
+		<div class="modal fade in" tabindex="-1" role="dialog" id="join_wait">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Please wait...</h5>
+					</div>
+					<div class="modal-body">
+						<p>Please wait while you are added to the collection...</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- #endregion -->
+		
+		<!-- #region Footer -->
+		<hr>
+		<div id="footer" style="font-size: x-small;" class="row">
+			<a href="/privacy.html">Privacy Policy</a>
+			&nbsp;-&nbsp;
+			Icons made by <a href="https://www.flaticon.com/authors/prettycons" title="prettycons">prettycons</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+		</div>
+		<!-- #endregion -->
+		
+		<!-- Script -->
+		<script src="js/accept_invite.js" type="module"></script>
+  </body>
+</html>

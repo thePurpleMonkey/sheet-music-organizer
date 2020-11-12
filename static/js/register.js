@@ -14,7 +14,13 @@ $("#wait").on('shown.bs.modal', function (e) {
 	}
 	$.post( "/user/register", JSON.stringify({ email: $("#email").val(), password: $("#password").val(), name: $("#name").val() }) )
 		.done(function( data ) {
-			window.location.href = "/collections.html";
+			let redirect = new URL(window.location.href).searchParams.get("redirect");
+			if (redirect === null) {
+				redirect = "/collections.html";
+			}
+			redirect = decodeURIComponent(redirect);
+			console.log("Redirecting to: " + redirect);
+			window.location.href = redirect;
 		})
 		.fail(function( data ) {
 			alert_ajax_failure("Registration failed.", data);

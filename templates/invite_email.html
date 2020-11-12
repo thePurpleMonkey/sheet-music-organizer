@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<head>
+
+</head>
+<body>
+	<h1>Sheet Music Organizer</h1>
+	<h2>Invitation Email</h2>
+	<hr>
+
+	<p>Dear {{.InviteeName}},</p>
+	<p>
+		{{.InviterName}} ({{.InviterEmail}}) has invited you to collaborate on their
+		collection "{{.CollectionName}}" on Sheet Music Organizer.
+	</p>
+	{{ if .Message }}
+	<p>
+		{{.InviterName}} has included a personal message with their invitation:
+		<blockquote>{{.Message}}</blockquote>
+	</p>
+	{{ end }}
+	<p>To accept this invitation, click the link below:</p>
+	<a href="{{.Href}}">{{.Href}}</a>
+	<p>If you did not wish to accept this invitation, you may delete this email.</p>
+	<p>You can also copy and paste the link into your browser.</p>
+	<p>To report a problem, please email <a href="mailto:sheetmusicorganizer@michaelhumphrey.dev?subject=Feedback from Invitation">sheetmusicorganizer@michaelhumphrey.dev</a></p>
+	<p>Regards,</p>
+	<p>Sheet Music Organizer</p>
+</body>

@@ -1,0 +1,19 @@
+Sheet Music Organizer - Invitation email
+
+Dear {{.InviteeName}},
+
+{{.InviterName}} ({{.InviterEmail}}) has invited you to collaborate on their
+collection "{{.CollectionName}}" on Sheet Music Organizer.
+
+{{ if .Message }}
+{{.InviterName}} has included a personal message with their invitation:
+{{.Message}}
+
+{{ end }}
+To accept this invitation, please copy and paste the below link into your browser:
+{{.Href}}
+If you did not wish to accept this invitation, you may delete this email.
+To report a problem, please email sheetmusicorganizer@michaelhumphrey.dev
+
+Regards,
+Sheet Music Organizer

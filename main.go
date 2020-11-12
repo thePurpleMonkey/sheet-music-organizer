@@ -23,11 +23,13 @@ func makeRouter() *mux.Router {
 	r.HandleFunc("/user/register", register).Methods("POST")
 	r.HandleFunc("/user/password/forgot", requestPasswordResetEmail).Methods("POST")
 	r.HandleFunc("/user/password/reset", resetPassword)
+	r.HandleFunc("/invitations", RequireAuthentication(InvitationsHandler)).Methods("GET", "POST")
 
 	// Collections
 	r.HandleFunc("/collections", RequireAuthentication(CollectionsHandler)).Methods("GET", "POST")
 	r.HandleFunc("/collections/{collection_id}", VerifyCollectionID(RequireAuthentication(CollectionHandler))).Methods("GET", "PUT", "DELETE")
-	r.HandleFunc("/collections/{collection_id}/members", VerifyCollectionID(RequireAuthentication(CollectionMembersHandler))).Methods("GET", "PUT", "DELETE")
+	r.HandleFunc("/collections/{collection_id}/members", VerifyCollectionID(RequireAuthentication(CollectionMembersHandler))).Methods("GET")
+	r.HandleFunc("/collections/{collection_id}/members/{user_id}", VerifyCollectionID(RequireAuthentication(CollectionMemberHandler))).Methods("DELETE")
 	r.HandleFunc("/collections/{collection_id}/invitations", VerifyCollectionID(RequireAuthentication(CollectionInvitationsHandler))).Methods("GET", "POST", "DELETE")
 
 	// Songs
