@@ -55,7 +55,7 @@ function retract_invite(e) {
 	let invitation_id = $(this).data("invitation_id");
 	console.log("Retracting invitation_id: " + invitation_id);
 	if (!invitation_id) {
-		add_alert("Unable to remove user", "This operation has failed.", "danger");
+		add_alert("Unable to retract invitation!", "This operation has failed.", "danger");
 		return;
 	}
 
@@ -63,15 +63,15 @@ function retract_invite(e) {
 		method: "DELETE"
 	})
 	.done(function(data) {
-		console.log("Delete member response:")
+		console.log("Retract invitation response:")
 		console.log(data);
 	})
 	.fail(function(data) {
-		alert_ajax_failure("Unable to remove member from collection.", data);
+		alert_ajax_failure("Unable to retract invitation.", data);
 	})
 	.always(function(data) {
-		refresh_members();
-		add_alert("Success!", "Successfully removed user from collection.", "success");
+		refresh_invitations();
+		add_alert("Success!", "Successfully retracted invitation.", "success");
 	});
 };
 

@@ -72,14 +72,14 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		// Check if invitation has been retracted
 		if retracted {
 			log.Printf("Invitations POST - User %d attempted to get a retracted invitation %d\n", session.Values["user_id"], invitationID)
-			SendError(w, `{"error": "This invitation has been retracted and is no longer valid."}`, http.StatusForbidden)
+			SendError(w, `{"error": "This invitation has been retracted and is no longer valid.", "code": "retracted"}`, http.StatusForbidden)
 			return
 		}
 
 		// Check if the correct user is logged in
 		if invite.Email != session.Values["email"] {
 			log.Printf("Invitation GET - User %s logged in to accept invitation for %s.\n", session.Values["email"], invite.Email)
-			SendError(w, `{"error": "You cannot accept this invitation. Please log out and try again."}`, http.StatusForbidden)
+			SendError(w, `{"error": "You cannot accept this invitation. Please log out and try again.", "code": "wrong_user"}`, http.StatusForbidden)
 			return
 		}
 

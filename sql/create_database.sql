@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS invitations
 	admin_invite BOOLEAN NOT NULL,
 	invite_sent TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	retracted BOOLEAN NOT NULL DEFAULT FALSE,
+	token CHAR(64) NOT NULL,
 	UNIQUE (invitee_email, collection_id, inviter_id)
 );
 

@@ -26,9 +26,17 @@ $(function() {
 		$("#confirm_invite").show(500);
 	})
 	.fail(function(data) {
+		console.log("Error getting invitation:");
+		console.log(data);
 		if (data.status === 403) {
-			add_alert("Wrong user", "You cannot accept this invitation. Please log out and try again.", "danger");
-			$("#logout").show();
+			if (data.responseJSON.code == "wrong_user") {
+				add_alert("Wrong user", "You cannot accept this invitation. Please log out and try again.", "danger");
+				$("#logout").show();
+			} else if (data.responseJSON.code == "retracted") {
+				add_alert("Invitation retracted.", data.responseJSON.error, "danger");
+			} else {
+				add_alert("Unknown error", data.responseJSON, "danger");
+			}
 		} else if (data.status === 401) {
 			$("#unauthorized").show(500);
 			return;
