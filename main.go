@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -74,7 +73,7 @@ func makeRouter() *mux.Router {
 func main() {
 	log.Println()
 	log.Println("==============================")
-	log.Printf("Server booted at %s\n", time.Now())
+	log.Println("Server booted")
 
 	// Check environment variables
 	if os.Getenv("SESSION_KEY") == "" {
@@ -115,6 +114,5 @@ func main() {
 
 	// Launch server
 	fmt.Println("Running on port " + port)
-	// log.Fatal(http.ListenAndServe(":8000", handlers.RecoveryHandler()(r)))
 	log.Fatal(http.ListenAndServeTLS(":"+port, os.Getenv("CERT_FILE"), os.Getenv("KEY_FILE"), handlers.RecoveryHandler()(r)))
 }
