@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -71,6 +72,10 @@ func makeRouter() *mux.Router {
 }
 
 func main() {
+	log.Println()
+	log.Println("==============================")
+	log.Printf("Server booted at %s\n", time.Now())
+
 	// Check environment variables
 	if os.Getenv("SESSION_KEY") == "" {
 		panic("Session key environment variable not set!")
