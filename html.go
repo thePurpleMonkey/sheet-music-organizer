@@ -14,6 +14,9 @@ func HTMLHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	filename := vars["filename"]
+	if filename == "" {
+		filename = "index"
+	}
 
 	// Load template
 	t, err := template.ParseGlob("html_templates/*.html")
@@ -23,6 +26,7 @@ func HTMLHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("HTML Handler - Serving %s.html\n", filename)
 	tmpl := t.Lookup(filename + ".html")
 	if tmpl == nil {
 		// The desired template was not found, so present a 404 error
