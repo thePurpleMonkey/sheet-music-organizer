@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -13,6 +14,17 @@ import (
 )
 
 var db *sql.DB
+
+func preventDirectoryListing(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/") {
+			http.NotFound(w, r)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
 
 func makeRouter() *mux.Router {
 	r := mux.NewRouter()
@@ -53,7 +65,7 @@ func makeRouter() *mux.Router {
 	// Static files
 	r.HandleFunc("/{filename}.html", HTMLHandler)
 	r.HandleFunc("/", HTMLHandler)
-	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("static"))))
+	r.PathPrefix("/").Handler(http.StripPrefix("/", preventDirectoryListing(http.FileServer(http.Dir("static")))))
 
 	return r
 }
