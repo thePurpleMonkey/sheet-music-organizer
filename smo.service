@@ -1,0 +1,16 @@
+[Unit]
+Description=Sheet Music Organizer Go server
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=root
+WorkingDirectory=/home/michael/go/src/github.com/thePurpleMonkey/sheet-music-organizer/
+ExecStart=/home/michael/go/src/github.com/thePurpleMonkey/sheet-music-organizer/run.sh
+
+[Install]
+WantedBy=multi-user.target
+
