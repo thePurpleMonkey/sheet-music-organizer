@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS users
 	name VARCHAR(127) NOT NULL,
 	verified BOOLEAN DEFAULT false,
 	restricted BOOLEAN DEFAULT false,
-	created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_DATE,
-	last_login TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_DATE
+	created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+	last_login TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS collections
@@ -28,11 +28,12 @@ CREATE TABLE IF NOT EXISTS collection_members
 CREATE TABLE IF NOT EXISTS invitations
 (
 	invitation_id SERIAL PRIMARY KEY,
-	inviter_id INT REFERENCES users(user_id),
+	inviter_id INT REFERENCES users(user_id) NOT NULL,
 	invitee_email VARCHAR(255) NOT NULL,
-	collection_id INT REFERENCES collections(collection_id),
-	admin_invite BOOLEAN,
-	invite_sent TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_DATE,
+	collection_id INT REFERENCES collections(collection_id) NOT NULL,
+	admin_invite BOOLEAN NOT NULL,
+	invite_sent TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	retracted BOOLEAN NOT NULL DEFAULT FALSE,
 	UNIQUE (invitee_email, collection_id, inviter_id)
 );
 

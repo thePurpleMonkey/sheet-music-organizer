@@ -56,8 +56,9 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		// Get invitation from database
 		var invite AcceptInvite
 		var collectionID string
-		var inviterID int64
-		if err := db.QueryRow("SELECT invitee_email, admin_invite, collection_id, inviter_id FROM invitations WHERE token = $1", token).Scan(&invite.Email, &invite.Administrator, &collectionID, &inviterID); err != nil {
+		var inviterID, invitationID int64
+		var retracted bool
+		if err := db.QueryRow("SELECT invitation_id, invitee_email, admin_invite, collection_id, inviter_id, retracted FROM invitations WHERE token = $1", token).Scan(&invitationID, &invite.Email, &invite.Administrator, &collectionID, &inviterID, &retracted); err != nil {
 			if err == sql.ErrNoRows {
 				log.Printf("Invitations GET - Attempted to accept invitation with invalid token: %v\n", token)
 				SendError(w, `{"error": "Invitation not found."}`, http.StatusNotFound)
@@ -65,6 +66,13 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 				log.Printf("Invitations GET - Unable to get invitation from database: %v\n", err)
 				SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			}
+			return
+		}
+
+		// Check if invitation has been retracted
+		if retracted {
+			log.Printf("Invitations POST - User %d attempted to get a retracted invitation %d\n", session.Values["user_id"], invitationID)
+			SendError(w, `{"error": "This invitation has been retracted and is no longer valid."}`, http.StatusForbidden)
 			return
 		}
 
@@ -108,9 +116,9 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Get invitation from database
-		var collectionID int64
-		var adminInvite bool
-		if err := db.QueryRow("SELECT admin_invite, collection_id FROM invitations WHERE token = $1", accept.Token).Scan(&adminInvite, &collectionID); err != nil {
+		var collectionID, invitationID int64
+		var adminInvite, retracted bool
+		if err := db.QueryRow("SELECT admin_invite, collection_id, retracted, invitation_id FROM invitations WHERE token = $1", accept.Token).Scan(&adminInvite, &collectionID, &retracted, &invitationID); err != nil {
 			if err == sql.ErrNoRows {
 				log.Printf("Invitations POST - Attempted to accept invitation with invalid token: %v\n", accept.Token)
 				SendError(w, `{"error": "Invitation not found."}`, http.StatusNotFound)
@@ -118,6 +126,13 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 				log.Printf("Invitations POST - Unable to accept invitation from database: %v\n", err)
 				SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			}
+			return
+		}
+
+		// Check if invitation has been retracted
+		if retracted {
+			log.Printf("Invitations POST - User %d accepted a retracted invitation %d\n", session.Values["user_id"], invitationID)
+			SendError(w, `{"error": "This invitation has been retracted and is no longer valid."}`, http.StatusForbidden)
 			return
 		}
 
@@ -179,8 +194,8 @@ func CollectionInvitationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "GET" {
-		// Get a list of all user's collections
-		rows, err := db.Query("SELECT invitation_id, invitee_email, admin_invite, invite_sent FROM invitations WHERE inviter_id = $1 AND collection_id = $2", session.Values["user_id"], collectionID)
+		// Get all invitations from this user for this collection
+		rows, err := db.Query("SELECT invitation_id, invitee_email, admin_invite, invite_sent FROM invitations WHERE inviter_id = $1 AND collection_id = $2 AND retracted = false AND invite_sent > CURRENT_TIMESTAMP - INTERVAL '7 days'", session.Values["user_id"], collectionID)
 		if err != nil {
 			log.Printf("Invitations GET - Unable to retrieve invitations from database for user %v: %v\n", session.Values["user_id"], err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
@@ -226,7 +241,7 @@ func CollectionInvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		// Check if user is allowed to send invitations
 		if session.Values["restricted"].(bool) {
 			log.Printf("Invitations POST - Restricted user '%s' attempted to send an invitation to '%s'\n", session.Values["email"], invite.InviteeEmail)
-			SendError(w, `{"error": "That action is not permitted."}`, http.StatusForbidden)
+			SendError(w, PERMISSION_ERROR_MESSAGE, http.StatusForbidden)
 			return
 		}
 
@@ -247,11 +262,15 @@ func CollectionInvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		var invitationID int64
 		var sent time.Time
 		if err := db.QueryRow("SELECT invitation_id, invite_sent FROM invitations WHERE collection_id = $1 AND inviter_id = $2 AND invitee_email = $3", collectionID, session.Values["user_id"], invite.InviteeEmail).Scan(&invitationID, &sent); err != nil {
+			// There was a database error executing the SQL statement
 			if err != sql.ErrNoRows {
 				log.Printf("Invitations POST - Unable to look up invitation for user")
 				SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 				return
 			}
+
+			// The error returned was sql.ErrNoRows, so there is no existing invitation.
+			// This new invitation can be safely committed to the database
 		} else {
 			// Invitation exists.
 			log.Printf("Invitations POST - Existing invitation %d sent at %v.\n", invitationID, sent)
@@ -342,53 +361,40 @@ func CollectionInvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 
 	} else if r.Method == "DELETE" {
-		log.Printf("Invitations DELETE - Not implemented.")
-		SendError(w, "Not Found", http.StatusNotFound)
+		// Get invitation_id from URL
+		invitationID, err := strconv.ParseInt(mux.Vars(r)["invitation_id"], 10, 64)
+		if err != nil {
+			log.Printf("Invitation DELETE - Unable to parse invitation id: %v\n", err)
+			SendError(w, URL_ERROR_MESSAGE, http.StatusBadRequest)
+			return
+		}
+
+		// Check if user actually sent this invitation
+		var inviterID int64
+		if err := db.QueryRow("SELECT inviter_id FROM invitations WHERE collection_id = $1 AND invitation_id = $2", collectionID, invitationID).Scan(&inviterID); err != nil {
+			if err == sql.ErrNoRows {
+				log.Printf("Invitation DELETE - User %d attempted to retract a non-existant invitation %d.\n", session.Values["user_id"], invitationID)
+				SendError(w, `{"error": "Invitation not found."}`, http.StatusNotFound)
+			} else {
+				log.Printf("Invitation DELETE - Unable to get collection member from database: %v\n", err)
+				SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			}
+			return
+		}
+		if inviterID != session.Values["user_id"] {
+			log.Printf("Invitation DELETE - User %d attempted to retract invitation %d owned by user %d.\n", session.Values["user_id"], invitationID, inviterID)
+			SendError(w, PERMISSION_ERROR_MESSAGE, http.StatusForbidden)
+			return
+		}
+
+		// Mark invitation as retracted
+		if _, err = db.Exec("UPDATE invitations SET retracted = true WHERE invitation_id = $1", invitationID); err != nil {
+			log.Printf("Invitation DELETE - Unable to retract invitation %d: %v\n", invitationID, err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
 		return
-
-		// // Start db transaction
-		// tx, err := db.Begin()
-		// if err != nil {
-		// 	log.Printf("Collection DELETE - Unable to start database transaction: %v\n", err)
-		// 	SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
-		// }
-
-		// // Remove songs from collection
-		// if _, err = tx.Exec("DELETE FROM songs WHERE collection_id = $1", collection.CollectionID); err != nil {
-		// 	log.Printf("Collection DELETE - Unable to delete songs from collection: %v\n", err)
-		// 	SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
-		// 	return
-		// }
-
-		// // Remove tags from collection
-		// if _, err = tx.Exec("DELETE FROM tags WHERE collection_id = $1", collection.CollectionID); err != nil {
-		// 	log.Printf("Collection DELETE - Unable to delete tags from collection: %v\n", err)
-		// 	SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
-		// 	return
-		// }
-
-		// // Remove users from collection
-		// if _, err = tx.Exec("DELETE FROM collection_members WHERE collection_id = $1", collection.CollectionID); err != nil {
-		// 	log.Printf("Collection DELETE - Unable to delete collection members: %v\n", err)
-		// 	SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
-		// 	return
-		// }
-
-		// // Delete collection
-		// if _, err = tx.Exec("DELETE FROM collections WHERE collection_id = $1", collection.CollectionID); err != nil {
-		// 	log.Printf("Collection DELETE - Unable to delete collection from database: %v\n", err)
-		// 	SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
-		// 	return
-		// }
-
-		// // Save changes
-		// if err = tx.Commit(); err != nil {
-		// 	log.Printf("Collection DELETE - Unable to commit database transaction: %v\n", err)
-		// 	SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
-		// 	return
-		// }
-
-		// w.WriteHeader(http.StatusOK)
-		// return
 	}
 }

@@ -30,6 +30,17 @@ function refresh_invitations() {
 				.addClass("list-group-item")
 				.attr("title", "Invite sent at " + datetime_format.format(invite_sent));
 			item.append(invite.invitee_email);
+			
+			// Delete button
+			let retract_invite_button = $("<button type='button' class='close' title='Retract invitation'>");
+			retract_invite_button.append($("<span aria-hidden='true'>").html("&times;"));
+			
+			// Store invitation_id with this element
+			retract_invite_button.data("invitation_id", invite.invitation_id);
+
+			retract_invite_button.click(retract_invite);
+			item.append(retract_invite_button);
+
 			$("#invitations_list").append(item);
 		});
 	})
@@ -37,6 +48,30 @@ function refresh_invitations() {
 		alert_ajax_failure("Unable to get pending invitations.", data);
 		$("#invitations_list").empty();
 		$("#invitations_list").append($("<li>").addClass("list-group-item disabled").attr("aria-disabled", "true").text("Error retrieving pending invitations."));
+	});
+};
+
+function retract_invite(e) {
+	let invitation_id = $(this).data("invitation_id");
+	console.log("Retracting invitation_id: " + invitation_id);
+	if (!invitation_id) {
+		add_alert("Unable to remove user", "This operation has failed.", "danger");
+		return;
+	}
+
+	$.ajax(`/collections/${collection_id}/invitations/${invitation_id}`, {
+		method: "DELETE"
+	})
+	.done(function(data) {
+		console.log("Delete member response:")
+		console.log(data);
+	})
+	.fail(function(data) {
+		alert_ajax_failure("Unable to remove member from collection.", data);
+	})
+	.always(function(data) {
+		refresh_members();
+		add_alert("Success!", "Successfully removed user from collection.", "success");
 	});
 };
 
@@ -82,7 +117,7 @@ function refresh_members() {
 					.addClass("user_img")
 				);
 			} else if (admin) {
-				let remove_member_button = $("<button type='button' class='close'>");
+				let remove_member_button = $("<button type='button' class='close' title='Remove member from collection'>");
 				remove_member_button.append($("<span aria-hidden='true'>").html("&times;"));
 				
 				// Store user_id with this element
@@ -122,7 +157,7 @@ function remove_member(e) {
 		refresh_members();
 		add_alert("Success!", "Successfully removed user from collection.", "success");
 	});
-}
+};
 
 $(function() {
     // Replace link for collection

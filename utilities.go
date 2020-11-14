@@ -18,6 +18,9 @@ const SERVER_ERROR_MESSAGE string = `{"error": "There was an error attempting to
 // URL_ERROR_MESSAGE is a generic error message for parsing URLs
 const URL_ERROR_MESSAGE string = `{"error": "Unable to parse URL."}`
 
+// PERMISSION_ERROR_MESSAGE is a generic error message for attempting an action that you do not have permission for.
+const PERMISSION_ERROR_MESSAGE string = `{"error": "That action is not permitted."}`
+
 // SendEmail ...
 func SendEmail(name string, address string, subject string, htmlContent string, plainTextContent string) error {
 	from := mail.NewEmail("Sheet Music Organizer", "sheetmusicorganizer@michaelhumphrey.dev")

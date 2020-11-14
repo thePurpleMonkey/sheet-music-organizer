@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -40,9 +39,10 @@ func makeRouter() *mux.Router {
 	// Collections
 	r.HandleFunc("/collections", RequireAuthentication(CollectionsHandler)).Methods("GET", "POST")
 	r.HandleFunc("/collections/{collection_id}", VerifyCollectionID(RequireAuthentication(CollectionHandler))).Methods("GET", "PUT", "DELETE")
-	r.HandleFunc("/collections/{collection_id}/members", VerifyCollectionID(RequireAuthentication(CollectionMembersHandler))).Methods("GET")
-	r.HandleFunc("/collections/{collection_id}/members/{user_id}", VerifyCollectionID(RequireAuthentication(CollectionMemberHandler))).Methods("DELETE")
-	r.HandleFunc("/collections/{collection_id}/invitations", VerifyCollectionID(RequireAuthentication(CollectionInvitationsHandler))).Methods("GET", "POST", "DELETE")
+	r.HandleFunc("/collections/{collection_id}/members", VerifyCollectionID(RequireAuthentication(MembersHandler))).Methods("GET")
+	r.HandleFunc("/collections/{collection_id}/members/{user_id}", VerifyCollectionID(RequireAuthentication(MemberHandler))).Methods("DELETE")
+	r.HandleFunc("/collections/{collection_id}/invitations", VerifyCollectionID(RequireAuthentication(CollectionInvitationsHandler))).Methods("GET", "POST")
+	r.HandleFunc("/collections/{collection_id}/invitations/{invitation_id}", VerifyCollectionID(RequireAuthentication(CollectionInvitationsHandler))).Methods("DELETE")
 
 	// Songs
 	r.HandleFunc("/collections/{collection_id}/songs", VerifyCollectionID(RequireAuthentication(SongsHandler))).Methods("GET", "POST")
@@ -113,6 +113,6 @@ func main() {
 	defer db.Close()
 
 	// Launch server
-	fmt.Println("Running on port " + port)
+	log.Printf("Running on port %s\n", port)
 	log.Fatal(http.ListenAndServeTLS(":"+port, os.Getenv("CERT_FILE"), os.Getenv("KEY_FILE"), handlers.RecoveryHandler()(r)))
 }
