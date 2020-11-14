@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="author" content="Michael Humphrey">
-
-    <link rel="icon" type="image/png" href="img/sheet-music-icon.png">
+    {{template "header.html"}}
 
     <style>
       #new_collection {
@@ -14,16 +10,6 @@
     </style>
 
     <title>Collections - Sheet Music Organizer</title>
-  
-  <!-- Scripts -->
-  <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-  
-  <!-- Cookie Banner -->
-  <link rel="stylesheet" href="/css/cookie-banner.css">
-  <script async src="/js/cookie-banner.js"></script>
   </head>
 
   <body>
@@ -64,14 +50,7 @@
       </div>
       <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#new_collection_modal" id="new_collection">New collection</button>
 
-      <!-- #region Footer -->
-      <hr>
-      <div id="footer" style="font-size: x-small;">
-        <a href="/privacy.html">Privacy Policy</a>
-        &nbsp;-&nbsp;
-        Icons made by <a href="https://www.flaticon.com/authors/prettycons" title="prettycons">prettycons</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
-      </div>
-      <!-- #endregion -->
+      {{template "footer.html"}}
     </div>
 
     <!-- #region Modals -->
@@ -121,19 +100,7 @@
     </div>
 
     <!-- #endregion Modals -->
-
-    <!-- #region Scripts -->
+    
     <script src="/js/collections.js" type="module"></script>
-
-    <!-- Cookie Banner -->
-    <div class="nk-cookie-banner alert alert-dark text-center mb-0" role="alert">
-      &#x1F36A; This website uses cookies to ensure you get the best experience on our website.
-      <a href="https://www.cookiesandyou.com/" target="blank">Learn more</a>
-      <button type="button" class="btn btn-primary btn-sm ml-3" onclick="window.nk_hideCookieBanner()">
-        I Got It
-      </button>
-    </div>
-
-    <!-- #endregion -->
   </body>
 </html>

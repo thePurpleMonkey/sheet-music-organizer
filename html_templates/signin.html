@@ -7,7 +7,7 @@
 
     <link rel="icon" type="image/png" href="img/sheet-music-icon.png">
 
-    <title>Register - Sheet Music Organizer</title>
+    <title>Sign in - Sheet Music Organizer</title>
 
     <!-- Custom styles for this template -->
 	<link href="css/signin.css" rel="stylesheet">
@@ -24,53 +24,36 @@
   </head>
 
   <body class="text-center">
+		<!-- Alert -->
 		<div id="alerts"></div>
 
 		<!-- Form -->
 		<form class="form-signin">
-			<h1 class="h3 mb-3 font-weight-normal">Registration</h1>
+			<h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
 			<input type="email" id="email" class="form-control" placeholder="Email address" required autofocus>
 			<input type="password" id="password" class="form-control" placeholder="Password" required>
-			<input type="password" id="confirm" class="form-control" placeholder="Re-enter password" required>
-			<input type="text" id="name" class="form-control" placeholder="Name">
-			<button class="btn btn-lg btn-primary btn-block" type="button" id="register">Register</button>
-			<small><img src="img/alert-circle.svg" alt="Don't forget!" width="16px">&nbsp;Don't forget to use a unique password for every website!</small>
+			<button class="btn btn-lg btn-primary btn-block" type="button" id="login">Sign in</button>
+			<a href="/forgot_password.html" id="forgot_password_link">Forgot password?</a>
 			<p class="mt-5 mb-3 text-muted">&copy; 2020 Michael Humphrey<br>All Rights Reserved</p>
 		</form>
 		
-		<!-- #region Footer -->
-		<hr>
-		<div id="footer" style="font-size: x-small;">
-			<a href="/privacy.html">Privacy Policy</a>
-			&nbsp;-&nbsp;
-			Icons made by <a href="https://www.flaticon.com/authors/prettycons" title="prettycons">prettycons</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
-		</div>
-
-		<!-- Cookie Banner -->
-		<div class="nk-cookie-banner alert alert-dark text-center mb-0" role="alert">
-		  &#x1F36A; This website uses cookies to ensure you get the best experience on our website.
-		  <a href="https://www.cookiesandyou.com/" target="blank">Learn more</a>
-		  <button type="button" class="btn btn-primary btn-sm ml-3" onclick="window.nk_hideCookieBanner()">
-			I Got It
-		  </button>
-		</div>
-		<!-- #endregion -->
-
+		{{template "footer.html"}}
+		
 		<!-- Modal -->
 		<div class="modal fade in" tabindex="-1" role="dialog" id="wait">
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title">Registering...</h5>
+					<h5 class="modal-title">Logging in...</h5>
 				</div>
 				<div class="modal-body">
-					<p>Please wait while we process your registration...</p>
+					<p>Please wait while we authenticate you...</p>
 				</div>
 				</div>
 			</div>
 		</div>
 		
 		<!-- Script -->
-		<script src="js/register.js" type="module"></script>
+		<script src="/js/signin.js" type="module"></script>
   </body>
 </html>
