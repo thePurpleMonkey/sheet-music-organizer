@@ -52,6 +52,12 @@ function refresh_members() {
 		let user_id = data.user_id;
 		let admin = data.admin;
 
+		if (admin) {
+			$("#invite_button").show();
+		} else {
+			$("#invite_button").hide();
+		}
+
 		data.members.forEach(member => {
 			let item = $("<li>")
 				.addClass("list-group-item");
