@@ -37,130 +37,97 @@
   </head>
 
   <body>
-
-    <!--  #region Navbar -->
-    <nav class="navbar navbar-expand-sm navbar-light bg-light">
-      <img src="img/sheet-music-icon.png" alt="" loading="lazy" width=30 height=30>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-    
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="/collections.html">Collections</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" id="collection_link">Dashboard</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Options
-            </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="#" id="edit_button">Edit</a>
-              <a class="dropdown-item text-danger" href="#" data-toggle="modal" data-target="#delete_tag_modal">Delete</a>
-            </div>
-          </li>
-        </ul>
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <a class="btn btn-sm btn-outline-secondary" href="#" id="logout">Logout</a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-    <!-- #endregion -->
+    {{template "navbar.html"}}
 
     <div class="container">
       <!-- Header -->
       <div class="row">
         <h1 id="page_header">Members</h1>
-	  </div>
-	  
-	  <hr>
+      </div>
+      
+      <hr>
 
-    <div id="alerts"></div>
+      <div id="alerts"></div>
 
-    <!-- Main view -->
-    <div class="row row-cols-2">
-      <!-- All songs list -->
-      <div id="members_container" class="col-sm-6">
-        <h3>Members of <span id="collection_name">this collection</span></h3>
-        <ul id="members_list" class="list-group"></ul>
-        <div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#invite_modal" id="invite_button">Invite new member</button></div>
+      <!-- Main view -->
+      <div class="row row-cols-2">
+        <!-- All songs list -->
+        <div id="members_container" class="col-sm-6">
+          <h3>Members of <span id="collection_name">this collection</span></h3>
+          <ul id="members_list" class="list-group"></ul>
+          <div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#invite_modal" id="invite_button">Invite new member</button></div>
+        </div>
+
+        <!-- Tags -->
+        <div id="invitations_container" class="col-sm-6">
+          <h3>Pending invitations</h3>
+          <ul id="invitations_list" class="list-group"></ul>
+        </div>
       </div>
 
-      <!-- Tags -->
-      <div id="invitations_container" class="col-sm-6">
-        <h3>Pending invitations</h3>
-        <ul id="invitations_list" class="list-group"></ul>
+      {{template "footer.html"}}
+
+      <!-- #region Modals -->
+
+      <!-- Invite modal -->
+      <div class="modal fade" id="invite_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Invite new member</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form>
+                <div class="form-group">
+                  <label for="recipient_name" class="col-form-label">Recipient's name:</label>
+                  <input type="text" class="form-control" id="recipient_name" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                  <label for="recipient_email" class="col-form-label">Recipient's email:</label>
+                  <input type="email" class="form-control" id="recipient_email" placeholder="john.doe@example.com" required>
+                </div>
+                <div class="form-group">
+                  <label for="message" class="col-form-label" >Message: (optional)</label>
+                  <textarea class="form-control" id="message" placeholder="An optional message to include with the invitation."></textarea>
+                </div>
+                <div class="form-group form-check">
+                  <input type="checkbox" class="form-check-input" id="admin_invite" checked>
+                  <label for="admin_invite" class="form-check-label">Invite as administrator</label>
+                </div>
+              </form>
+              <hr>
+              <p>
+                Clicking Send will send an email to the above email address, addressed to the recipient's name.
+                The email will include your name, email address, and personal message (if provided).
+                The recipient can click on the link in the email and (after creating an account if necessary) join this collection.
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" id="send_invite_button">Send</button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
 
-    {{template "footer.html"}}
-
-    <!-- #region Modals -->
-
-    <!-- Invite modal -->
-    <div class="modal fade" id="invite_modal" tabindex="-1" role="dialog">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
+      <!-- Send invite wait modal -->
+      <div class="modal fade in" tabindex="-1" role="dialog" id="invite_wait">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Invite new member</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-            </button>
+            <h5 class="modal-title">Sending invite...</h5>
           </div>
           <div class="modal-body">
-            <form>
-              <div class="form-group">
-                <label for="recipient_name" class="col-form-label">Recipient's name:</label>
-                <input type="text" class="form-control" id="recipient_name" placeholder="John Doe" required>
-              </div>
-              <div class="form-group">
-                <label for="recipient_email" class="col-form-label">Recipient's email:</label>
-                <input type="email" class="form-control" id="recipient_email" placeholder="john.doe@example.com" required>
-              </div>
-              <div class="form-group">
-                <label for="message" class="col-form-label" >Message: (optional)</label>
-                <textarea class="form-control" id="message" placeholder="An optional message to include with the invitation."></textarea>
-              </div>
-              <div class="form-group form-check">
-                <input type="checkbox" class="form-check-input" id="admin_invite" checked>
-                <label for="admin_invite" class="form-check-label">Invite as administrator</label>
-              </div>
-            </form>
-            <hr>
-            <p>
-              Clicking Send will send an email to the above email address, addressed to the recipient's name.
-              The email will include your name, email address, and personal message (if provided).
-              The recipient can click on the link in the email and (after creating an account if necessary) join this collection.
-            </p>
+            <p>Please wait while we send the invitation...</p>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" id="send_invite_button">Send</button>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Send invite wait modal -->
-    <div class="modal fade in" tabindex="-1" role="dialog" id="invite_wait">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Sending invite...</h5>
-        </div>
-        <div class="modal-body">
-          <p>Please wait while we send the invitation...</p>
-        </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- #endregion -->
+      <!-- #endregion -->
   
     <!-- Script -->
     <script src="/js/members.js" type="module"></script>

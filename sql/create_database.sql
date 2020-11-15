@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS songs
 	location VARCHAR(127),
 	last_performed DATE,
 	notes TEXT,
-	added_by INT NOT NULL REFERENCES users(user_id),
+	added_by INT REFERENCES users(user_id),
 	collection_id INT NOT NULL REFERENCES collections(collection_id)
 );
 

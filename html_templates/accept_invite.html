@@ -1,86 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    {{template "header.html"}}
+	<head>
+		{{template "header.html"}}
 
-    <title>Accept Invitation - Sheet Music Organizer</title>
+		<title>Accept Invitation - Sheet Music Organizer</title>
 
-    <!-- Custom styles for this template -->
-	<link href="css/signin.css" rel="stylesheet">
-  </head>
+	</head>
 
-  <body class="container">
-		<div id="alerts"></div>
+	<body>
+		{{template "navbar.html"}}
 
-		<!-- Form -->
+		<div class="container">
+			<div id="alerts"></div>
 
-		<div id="loading">
-			<h1 class="row">Loading...</h1>
-			<p class="row">Please wait while your invitation is loaded...</p>
-		</div>
+			<!-- Form -->
 
-		<div id="failed" style="display: none;">
-			<h1 class="row">Failure</h1>
-			<p class="row">There was a problem processing the invitation.</p>
-			<a href="#" id="logout" style="display: none;" class="row">Logout</a>
-		</div>
-
-		<div id="unauthorized" style="display: none;">
-			<h1 class="row">You're almost there!</h1>
-			<p class="row">
-				In order to join this collection, you must have an account.
-				Please login or register to finish.
-			</p>
-			<span class="row"><a href="/signin.html" class="needs_token">Login</a></span>
-			<span class="row"><a href="/register.html" class="needs_token">Register</a></span>
-		</div>
-
-		<div id="confirm_invite" style="display: none;">
-			<h1 class="row">Confirm</h1>
-			<p>Please confirm the following information before accepting the invitation:</p>
-			<hr>
-
-			<div class="row">
-				<p class="col-sm-4">Inviter name:</p>
-				<p class="col-sm-8" id="name"></p>
+			<div id="loading">
+				<h1 class="row">Loading...</h1>
+				<p class="row">Please wait while your invitation is loaded...</p>
 			</div>
 
-			<div class="row">
-				<p class="col-sm-4">Inviter email:</p>
-				<p class="col-sm-8" id="email"></p>
+			<div id="failed" style="display: none;">
+				<h1 class="row">Failure</h1>
+				<p class="row">There was a problem processing the invitation.</p>
+				<a href="#" id="logout" style="display: none;" class="row">Logout</a>
 			</div>
 
-			<div class="row">
-				<p class="col-sm-4">Collection:</p>
-				<p class="col-sm-8" id="collection"></p>
+			<div id="unauthorized" style="display: none;">
+				<h1 class="row">You're almost there!</h1>
+				<p class="row">
+					In order to join this collection, you must have an account.
+					Please login or register to finish.
+				</p>
+				<span class="row"><a href="/signin.html" class="needs_token">Login</a></span>
+				<span class="row"><a href="/register.html" class="needs_token">Register</a></span>
 			</div>
 
-			<div class="row">
-				<p class="col-sm-4">Administrator:</p>
-				<p class="col-sm-8" id="admin"></p>
+			<div id="confirm_invite" style="display: none;">
+				<h1 class="row">Confirm</h1>
+				<p>Please confirm the following information before accepting the invitation:</p>
+				<hr>
+
+				<div class="row">
+					<p class="col-sm-4">Inviter name:</p>
+					<p class="col-sm-8" id="name"></p>
+				</div>
+
+				<div class="row">
+					<p class="col-sm-4">Inviter email:</p>
+					<p class="col-sm-8" id="email"></p>
+				</div>
+
+				<div class="row">
+					<p class="col-sm-4">Collection:</p>
+					<p class="col-sm-8" id="collection"></p>
+				</div>
+
+				<div class="row">
+					<p class="col-sm-4">Administrator:</p>
+					<p class="col-sm-8" id="admin"></p>
+				</div>
+
+				<p>If this information looks correct, click Join to join this collection.</p>
+				<div class="text-center"><button type="button" class="btn btn-primary" id="join">Join</button></div>
 			</div>
 
-			<p>If this information looks correct, click Join to join this collection.</p>
-			<div class="text-center"><button type="button" class="btn btn-primary" id="join">Join</button></div>
-		</div>
-
-		<!-- #region Modals -->
-		<!-- Joining wait modal -->
-		<div class="modal fade in" tabindex="-1" role="dialog" id="join_wait">
-			<div class="modal-dialog" role="document">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h5 class="modal-title">Please wait...</h5>
-					</div>
-					<div class="modal-body">
-						<p>Please wait while you are added to the collection...</p>
+			<!-- #region Modals -->
+			<!-- Joining wait modal -->
+			<div class="modal fade in" tabindex="-1" role="dialog" id="join_wait">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Please wait...</h5>
+						</div>
+						<div class="modal-body">
+							<p>Please wait while you are added to the collection...</p>
+						</div>
 					</div>
 				</div>
 			</div>
+			<!-- #endregion -->
+			
+			{{template "footer.html"}}
+				
 		</div>
-		<!-- #endregion -->
-		
-		{{template "footer.html"}}
 		
 		<!-- Script -->
 		<script src="js/accept_invite.js" type="module"></script>

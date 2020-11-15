@@ -5,6 +5,8 @@
 		<title>Privacy Policy - Sheet Music Organizer</title>
 	</head>
 	<body>
+		{{template "navbar.html"}}
+
 		<div class="container">
 			<h1>Privacy Policy</h1>
 			<p>Last updated: October 30, 2020</p>
@@ -185,6 +187,10 @@
 			</ul>
 
 			{{template "footer.html"}}
+
+			<script>
+				$("#navbar_logout").hide();
+			</script>
 		</div>
 	</body>
 </html>

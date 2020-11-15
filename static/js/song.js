@@ -8,6 +8,10 @@ let add_tag = false;
 let delete_tag = undefined;
 let edit_mode = false;
 
+// Show options in navbar
+$("#navbar_options").show();
+$("#navbar_dashboard").show();
+
 let song = {
     // Parse name and collection ID from URL parameter
     song_id: url.searchParams.get("song_id"),

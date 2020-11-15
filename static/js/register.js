@@ -2,6 +2,10 @@
 
 import { add_alert, alert_ajax_failure } from "./utilities.js";
 
+// Hide options in navbar
+$("#navbar_collections").hide();
+$("#navbar_logout").hide();
+
 $("#register").click(function() {
 	$("#wait").modal();
 });

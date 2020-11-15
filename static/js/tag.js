@@ -19,6 +19,10 @@ let tag = {
     description: undefined,
 };
 
+// Show options in navbar
+$("#navbar_options").show();
+$("#navbar_dashboard").show();
+
 function refresh_tag() {
     $.get(`/collections/${tag.collection_id}/tags/${tag.tag_id}`)
     .done(function(data) {

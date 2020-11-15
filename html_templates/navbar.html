@@ -1,0 +1,44 @@
+<nav class="navbar navbar-expand-sm navbar-light bg-light">
+	<div class="navbar-brand">
+		<img src="img/sheet-music-icon.png" alt="Sheet Music Organizer Logo" loading="lazy" width=30 height=30>
+		Sheet Music Organizer
+	</div>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	
+	<div class="collapse navbar-collapse" id="navbarSupportedContent">
+		<ul class="navbar-nav mr-auto">
+		<li class="nav-item" id="navbar_collections">
+			<a class="nav-link" href="/collections.html">Collections</a>
+		</li>
+		<li class="nav-item" id="navbar_dashboard" style="display: none;">
+			<a class="nav-link" href="#" id="collection_link">Dashboard</a>
+		</li>
+		<li class="nav-item dropdown" id="navbar_options" style="display: none;">
+			<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			Options
+			</a>
+			<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+				<div id="navbar_members" style="display: none;">
+					<a class="dropdown-item" href="#" id="members_link">Members</a>
+					<div class="dropdown-divider"></div>
+				</div>
+				<a class="dropdown-item" href="#" id="edit_button">Edit</a>
+				<a class="dropdown-item text-danger" href="#" data-toggle="modal" data-target="#delete_song_modal">Delete</a>
+			</div>
+		</li>
+		</ul>
+		<ul class="navbar-nav ml-auto">
+		<li class="nav-item" id="navbar_logout">
+			<a class="btn btn-sm btn-outline-secondary" onclick="$.get('/user/logout'); window.location.href = '/';">Logout</a>
+		</li>
+		<li class="nav-item" id="navbar_register" style="display: none;">
+			<a href="/register.html" class="nav-link">Register</a>
+		</li>
+		<li class="nav-item" id="navbar_login" style="display: none;">
+			<a href="/signin.html" class="nav-link text-primary">Login</a>
+		</li>
+		</ul>
+	</div>
+</nav>

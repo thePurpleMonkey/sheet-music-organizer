@@ -16,6 +16,10 @@ let collection = {
     description: undefined
 };
 
+// Show options in navbar
+$("#navbar_options").show();
+$("#navbar_members").show();
+
 // Get collection info when document becomes ready
 $(function() {
     // Replace link for members
@@ -227,10 +231,4 @@ $('#add_tag_modal').on('hidden.bs.modal', function (e) {
 $("#add_tag_modal_button").click(function() {
     add_tag = true
     $("#add_tag_modal").modal("hide");
-});
-
-// Logout button
-$("#logout").click(function() {
-    $.get("/user/logout");
-    window.location.href = "/"
 });

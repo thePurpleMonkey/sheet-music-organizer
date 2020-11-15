@@ -5,6 +5,10 @@ import { add_alert, alert_ajax_failure, getUrlParameter } from "./utilities.js";
 let collection_id = getUrlParameter("collection_id");
 let token = getUrlParameter("token");
 
+// Hide options in navbar
+$("#navbar_logout").hide();
+$("#navbar_collections").hide();
+
 $(function() {
 	let payload = {token: token};
 	let redirect_to = encodeURIComponent(window.location.href);

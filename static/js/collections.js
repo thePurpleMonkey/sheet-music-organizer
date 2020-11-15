@@ -60,9 +60,3 @@ $('#wait').on('shown.bs.modal', function (e) {
 		refreshCollections();
 	});
 });
-
-// Logout button
-$("#logout").click(function() {
-	$.get("/user/logout");
-	window.location.href = "/"
-});

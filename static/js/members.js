@@ -10,6 +10,9 @@ let datetime_format = new Intl.DateTimeFormat([], {
 	timeStyle: "short"
 })
 
+// Hide options in navbar
+$("#navbar_dashboard").show();
+
 function refresh_invitations() {
 	$("#invitations_list").empty();
 	$("#invitations_list").append("<li>Loading pending invitations, please wait...</li>");
