@@ -206,6 +206,7 @@ function set_editing_mode(is_editing) {
 	$("#song_location").prop("disabled", !is_editing);
 	$("#song_last_performed").prop("disabled", !is_editing);
     $("#song_notes").prop("disabled", !is_editing);
+    $("#song_name").prop("disabled", !is_editing);
 
     if (is_editing) {
         $("#edit_buttons").show(500);
@@ -231,7 +232,7 @@ $("#song_save").click(function() {
 $('#edit_song_wait').on('shown.bs.modal', function (e) {
     let payload = JSON.stringify({
         name: $("#song_name").val(),
-		artist: $("#song_artist").val(), 
+		artist: $("#song_artist").val(),
 		//date_added: $("#song_date_added").val(),
 		location: $("#song_location").val(),
 		last_performed: $("#song_last_performed").val(),
@@ -249,6 +250,12 @@ $('#edit_song_wait').on('shown.bs.modal', function (e) {
     .done(function(data) {
 		console.log("Edit song result:");
         console.log(data);
+        $("#page_header").text($("#song_name").val());
+        song.name = $("#song_name").val();
+        song.artist = $("#song_artist").val();
+        song.location = $("#song_location").val();
+        song.last_performed = $("#song_last_performed").val();
+        song.notes = $("#song_notes").val();
         add_alert("Changes saved!", "Changes to this song have been successfully saved.");
     })
     .fail(function(data) {

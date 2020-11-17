@@ -216,7 +216,7 @@ func SongHandler(w http.ResponseWriter, r *http.Request) {
 		if *song.LastPerformed == "" {
 			song.LastPerformed = nil
 		}
-		if _, err = db.Exec("UPDATE songs SET artist = $1, location = $2, last_performed = $3, notes = $4 WHERE collection_id = $5 AND name = $6", song.Artist, song.Location, song.LastPerformed, song.Notes, collectionID, song.Name); err != nil {
+		if _, err = db.Exec("UPDATE songs SET artist = $1, location = $2, last_performed = $3, notes = $4, name = $5 WHERE collection_id = $6 AND song_id = $7", song.Artist, song.Location, song.LastPerformed, song.Notes, song.Name, collectionID, song.SongID); err != nil {
 			log.Printf("Song PUT - Unable to update song in database: %v\n", err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
