@@ -156,8 +156,12 @@ $('#tag_wait').on('shown.bs.modal', function (e) {
     });
 });
 
+// Attach to navbar buttons
 $("#edit_button").click(function() {
     $("#edit_collection_modal").modal("show");
+});
+$("#delete_button").click(function() {
+    $("#delete_collection_modal").modal("show");
 });
 
 // Saves changes to collection

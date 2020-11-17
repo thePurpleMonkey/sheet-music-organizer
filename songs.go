@@ -156,15 +156,14 @@ func SongsHandler(w http.ResponseWriter, r *http.Request) {
 
 // SongHandler handles creating, updating, and deleting a single song.
 func SongHandler(w http.ResponseWriter, r *http.Request) {
-	// session, err := store.Get(r, "session")
-	// if err != nil {
-	// 	SendError(w, err.Error(), http.StatusInternalServerError)
-	// 	log.Fatal(err)
-	// 	return
-	// }
+	session, err := store.Get(r, "session")
+	if err != nil {
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+		log.Printf("Song handler - Unable to get session: %v\n", err)
+		return
+	}
 
 	var song Song
-	var err error
 
 	// Get collection ID from URL
 	song.CollectionID, err = strconv.ParseInt(mux.Vars(r)["collection_id"], 10, 64)
@@ -225,27 +224,24 @@ func SongHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	} else if r.Method == "DELETE" {
-		// Start db transaction
-		tx, err := db.Begin()
-		if err != nil {
-			log.Printf("Song DELETE - Unable to start database transaction: %v\n", err)
-			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
-		}
-
 		// Delete song
-		if _, err = tx.Exec("DELETE FROM songs WHERE collection_id = $1 AND name = $2", song.CollectionID, song.Name); err != nil {
+		var result sql.Result
+		if result, err = db.Exec("DELETE FROM songs WHERE collection_id = $1 AND song_id = $2", song.CollectionID, song.SongID); err != nil {
 			log.Printf("Song DELETE - Unable to delete song from database: %v\n", err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
-		// Save changes
-		if err = tx.Commit(); err != nil {
-			log.Printf("Song DELETE - Unable to commit database transaction: %v\n", err)
-			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+		var rowsAffected int64
+		if rowsAffected, err = result.RowsAffected(); err != nil {
+			log.Printf("Song DELETE - Unable to get rows affected. Assuming everything is fine?")
+		} else if rowsAffected == 0 {
+			log.Printf("Song DELETE - No rows were deleted from the database for song id %d\n", song.SongID)
+			SendError(w, `{"error": "No song was found with that ID"}`, http.StatusNotFound)
 			return
 		}
 
+		log.Printf("Song DELETE - User %d deleted song %d from collection %d.\n", session.Values["user_id"], song.SongID, song.CollectionID)
 		w.WriteHeader(http.StatusOK)
 		return
 	}

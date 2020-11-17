@@ -268,6 +268,9 @@ $('#edit_song_wait').on('shown.bs.modal', function (e) {
 });
 
 // Delete song
+$("#delete_button").click(function() {
+    $("#delete_song_modal").modal("show");
+});
 $("#delete_song").click(function() {
     delete_song = true;
     $("#delete_song_modal").modal("hide");
@@ -280,7 +283,7 @@ $('#delete_song_modal').on('hidden.bs.modal', function (e) {
 $('#delete_song_wait').on('shown.bs.modal', function (e) {
     $.ajax({
         method: "DELETE",
-        url: `/collections/${song.collection_id}/songs/${song.name}`
+        url: `/collections/${song.collection_id}/songs/${song.song_id}`
     })
     .done(function(data) {
         console.log("Song delete.");
