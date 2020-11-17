@@ -4,7 +4,7 @@ export function add_alert(title, message, style="info") {
 	let alert = $("<div class='alert alert-dismissible' role='alert'>");
 	alert.addClass("alert-" + style)
 	alert.append($("<strong>").text(title));
-	alert.append($("<div>").text(message));
+	alert.append($("<div>").html(message));
 	let close = $("<button type='button' class='close' aria-label='Close' data-dismiss='alert'>");
 	close.append($("<span aria-hidden='true'>").html("&times;"));
 	alert.append(close);

@@ -104,6 +104,15 @@ func VerifyHandler(w http.ResponseWriter, r *http.Request) {
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		}
 
+		// Update session
+		log.Printf("Verify GET - Verifying user %d's session.", session.Values["user_id"])
+		session.Values["verified"] = true
+		if err = session.Save(r, w); err != nil {
+			log.Printf("Verify GET - Unable to save session state: %v\n", err)
+			SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
 		log.Printf("Verify GET - User %d verified.\n", userID)
 		w.WriteHeader(http.StatusOK)
 		return

@@ -43,7 +43,7 @@ body {
   border-top-right-radius: 0;
 }
 
-.alert {
+#alerts > .alert {
 	width: fit-content;
 	margin: 0 auto;
 }

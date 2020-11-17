@@ -30,6 +30,7 @@ type Invite struct {
 // AcceptInvite is a struct that is sent to a user confirming an invitation
 type AcceptInvite struct {
 	Email          string `json:"email"`
+	CollectionID   int64  `json:"collection_id"`
 	CollectionName string `json:"collection_name"`
 	InviterName    string `json:"inviter_name"`
 	InviterEmail   string `json:"inviter_email"`
@@ -55,10 +56,9 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Get invitation from database
 		var invite AcceptInvite
-		var collectionID string
 		var inviterID, invitationID int64
 		var retracted bool
-		if err := db.QueryRow("SELECT invitation_id, invitee_email, admin_invite, collection_id, inviter_id, retracted FROM invitations WHERE token = $1", token).Scan(&invitationID, &invite.Email, &invite.Administrator, &collectionID, &inviterID, &retracted); err != nil {
+		if err := db.QueryRow("SELECT invitation_id, invitee_email, admin_invite, collection_id, inviter_id, retracted FROM invitations WHERE token = $1", token).Scan(&invitationID, &invite.Email, &invite.Administrator, &invite.CollectionID, &inviterID, &retracted); err != nil {
 			if err == sql.ErrNoRows {
 				log.Printf("Invitations GET - Attempted to accept invitation with invalid token: %v\n", token)
 				SendError(w, `{"error": "Invitation not found."}`, http.StatusNotFound)
@@ -84,7 +84,7 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Get collection from database
-		if err := db.QueryRow("SELECT name FROM collections WHERE collection_id = $1", collectionID).Scan(&invite.CollectionName); err != nil {
+		if err := db.QueryRow("SELECT name FROM collections WHERE collection_id = $1", invite.CollectionID).Scan(&invite.CollectionName); err != nil {
 			log.Printf("Invitations GET - Unable to get invitation's collection name from database: %v\n", err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
@@ -245,6 +245,13 @@ func CollectionInvitationsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Check if the user's account has been verified
+		if !session.Values["verified"].(bool) {
+			log.Printf("Invitations POST - User '%s' attempted to send an invitation to '%s' without verifying their account.\n", session.Values["email"], invite.InviteeEmail)
+			SendError(w, `{"error": "You must verify your account first before you can perform this action.", "code": "unverified"}`, http.StatusForbidden)
+			return
+		}
+
 		// Check if user is an administrator on this collection
 		var admin bool
 		if err := db.QueryRow("SELECT admin FROM collection_members WHERE collection_id = $1 AND user_id = $2", collectionID, session.Values["user_id"]).Scan(&admin); err != nil {
@@ -261,7 +268,8 @@ func CollectionInvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		// Check for existing invitations
 		var invitationID int64
 		var sent time.Time
-		if err := db.QueryRow("SELECT invitation_id, invite_sent FROM invitations WHERE collection_id = $1 AND inviter_id = $2 AND invitee_email = $3", collectionID, session.Values["user_id"], invite.InviteeEmail).Scan(&invitationID, &sent); err != nil {
+		var retracted bool
+		if err := db.QueryRow("SELECT invitation_id, invite_sent, retracted FROM invitations WHERE collection_id = $1 AND inviter_id = $2 AND invitee_email = $3", collectionID, session.Values["user_id"], invite.InviteeEmail).Scan(&invitationID, &sent, &retracted); err != nil {
 			// There was a database error executing the SQL statement
 			if err != sql.ErrNoRows {
 				log.Printf("Invitations POST - Unable to look up invitation for user")
@@ -273,15 +281,17 @@ func CollectionInvitationsHandler(w http.ResponseWriter, r *http.Request) {
 			// This new invitation can be safely committed to the database
 		} else {
 			// Invitation exists.
-			log.Printf("Invitations POST - Existing invitation %d sent at %v.\n", invitationID, sent)
-			if sent.Before(time.Now().AddDate(0, 0, -7)) {
+			log.Printf("Invitations POST - Existing invitation %d sent at %v. Retracted: %v\n", invitationID, sent, retracted)
+
+			// Check if invitations is expired or retracted
+			if sent.Before(time.Now().AddDate(0, 0, -7)) || retracted {
 				// Delete existing expired invitation from database
 				if _, err = db.Exec("DELETE FROM invitations WHERE inviter_id = $1 AND invitee_email = $2, collection_id = $3", session.Values["user_id"], invite.InviteeEmail, collectionID); err != nil {
-					log.Printf("Invitations POST - Unable to delete expired invite from database: %v\n", err)
+					log.Printf("Invitations POST - Unable to delete expired and/or retracted invite from database: %v\n", err)
 					SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 					return
 				}
-				log.Printf("Invitations POST - Expired invitation deleted.")
+				log.Printf("Invitations POST - Expired and/or retracted invitation deleted.")
 			}
 
 			// There was an invitation that has not expired yet.

@@ -2,7 +2,7 @@
 
 import { add_alert, alert_ajax_failure, getUrlParameter } from "./utilities.js";
 
-let collection_id = getUrlParameter("collection_id");
+var collection_id;
 let token = getUrlParameter("token");
 
 // Hide options in navbar
@@ -27,7 +27,8 @@ $(function() {
 		$("#email").text(data.inviter_email);
 		$("#name").text(data.inviter_name);		
 		$("#collection").text(data.collection_name);		
-		$("#admin").text(data.administrator ? "Yes" : "No");		
+		$("#admin").text(data.administrator ? "Yes" : "No");
+		collection_id = data.collection_id;		
 		$("#confirm_invite").show(500);
 	})
 	.fail(function(data) {

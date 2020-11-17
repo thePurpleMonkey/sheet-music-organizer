@@ -211,7 +211,15 @@ $('#invite_wait').on('shown.bs.modal', function (e) {
 		add_alert("Invitation sent!", `The invitation has been sent to ${payload.invitee_email}.`, "success");
     })
     .fail(function(data) {
+		console.log("Invite POST response:");
+		console.log(data);
+		if (data.responseJSON.code === "unverified") {
+			// User is unverified
+			add_alert("Unverified account", "You need to verify your account before you can send invitations. Please visit your <a href='/account.html' class='alert-link'>account page</a> to verify your account.", "danger");
+		} else {
+			// Something else went wrong
         alert_ajax_failure("Unable to send invite.", data);
+		}
     })
     .always(function() {
 		refresh_invitations();
