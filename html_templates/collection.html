@@ -10,6 +10,10 @@
         margin-top: 10px;
         width: 10em;
       }
+      
+      #description {
+        font-style: italic;
+      }
     </style>
   </head>
 
@@ -18,7 +22,14 @@
 
     <div class="container">
       <!-- Header -->
-      <h1 id="page_header">Loading...</h1>
+      <div class="row">
+        <h1 id="page_header">Loading...</h1>
+      </div>
+      <div class="row" id="description_header">
+        <span style="font-weight: bold;">Description:</span>
+        &nbsp;
+        <span id="description"></span>
+      </div>
       <hr>
 
       <div id="alerts"></div>

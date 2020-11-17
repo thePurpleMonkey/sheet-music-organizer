@@ -35,6 +35,12 @@ $(function() {
         $("#page_header").text(collection.name);
         $("#collection_name").val(collection.name);
         $("#collection_description").val(collection.description);
+
+        if (collection.description) {
+            $("#description").text(collection.description);
+        } else {
+            $("#description_header").hide();
+        }
     })
     .fail(function(data) {
         alert_ajax_failure("Unable to get collection information!", data);
