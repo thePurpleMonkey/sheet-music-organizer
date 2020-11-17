@@ -1,6 +1,6 @@
 "use strict";
 
-import { add_alert, alert_ajax_failure } from "./utilities.js";
+import { add_alert, alert_ajax_failure, getUrlParameter } from "./utilities.js";
 
 let create_collection = false;
 
@@ -31,6 +31,12 @@ function refreshCollections() {
 	.always(function() {
 		$("#loading").remove();
 	});
+
+	// Check if the user arrived here after verifying their account
+	if (window.sessionStorage.getItem("verified") === "true") {
+		add_alert("Account verified", "Congratulations, your account has been verified!", "success");
+		window.sessionStorage.setItem("verified", false);
+	}
 };
 
 refreshCollections();

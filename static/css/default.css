@@ -1,0 +1,7 @@
+#navbarSupportedContent > .ml-auto > li {
+	margin-left: 10px;
+}
+
+.hidden {
+	display: none;
+}

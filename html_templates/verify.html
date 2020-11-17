@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		{{template "header.html"}}
+		<title>Verify Account - Sheet Music Organizer</title>
+	</head>
+	<body>
+		{{template "navbar.html"}}
+		
+		<div class="container">
+			<div class="row">
+				<h1>Verify account</h1>
+			</div>
+
+			<hr>
+			<div id="alerts"></div>
+
+			<div class="row" id="loading">
+				Please wait while we verify your account.
+			</div>
+			<div class="row hidden" id="success">
+				<h2>Success!</h2>
+				<p>Your account has been successfully verified! You can now invite others to collaborate with you on your collection.</p>
+				<p>You will be redirected to your collections momentarily. If not, please <a href="/collections.html">click here</a>.</p>
+			</div>
+			<div class="row hidden" id="failed">
+				<h2>Failure</h2>
+				<p>There was a problem verifying your account.</p>
+				<p>Please try again.</p>
+			</div>
+			{{template "footer.html"}}
+		</div>
+		
+		<!-- Script -->
+		<script src="js/verify.js" type="module"></script>
+	</body>
+</html>

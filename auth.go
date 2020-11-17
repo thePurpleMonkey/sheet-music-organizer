@@ -20,10 +20,12 @@ import (
 
 // User is a struct that models the structure of a user, both in the request body, and in the DB
 type User struct {
-	UserID   int64  `json:"user_id" db:"user_id"`
-	Password string `json:"password" db:"password"`
-	Email    string `json:"email" db:"email"`
-	Name     string `json:"name" db:"name"`
+	UserID     int64  `json:"user_id"`
+	Email      string `json:"email"`
+	Password   string `json:"password,omitempty"`
+	Name       string `json:"name"`
+	Verified   bool   `json:"verified"`
+	Restricted bool   `json:"restricted"`
 }
 
 // PasswordResetRequest is a data structure to model incoming parameters of a password reset POST request
@@ -231,8 +233,8 @@ func requestPasswordResetEmail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create email template
-	htmlTemplate := template.Must(template.New("password_reset_email.html").ParseFiles("templates/password_reset_email.html"))
-	textTemplate := template.Must(template.New("password_reset_email.txt").ParseFiles("templates/password_reset_email.txt"))
+	htmlTemplate := template.Must(template.New("password_reset_email.html").ParseFiles("email_templates/password_reset_email.html"))
+	textTemplate := template.Must(template.New("password_reset_email.txt").ParseFiles("email_templates/password_reset_email.txt"))
 
 	var htmlBuffer, textBuffer bytes.Buffer
 	url := "https://" + os.Getenv("HOST") + "/reset_password.html?token=" + token

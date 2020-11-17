@@ -318,8 +318,8 @@ func CollectionInvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Create email template
-		htmlTemplate := template.Must(template.New("invite_email.html").ParseFiles("templates/invite_email.html"))
-		textTemplate := template.Must(template.New("invite_email.txt").ParseFiles("templates/invite_email.txt"))
+		htmlTemplate := template.Must(template.New("invite_email.html").ParseFiles("email_templates/invite_email.html"))
+		textTemplate := template.Must(template.New("invite_email.txt").ParseFiles("email_templates/invite_email.txt"))
 
 		var htmlBuffer, textBuffer bytes.Buffer
 		url := "https://" + os.Getenv("HOST") + "/accept_invite.html?token=" + token

@@ -8,7 +8,7 @@ let send_invite = false;
 let datetime_format = new Intl.DateTimeFormat([], {
 	dateStyle: "short",
 	timeStyle: "short"
-})
+});
 
 // Hide options in navbar
 $("#navbar_dashboard").show();

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		{{template "header.html"}}
+		<title>Account - Sheet Music Organizer</title>
+
+		<style>
+			#account_restricted {
+				color: red;
+			}
+
+			#verified {
+				color: green;
+			}
+
+			#not_verified {
+				color: darkorange;
+			}
+
+			.row {
+				margin: 5px 0;
+			}
+
+			#help {
+				margin-top: -2px;
+				height: 1.25em;
+				filter: invert(60%);
+				transition: filter .5s;
+			}
+
+			#help:hover {
+				filter: invert(30%);
+			}
+		</style>
+	</head>
+	<body>
+		{{template "navbar.html"}}
+		
+		<div class="container">
+			<h1>Account</h1>
+			<hr>
+			
+			<div id="alerts"></div>
+			
+			<div class="row">
+				<div class="col-2">
+					Email:
+				</div>
+				<div class="col-10" id="email">
+					Loading...
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-2">
+					Name:
+				</div>
+				<div class="col-10" id="name">
+					Loading...
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-2">
+					Verified:
+				</div>
+				<div class="col-10 hidden" id="verified">
+					This account has been verified!
+				</div>
+				<div class="col-10 hidden" id="not_verified">
+					This account has not yet been verified.
+					<a href="#" data-toggle="modal" data-target="#verify_confirm_modal" id="verify_button">Verify now.</a>
+					<img src="/img/help-circle.svg" data-toggle="tooltip" alt="Verify help" title="Unverified accounts cannot send email invites. Click 'Verify now' to verify your email and enable this feature." id="help">
+				</div>
+			</div>
+			<div class="col-12 hidden" id="account_restricted">
+				This account has been restricted. You may not invite others to your collections. If you have questions about this, please contact <a href="mailto:sheetmusicorganizer@michaelhumphrey.dev">sheetmusicorganizer@michaelhumphrey.dev</a> for more information.
+			</div>
+			{{template "footer.html"}}
+		</div>
+
+		<!-- #region Modals -->
+
+		<!-- Delete song modal -->
+		<div class="modal fade" id="verify_confirm_modal" tabindex="-1" role="dialog">
+			<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+				<h5 class="modal-title">Verify account</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+				</button>
+				</div>
+				<div class="modal-body">
+				<p>
+					An email will be sent to you with a verification link.
+					Click on the link in the email to verify your account.
+					Once your account is verified, you will be able to invite others to collaborate with you on any of your collections.
+				</p>
+				<p>Do you want to send the verification email?</p>
+				</div>
+				<div class="modal-footer">
+				<button type="button" class="btn btn-primary" id="send_verification_email">Send</button>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+			</div>
+		</div>
+
+    <!-- Verify wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="verify_wait" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Sending verification email</h5>
+        </div>
+        <div class="modal-body">
+          <p>Please wait while your verification email is sent...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+
+		<!-- #endregion -->
+
+		<!-- Script -->
+		<script src="/js/account.js" type="module"></script>
+	</body>
+</html>

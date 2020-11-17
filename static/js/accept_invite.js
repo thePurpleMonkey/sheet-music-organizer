@@ -7,6 +7,7 @@ let token = getUrlParameter("token");
 
 // Hide options in navbar
 $("#navbar_logout").hide();
+$("#navbar_account").hide();
 $("#navbar_collections").hide();
 
 $(function() {
@@ -73,10 +74,4 @@ $("#join_wait").on("shown.bs.modal", function() {
 	.always(function(data) {
 		$("#join_wait").hide(500);
 	})
-});
-
-// Logout button
-$("#logout").click(function() {
-	$.get("/user/logout");
-	window.location.reload();
 });

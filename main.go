@@ -34,6 +34,8 @@ func makeRouter() *mux.Router {
 	r.HandleFunc("/user/register", register).Methods("POST")
 	r.HandleFunc("/user/password/forgot", requestPasswordResetEmail).Methods("POST")
 	r.HandleFunc("/user/password/reset", resetPassword)
+	r.HandleFunc("/user/account", RequireAuthentication(AccountHandler)).Methods("GET", "PUT", "DELETE")
+	r.HandleFunc("/user/verify", RequireAuthentication(VerifyHandler)).Methods("GET", "POST")
 	r.HandleFunc("/invitations", RequireAuthentication(InvitationsHandler)).Methods("GET", "POST")
 
 	// Collections
