@@ -156,6 +156,10 @@ $('#tag_wait').on('shown.bs.modal', function (e) {
     });
 });
 
+$("#edit_button").click(function() {
+    $("#edit_collection_modal").modal("show");
+});
+
 // Saves changes to collection
 $("#save_collection").click(function() {
     edit_collection = true;
