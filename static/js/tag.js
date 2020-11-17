@@ -36,7 +36,11 @@ function refresh_tag() {
         console.log(tag);
 
         $("#page_header").text(tag.name);
-        $("#description").text(tag.description);
+        if (tag.description) {
+            $("#description").text(tag.description);
+        } else {
+            $("#description_row").hide();
+        }
     })
     .fail(function(data) {
         alert_ajax_failure("Unable to get tag information.", data);
