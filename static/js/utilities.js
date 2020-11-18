@@ -30,6 +30,8 @@ export function getUrlParameter(sParam) {
 };
 
 export function alert_ajax_failure(title, data) {
+	console.log("Ajax failure!");
+	console.log(data);
 	if (data.status === 401) {
 		let redirect = "/signin.html?redirect=" + encodeURIComponent(window.location.pathname + window.location.search);
 		console.log("403 Forbidden response received. Redirecting to: " + redirect);

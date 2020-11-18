@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -33,10 +34,71 @@ func AccountHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Send response
+		log.Printf("Account GET - Retrieved user account %d\n", session.Values["user_id"])
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(user)
 		return
+	} else if r.Method == "PUT" {
+		var user User
+
+		if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+			// If there is something wrong with the request body, return a 400 status
+			log.Printf("Account PUT - Unable to parse request body: %v\n", err)
+			body, _ := ioutil.ReadAll(r.Body)
+			log.Printf("Body: %v\n", body)
+			SendError(w, `{"error": "Unable to parse request."}`, http.StatusBadRequest)
+			return
+		}
+
+		// Check if updating email address
+		var unverify = false
+		if user.Email != session.Values["email"] {
+			unverify = true
+		}
+
+		// Calculate user's new verified status
+		var verified = session.Values["verified"].(bool) && !unverify
+
+		// Unverify user's session if necessary
+		if unverify {
+			log.Printf("Account PUT - Unverifying user account %d in session.\n", session.Values["user_id"])
+			session.Values["verified"] = false
+			if err = session.Save(r, w); err != nil {
+				log.Printf("Account PUT - Unable to save session state: %v\n", err)
+				SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+				return
+			}
+		}
+
+		// Update user in database
+		var result sql.Result
+		if result, err = db.Exec("UPDATE users SET name = $1, email = $2, verified = $3 WHERE user_id = $4", user.Name, user.Email, verified, session.Values["user_id"]); err != nil {
+			log.Printf("Account PUT - Unable to update user in database: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		// Check if update did anything
+		var rows int64
+		rows, err = result.RowsAffected()
+		if err != nil {
+			log.Printf("Account PUT - Unable to get rows affected by update: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		if rows == 0 {
+			log.Printf("Account PUT - User %d update did not affect any row in database", session.Values["user_id"])
+			SendError(w, `{"error": "User not found."}`, http.StatusNotFound)
+			return
+		}
+
+		log.Printf("Account PUT - Updated user %d\n", session.Values["user_id"])
+		w.WriteHeader(http.StatusOK)
+		return
+	} else if r.Method == "DELETE" {
+
 	}
 }
 
