@@ -430,3 +430,17 @@ func getAuthorizedCollectionIDs(userID int64) ([]int64, error) {
 
 	return IDs, nil
 }
+
+func checkAdmin(userID, collectionID int64) (bool, error) {
+	var admin bool
+	if err := db.QueryRow("SELECT admin FROM collection_members WHERE user_id = $1 AND collection_id = $2", userID, collectionID).Scan(&admin); err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("checkAdmin - User %d not found in collection %d\n", userID, collectionID)
+		} else {
+			log.Printf("checkAdmin - Error accessing database: %v\n", err)
+		}
+		return false, err
+	}
+
+	return admin, nil
+}

@@ -16,21 +16,27 @@ let collection = {
     description: undefined
 };
 
+// Replace link for members
+$("#members_link").attr("href", "/members.html?collection_id=" + collection.id);
+
 // Show options in navbar
 $("#navbar_options").show();
 $("#navbar_members").show();
 
 // Get collection info when document becomes ready
 $(function() {
-    // Replace link for members
-    $("#members_link").attr("href", "/members.html?collection_id=" + collection.id);
-    
     // Handler for .ready() called.
     $.get(`/collections/${collection.id}`)
     .done(function(data) {
         console.log(data);
         collection.name = data.name;
         collection.description = data.description;
+        
+        if (!data.admin) {
+            $("#edit_button").hide();
+            $("#delete_button").hide();
+            $("#members_divider").hide();
+        }
 
         $("#page_header").text(collection.name);
         $("#collection_name").val(collection.name);

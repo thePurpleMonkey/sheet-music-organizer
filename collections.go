@@ -14,6 +14,7 @@ type Collection struct {
 	CollectionID int64  `json:"collection_id" db:"collection_id"`
 	Name         string `json:"name" db:"name"`
 	Description  string `json:"description" db:"description"`
+	Admin        *bool  `json:"admin,omitempty"`
 }
 
 // CollectionsHandler handles GETting all of the user's collections and POSTing a new collection.
@@ -124,15 +125,14 @@ func CollectionsHandler(w http.ResponseWriter, r *http.Request) {
 
 // CollectionHandler handles getting, updating, and deleting a single collection.
 func CollectionHandler(w http.ResponseWriter, r *http.Request) {
-	// session, err := store.Get(r, "session")
-	// if err != nil {
-	// 	SendError(w, err.Error(), http.StatusInternalServerError)
-	// 	log.Fatal(err)
-	// 	return
-	// }
+	session, err := store.Get(r, "session")
+	if err != nil {
+		log.Printf("Collections handler - Unable to get session store: %v\n", err)
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+		return
+	}
 
 	var collection Collection
-	var err error
 
 	// Get URL parameter
 	collection.CollectionID, err = strconv.ParseInt(mux.Vars(r)["collection_id"], 10, 64)
@@ -145,7 +145,7 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		// Find the collection in the database
-		if err := db.QueryRow("SELECT name, description FROM collections WHERE collection_id = $1", collection.CollectionID).Scan(&collection.Name, &collection.Description); err != nil {
+		if err := db.QueryRow("SELECT name, description, admin FROM collections NATURAL JOIN collection_members WHERE collection_id = $1 AND user_id = $2", collection.CollectionID, session.Values["user_id"]).Scan(&collection.Name, &collection.Description, &collection.Admin); err != nil {
 			log.Printf("Collection GET - Unable to get collection from database: %v\n", err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
@@ -174,7 +174,6 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 		// Update collection in database
 		if _, err = db.Exec("UPDATE collections SET name = $1, description = $2 WHERE collection_id = $3", collection.Name, collection.Description, collectionID); err != nil {
 			log.Printf("Collection PUT - Unable to update collection in database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
@@ -183,18 +182,27 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 
 	} else if r.Method == "DELETE" {
+		if admin, err := checkAdmin(session.Values["user_id"].(int64), collection.CollectionID); err != nil {
+			log.Printf("Collection DELETE - Unable to check admin status for user %d in collection %d: %v\n", session.Values["user_id"], collection.CollectionID, err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		} else if !admin {
+			log.Printf("Collection DELETE - Non-admin user %d attempted to delete collection %d\n", session.Values["user_id"], collection.CollectionID)
+			SendError(w, PERMISSION_ERROR_MESSAGE, http.StatusForbidden)
+			return
+		}
+
 		// Start db transaction
 		tx, err := db.Begin()
 		if err != nil {
 			log.Printf("Collection DELETE - Unable to start database transaction: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
 		}
 
 		// Remove songs from collection
 		if _, err = tx.Exec("DELETE FROM songs WHERE collection_id = $1", collection.CollectionID); err != nil {
 			log.Printf("Collection DELETE - Unable to delete songs from collection: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
@@ -202,7 +210,6 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 		// Remove tags from collection
 		if _, err = tx.Exec("DELETE FROM tags WHERE collection_id = $1", collection.CollectionID); err != nil {
 			log.Printf("Collection DELETE - Unable to delete tags from collection: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
@@ -210,7 +217,6 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 		// Remove users from collection
 		if _, err = tx.Exec("DELETE FROM collection_members WHERE collection_id = $1", collection.CollectionID); err != nil {
 			log.Printf("Collection DELETE - Unable to delete collection members: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
@@ -218,7 +224,6 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 		// Delete collection
 		if _, err = tx.Exec("DELETE FROM collections WHERE collection_id = $1", collection.CollectionID); err != nil {
 			log.Printf("Collection DELETE - Unable to delete collection from database: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
@@ -226,7 +231,6 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 		// Save changes
 		if err = tx.Commit(); err != nil {
 			log.Printf("Collection DELETE - Unable to commit database transaction: %v\n", err)
-			w.Header().Add("Content-Type", "application/json")
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
