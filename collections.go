@@ -161,6 +161,17 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 		// Save the URL collection ID so the user can't update another record
 		var collectionID = collection.CollectionID
 
+		// Verify user is admin of collection
+		if admin, err := checkAdmin(session.Values["user_id"].(int64), collection.CollectionID); err != nil {
+			log.Printf("Collection PUT - Unable to check admin status for user %d in collection %d: %v\n", session.Values["user_id"], collectionID, err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		} else if !admin {
+			log.Printf("Collection PUT - Non-admin user %d attempted to edit collection %d\n", session.Values["user_id"], collectionID)
+			SendError(w, PERMISSION_ERROR_MESSAGE, http.StatusForbidden)
+			return
+		}
+
 		err := json.NewDecoder(r.Body).Decode(&collection)
 		if err != nil {
 			// If there is something wrong with the request body, return a 400 status
@@ -182,6 +193,7 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 
 	} else if r.Method == "DELETE" {
+		// Verify user is admin of collection
 		if admin, err := checkAdmin(session.Values["user_id"].(int64), collection.CollectionID); err != nil {
 			log.Printf("Collection DELETE - Unable to check admin status for user %d in collection %d: %v\n", session.Values["user_id"], collection.CollectionID, err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
