@@ -252,9 +252,9 @@ $('#leave_wait').on('shown.bs.modal', function (e) {
 	.done(function(data) {
 		console.log("Leave collection response:")
 		console.log(data);
-		add_alert("Success!", "Successfully left collection.", "success");
-		window.sessionStorage.setItem("left_collection", true);
-		window.location.href = "/collections.html";
+		if (add_session_alert("Success!", "Successfully left collection.", "success")) {
+			window.location.href = "/collections.html";
+		}
 	})
 	.fail(function(data) {
 		alert_ajax_failure("Unable to leave collection.", data);

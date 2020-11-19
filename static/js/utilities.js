@@ -45,3 +45,32 @@ export function alert_ajax_failure(title, data) {
 	}
 	add_alert(title, alert_text, "danger");
 };
+
+export function add_session_alert(title, message, style="info") {
+	try {
+		window.sessionStorage.setItem("pending_invitation", true);
+		window.sessionStorage.setItem("title", title);
+		window.sessionStorage.setItem("message", message);
+		window.sessionStorage.setItem("style", style);
+		return true;
+	} catch (err) {
+		return false;
+	}
+};
+
+export function get_session_alert() {
+	if (window.sessionStorage.getItem("pending_invitation") === "true") {
+		try {
+			window.sessionStorage.setItem("pending_invitation", false);
+			return {
+				title: window.sessionStorage.getItem("title"),
+				message: window.sessionStorage.getItem("message"),
+				style: window.sessionStorage.getItem("style"),
+			};
+		} catch (err) {
+			return null;
+		}
+	} else {
+		return null;
+	}
+};

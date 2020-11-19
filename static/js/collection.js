@@ -1,6 +1,6 @@
 "use strict";
 
-import { add_alert, getUrlParameter, alert_ajax_failure } from "./utilities.js";
+import { add_alert, getUrlParameter, alert_ajax_failure, get_session_alert } from "./utilities.js";
 
 let add_song = false;
 let add_tag = false;
@@ -55,6 +55,12 @@ $(function() {
 
     reloadSongs();
     reloadTags();
+
+	// Check for any alerts
+	let alert = get_session_alert();
+	if (alert) {
+		add_alert(alert.title, alert.message, alert.style);
+	}
 });
 
 function reloadSongs() {

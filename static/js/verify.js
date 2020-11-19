@@ -1,6 +1,6 @@
 "use strict";
 
-import { add_alert, alert_ajax_failure, getUrlParameter } from "./utilities.js";
+import { add_session_alert, alert_ajax_failure, getUrlParameter } from "./utilities.js";
 
 let token = getUrlParameter("token");
 
@@ -13,7 +13,7 @@ $(function() {
 		console.log("Verify GET response:");
 		console.log(data);		
 		$("#success").show(500);
-		window.sessionStorage.setItem("verified", true);
+		add_session_alert("Account verified", "Congratulations, your account has been verified!", "success");
 		window.location.href = "/collections.html";
 	})
 	.fail(function(data) {

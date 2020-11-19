@@ -1,6 +1,6 @@
 "use strict";
 
-import { add_alert, alert_ajax_failure, getUrlParameter } from "./utilities.js";
+import { add_alert, add_session_alert, alert_ajax_failure, getUrlParameter } from "./utilities.js";
 
 var collection_id;
 let token = getUrlParameter("token");
@@ -66,8 +66,9 @@ $("#join_wait").on("shown.bs.modal", function() {
 	.done(function(data) {
 		console.log("Accept invitation response:")
 		console.log(data);
-		add_alert("You have been added to the collection!", "You should be redirected to the collection momentarily.", "success");
-		window.location.href = `/collection.html?collection_id=${collection_id}`
+		if (add_session_alert("You have been added to the collection!", "You should be redirected to the collection momentarily.", "success")) {
+			window.location.href = `/collection.html?collection_id=${collection_id}`
+		}
 	})
 	.fail(function(data) {
 		alert_ajax_failure("Unable to get invitation.", data);
