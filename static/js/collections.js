@@ -31,15 +31,23 @@ function refreshCollections() {
 	.always(function() {
 		$("#loading").remove();
 	});
+};
+
+$(function() {
+	refreshCollections();
 
 	// Check if the user arrived here after verifying their account
 	if (window.sessionStorage.getItem("verified") === "true") {
 		add_alert("Account verified", "Congratulations, your account has been verified!", "success");
 		window.sessionStorage.setItem("verified", false);
 	}
-};
 
-refreshCollections();
+	// Check if the user leaving a collection
+	if (window.sessionStorage.getItem("left_collection") === "true") {
+		add_alert("Success!", "Successfully left collection.", "success");
+		window.sessionStorage.setItem("left_collection", false);
+	}
+})
 
 $("#create_collection").click(function() {
 	create_collection = true;

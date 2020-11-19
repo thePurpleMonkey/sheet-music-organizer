@@ -67,7 +67,7 @@ $("#join_wait").on("shown.bs.modal", function() {
 		console.log("Accept invitation response:")
 		console.log(data);
 		add_alert("You have been added to the collection!", "You should be redirected to the collection momentarily.", "success");
-		window.location.href = `/collections.html?collection_id=${collection_id}`
+		window.location.href = `/collection.html?collection_id=${collection_id}`
 	})
 	.fail(function(data) {
 		alert_ajax_failure("Unable to get invitation.", data);

@@ -44,4 +44,4 @@ export function alert_ajax_failure(title, data) {
 		alert_text = "Unknown error. Status code: " + data.status;
 	}
 	add_alert(title, alert_text, "danger");
-}
+};

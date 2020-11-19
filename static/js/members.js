@@ -4,6 +4,8 @@ import { add_alert, alert_ajax_failure, getUrlParameter } from "./utilities.js";
 
 let collection_id = getUrlParameter("collection_id");
 let send_invite = false;
+let leave = false;
+let current_user_id;
 
 let datetime_format = new Intl.DateTimeFormat([], {
 	dateStyle: "short",
@@ -11,7 +13,10 @@ let datetime_format = new Intl.DateTimeFormat([], {
 });
 
 // Hide options in navbar
-$("#navbar_dashboard").show();
+$("#navbar_dashboard").removeClass("hidden");
+$("#navbar_options").removeClass("hidden");
+$("#navbar_member_options").removeClass("hidden");
+$("#navbar_edit_options").addClass("hidden");
 
 function refresh_invitations() {
 	$("#invitations_list").empty();
@@ -87,13 +92,15 @@ function refresh_members() {
 		console.log(data);
 		$("#members_list").empty();
 
-		let user_id = data.user_id;
+		current_user_id = data.user_id;
 		let admin = data.admin;
 
 		if (admin) {
-			$("#invite_button").show();
+			$("#invite_button").removeClass("hidden");
+			$("#manage_members_button").removeClass("hidden");
 		} else {
-			$("#invite_button").hide();
+			$("#invite_button").addClass("hidden");
+			$("#manage_members_button").addClass("hidden");
 		}
 
 		data.members.forEach(member => {
@@ -111,7 +118,7 @@ function refresh_members() {
 			}
 			item.append(member.name);
 
-			if (user_id === member.user_id) {
+			if (current_user_id === member.user_id) {
 				item.append(
 					$("<img>")
 					.attr("src", "/img/user.svg")
@@ -189,7 +196,6 @@ $("#send_invite_button").click(function() {
 	send_invite = true;
 	$("#invite_modal").modal("hide");
 });
-
 $('#invite_modal').on('hidden.bs.modal', function (e) {
     if (send_invite) {
         $("#invite_wait").modal("show");
@@ -228,8 +234,33 @@ $('#invite_wait').on('shown.bs.modal', function (e) {
     });
 });
 
-// Logout button
-$("#logout").click(function() {
-	$.get("/user/logout");
-	window.location.href = "/"
+// #region Leave
+$("#leave_modal_button").click(function() {
+	leave = true;
+	$("#leave_modal").modal("hide");
 });
+$('#leave_modal').on('hidden.bs.modal', function (e) {
+    if (leave) {
+        $("#leave_wait").modal("show");
+    }
+});
+$('#leave_wait').on('shown.bs.modal', function (e) {
+	// Make AJAX request
+	$.ajax(`/collections/${collection_id}/members/${current_user_id}`, {
+		method: "DELETE"
+	})
+	.done(function(data) {
+		console.log("Leave collection response:")
+		console.log(data);
+		add_alert("Success!", "Successfully left collection.", "success");
+		window.sessionStorage.setItem("left_collection", true);
+		window.location.href = "/collections.html";
+	})
+	.fail(function(data) {
+		alert_ajax_failure("Unable to leave collection.", data);
+	})
+	.always(function() {
+		$("#leave_wait").modal("hide");
+	});
+});
+// #endregion

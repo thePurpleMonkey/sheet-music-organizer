@@ -22,6 +22,7 @@ $("#members_link").attr("href", "/members.html?collection_id=" + collection.id);
 // Show options in navbar
 $("#navbar_options").show();
 $("#navbar_members").show();
+$("#leave_button").removeClass("hidden");
 
 // Get collection info when document becomes ready
 $(function() {
@@ -186,9 +187,6 @@ $('#edit_collection_wait').on('shown.bs.modal', function (e) {
         url: `/collections/${collection.id}`,
         type: 'PUT',
         data: payload,
-        // success: function(result) {
-        //     // Do something with the result
-        // }
     })
     .done(function(data) {
         console.log(data);

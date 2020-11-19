@@ -49,7 +49,7 @@ func MembersHandler(w http.ResponseWriter, r *http.Request) {
 		response.UserID = session.Values["user_id"].(int64)
 		response.Members = make([]Member, 0)
 
-		// Get a list of all user's collections
+		// Get a list of all members in collection
 		rows, err := db.Query("SELECT user_id, name, admin FROM collection_members NATURAL JOIN users WHERE collection_id = $1 ORDER BY admin DESC", collectionID)
 		if err != nil {
 			log.Printf("Members GET - Unable to retrieve collection members from database: %v\n", err)
@@ -122,18 +122,34 @@ func MemberHandler(w http.ResponseWriter, r *http.Request) {
 	sourceUserID = session.Values["user_id"].(int64)
 
 	if r.Method == "DELETE" {
-		// Check if user is an admin for this collection
-		var admin bool
-		if err := db.QueryRow("SELECT admin FROM collection_members WHERE user_id = $1 AND collection_id = $2", sourceUserID, collectionID).Scan(&admin); err != nil {
-			log.Printf("Collection Member DELETE - Unable to get collection from database: %v\n", err)
-			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
-			return
-		}
+		// Check if user wants to remove another user from this collection
+		if sourceUserID != targetUserID {
+			// Check if user is an admin
+			var admin bool
+			if err := db.QueryRow("SELECT admin FROM collection_members WHERE user_id = $1 AND collection_id = $2", sourceUserID, collectionID).Scan(&admin); err != nil {
+				log.Printf("Collection Member DELETE - Unable to get collection from database: %v\n", err)
+				SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+				return
+			}
 
-		if !admin {
-			log.Printf("Collection Member DELETE - User %d attempted to delete user %d from collection %d!\n", sourceUserID, targetUserID, collectionID)
-			SendError(w, `{"error": "You do not have permission to perform that action."}`, http.StatusForbidden)
-			return
+			if !admin {
+				log.Printf("Collection Member DELETE - User %d attempted to delete user %d from collection %d!\n", sourceUserID, targetUserID, collectionID)
+				SendError(w, `{"error": "You do not have permission to perform that action."}`, http.StatusForbidden)
+				return
+			}
+		} else {
+			var remainingAdmins int64
+			if err = db.QueryRow("SELECT COUNT(*) FROM collection_members WHERE collection_id = $1 AND admin = true AND user_id != $2", collectionID, sourceUserID).Scan(&remainingAdmins); err != nil {
+				log.Printf("Collection Member DELETE - Unable to get the remaining admins from database: %v\n", err)
+				SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+				return
+			}
+
+			if remainingAdmins == 0 {
+				log.Printf("Collection Member DELETE - User %d attempted to leave collection %d as the only admin.\n", sourceUserID, collectionID)
+				SendError(w, `{"error": "You are not allowed to leave this collection because you are the only admin!"}`, http.StatusConflict)
+				return
+			}
 		}
 
 		// Remove target user from collection

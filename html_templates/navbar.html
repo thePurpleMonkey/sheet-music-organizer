@@ -12,20 +12,31 @@
 			<li class="nav-item" id="navbar_collections">
 				<a class="nav-link" href="/collections.html">Collections</a>
 			</li>
-			<li class="nav-item" id="navbar_dashboard" style="display: none;">
+			<li class="nav-item hidden" id="navbar_dashboard">
 				<a class="nav-link" href="#" id="collection_link">Dashboard</a>
 			</li>
-			<li class="nav-item dropdown" id="navbar_options" style="display: none;">
+			<li class="nav-item dropdown hidden" id="navbar_options">
 				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				Options
 				</a>
 				<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-					<div id="navbar_members" style="display: none;">
+					<div id="navbar_members" class="hidden">
 						<a class="dropdown-item" href="#" id="members_link">Members</a>
 						<div class="dropdown-divider" id="members_divider"></div>
 					</div>
-					<a class="dropdown-item" href="#" id="edit_button">Edit</a>
-					<a class="dropdown-item text-danger" href="#" id="delete_button">Delete</a>
+					<div id="navbar_member_options" class="hidden">
+						<a id="invite_button" class="dropdown-item" href="#" data-toggle="modal" data-target="#invite_modal">Invite</a>
+						<a id="manage_members_button" class="dropdown-item" href="#">Manage Members</a>
+						<a class="dropdown-item text-danger" 
+						   href="#" 
+						   title="Remove yourself from this collection."
+						   data-toggle="modal"
+						   data-target="#leave_modal">Leave</a>
+					</div>
+					<div id="navbar_edit_options">
+						<a class="dropdown-item" href="#" id="edit_button">Edit</a>
+						<a class="dropdown-item text-danger" href="#" id="delete_button">Delete</a>
+					</div>
 				</div>
 			</li>
 		</ul>
@@ -36,10 +47,10 @@
 			<li class="nav-item" id="navbar_logout">
 				<a class="btn btn-sm btn-outline-secondary" onclick="$.get('/user/logout'); window.location.href = '/';">Logout</a>
 			</li>
-			<li class="nav-item" id="navbar_register" style="display: none;">
+			<li class="nav-item hidden" id="navbar_register">
 				<a href="/register.html" class="nav-link">Register</a>
 			</li>
-			<li class="nav-item" id="navbar_login" style="display: none;">
+			<li class="nav-item hidden" id="navbar_login">
 				<a href="/signin.html" class="nav-link text-primary">Login</a>
 			</li>
 		</ul>

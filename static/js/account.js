@@ -6,7 +6,7 @@ let send_verification_email = false;
 let save_edit = false;
 
 // Show navbar options
-$("#navbar_options").show();
+$("#navbar_options").removeClass("hidden");
 
 // Enable tooltips:
 $("#help").tooltip();
