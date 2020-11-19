@@ -286,7 +286,7 @@ func CollectionInvitationsHandler(w http.ResponseWriter, r *http.Request) {
 			// Check if invitations is expired or retracted
 			if sent.Before(time.Now().AddDate(0, 0, -7)) || retracted {
 				// Delete existing expired invitation from database
-				if _, err = db.Exec("DELETE FROM invitations WHERE inviter_id = $1 AND invitee_email = $2, collection_id = $3", session.Values["user_id"], invite.InviteeEmail, collectionID); err != nil {
+				if _, err = db.Exec("DELETE FROM invitations WHERE inviter_id = $1 AND invitee_email = $2 AND collection_id = $3", session.Values["user_id"], invite.InviteeEmail, collectionID); err != nil {
 					log.Printf("Invitations POST - Unable to delete expired and/or retracted invite from database: %v\n", err)
 					SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 					return
