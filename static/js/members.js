@@ -19,6 +19,9 @@ $("#navbar_options").removeClass("hidden");
 $("#navbar_member_options").removeClass("hidden");
 $("#navbar_edit_options").addClass("hidden");
 
+// Enable tooltips
+
+
 function refresh_invitations() {
 	$("#invitations_list").empty();
 	$("#invitations_list").append("<li>Loading pending invitations, please wait...</li>");
@@ -149,7 +152,24 @@ function refresh_members() {
 			// Add user to appropriate manager user modal list
 			item = $("<button type='button'>").addClass("list-group-item list-group-item-action").text(member.name);
 			if (member.self) {
-				item.attr("disabled", true).attr("title", "You cannot remove your own administrator status!");
+				item.attr("disabled", true).attr("style", "pointer-events: none;")
+				let span = $("<span>")
+				.attr("title", "You cannot remove your own administrator status!")
+				.attr("data-toggle", "tooltip");
+
+				console.log(span);
+
+				span.append(item);
+				span.tooltip({
+					trigger: "click"
+				});
+				span.on("shown.bs.tooltip", function(e) {
+					setTimeout(function () {
+						$(e.target).tooltip('hide');
+					  }, 2000);
+				})
+				$("#administrators_list").append(span);
+				return; // Continue to the next iteration of the loop
 			}
 			
 			// Store user_id with this element
