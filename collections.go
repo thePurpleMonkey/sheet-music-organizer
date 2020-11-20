@@ -233,6 +233,13 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Remove invitations from collection
+		if _, err = tx.Exec("DELETE FROM invitations WHERE collection_id = $1", collection.CollectionID); err != nil {
+			log.Printf("Collection DELETE - Unable to delete invitations: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
 		// Delete collection
 		if _, err = tx.Exec("DELETE FROM collections WHERE collection_id = $1", collection.CollectionID); err != nil {
 			log.Printf("Collection DELETE - Unable to delete collection from database: %v\n", err)
