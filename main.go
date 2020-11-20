@@ -42,7 +42,7 @@ func makeRouter() *mux.Router {
 	r.HandleFunc("/collections", RequireAuthentication(CollectionsHandler)).Methods("GET", "POST")
 	r.HandleFunc("/collections/{collection_id}", VerifyCollectionID(RequireAuthentication(CollectionHandler))).Methods("GET", "PUT", "DELETE")
 	r.HandleFunc("/collections/{collection_id}/members", VerifyCollectionID(RequireAuthentication(MembersHandler))).Methods("GET")
-	r.HandleFunc("/collections/{collection_id}/members/{user_id}", VerifyCollectionID(RequireAuthentication(MemberHandler))).Methods("DELETE")
+	r.HandleFunc("/collections/{collection_id}/members/{user_id}", VerifyCollectionID(RequireAuthentication(MemberHandler))).Methods("PUT", "DELETE")
 	r.HandleFunc("/collections/{collection_id}/invitations", VerifyCollectionID(RequireAuthentication(CollectionInvitationsHandler))).Methods("GET", "POST")
 	r.HandleFunc("/collections/{collection_id}/invitations/{invitation_id}", VerifyCollectionID(RequireAuthentication(CollectionInvitationsHandler))).Methods("DELETE")
 

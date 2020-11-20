@@ -234,7 +234,7 @@ func SongHandler(w http.ResponseWriter, r *http.Request) {
 
 		var rowsAffected int64
 		if rowsAffected, err = result.RowsAffected(); err != nil {
-			log.Printf("Song DELETE - Unable to get rows affected. Assuming everything is fine?")
+			log.Printf("Song DELETE - Unable to get rows affected. Assuming everything is fine? Error: %v\n", err)
 		} else if rowsAffected == 0 {
 			log.Printf("Song DELETE - No rows were deleted from the database for song id %d\n", song.SongID)
 			SendError(w, `{"error": "No song was found with that ID"}`, http.StatusNotFound)

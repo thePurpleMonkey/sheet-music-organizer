@@ -15,15 +15,17 @@
       }
       
       .admin-icon {
-        height: 1em;
         margin-right: .5em;
 	    }
 
       .user_img {
-        height: 1em;
         float: right;
         top: 4px;
         position: relative;
+      }
+
+      img {
+        height: 1em;
       }
 
       .list-group-item {
@@ -156,6 +158,47 @@
           </div>
           <div class="modal-body">
             <p>Please wait while you are removed from this collection...</p>
+          </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Manage members modal -->
+      <div class="modal fade" id="manage_modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Manage members</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <h3>Current Administrators</h3>
+              <p>Selected administrators will have their admin privileges removed.</p>
+              <div id="administrators_list" class="list-group"></div>
+              <hr>
+              <h3>Regular Users</h3>
+              <p>Selected users will be promoted to administrator.</p>
+              <div id="users_list" class="list-group"></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" id="save_admins_button">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manage wait modal -->
+      <div class="modal fade in" tabindex="-1" role="dialog" id="manage_wait">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Saving...</h5>
+          </div>
+          <div class="modal-body">
+            <p>Please wait while your changes are saved...</p>
           </div>
           </div>
         </div>

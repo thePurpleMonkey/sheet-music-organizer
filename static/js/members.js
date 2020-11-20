@@ -6,6 +6,7 @@ let collection_id = getUrlParameter("collection_id");
 let send_invite = false;
 let leave = false;
 let current_user_id;
+let members = [];
 
 let datetime_format = new Intl.DateTimeFormat([], {
 	dateStyle: "short",
@@ -85,6 +86,9 @@ function retract_invite(e) {
 
 function refresh_members() {
 	$("#members_list").empty();
+	$("#administrators_list").empty();
+	$("#users_list").empty();
+
 	$("#members_list").append("<li>Loading members, please wait...</li>");
 	$.get(`/collections/${collection_id}/members`)
 	.done(function(data) {
@@ -93,6 +97,7 @@ function refresh_members() {
 		$("#members_list").empty();
 
 		current_user_id = data.user_id;
+		members = data.members;
 		let admin = data.admin;
 
 		if (admin) {
@@ -119,6 +124,7 @@ function refresh_members() {
 			item.append(member.name);
 
 			if (current_user_id === member.user_id) {
+				member.self = true;
 				item.append(
 					$("<img>")
 					.attr("src", "/img/user.svg")
@@ -135,9 +141,54 @@ function refresh_members() {
 
 				remove_member_button.click(remove_member);
 				item.append(remove_member_button);
+				$("#administrators_list").append(item);
 			}
 
 			$("#members_list").append(item);
+
+			// Add user to appropriate manager user modal list
+			item = $("<button type='button'>").addClass("list-group-item list-group-item-action").text(member.name);
+			if (member.self) {
+				item.attr("disabled", true).attr("title", "You cannot remove your own administrator status!");
+			}
+			
+			// Store user_id with this element
+			item.data("user_id", member.user_id);
+			item.data("name", member.name);
+
+			if (member.admin) {
+				item.data("admin", false);
+				item.prepend(
+					$("<img>")
+					.attr("src", "/img/user-x.svg")
+					.attr("alt", "Remove admin icon")
+					.attr("title", "This member will lose their admin privileges")
+					.addClass("admin-icon hidden")
+				);
+				item.click(function() {
+					if (!$(this).attr("disabled")) {
+						$(this).toggleClass("list-group-item-warning selected");
+						$(this).find("img").toggleClass("hidden");
+					}
+				});
+				$("#administrators_list").append(item);
+			} else {
+				item.data("admin", true);
+				item.prepend(
+					$("<img>")
+					.attr("src", "/img/user-plus.svg")
+					.attr("alt", "Add admin icon")
+					.attr("title", "This member will be promoted to admin")
+					.addClass("admin-icon hidden")
+				);
+				item.click(function() {
+					if (!$(this).attr("disabled")) {
+						$(this).toggleClass("list-group-item-success selected");
+						$(this).find("img").toggleClass("hidden");
+					}
+				});
+				$("#users_list").append(item);
+			}
 		});
 	})
 	.fail(function(data) {
@@ -191,7 +242,7 @@ $(function() {
 	refresh_invitations();
 });
 
-// Send invite clicked
+// #region Invite
 $("#send_invite_button").click(function() {
 	send_invite = true;
 	$("#invite_modal").modal("hide");
@@ -233,6 +284,7 @@ $('#invite_wait').on('shown.bs.modal', function (e) {
         send_invite = false;
     });
 });
+// #endregion
 
 // #region Leave
 $("#leave_modal_button").click(function() {
@@ -262,5 +314,55 @@ $('#leave_wait').on('shown.bs.modal', function (e) {
 	.always(function() {
 		$("#leave_wait").modal("hide");
 	});
+});
+// #endregion
+
+// #region Manage
+$("#save_admins_button").click(function() {
+	if ($(".selected").length > 0) {
+		leave = true;
+	}
+	$("#manage_modal").modal("hide");
+});
+$('#manage_modal').on('hidden.bs.modal', function (e) {
+    if (leave) {
+        $("#manage_wait").modal("show");
+    }
+});
+$('#manage_wait').on('shown.bs.modal', function (e) {
+	// Get all modified users
+	let members = $(".selected");
+
+	let requests = [];
+
+	members.each(function() {
+		let member = $(this);
+		let name = member.data("name");
+
+		let payload = {
+			admin: member.data("admin")
+		}
+		console.log(`Member ${member.data("user_id")}:`)
+		console.log(payload)
+		// Make AJAX request
+		requests.push(
+			$.ajax(`/collections/${collection_id}/members/${member.data("user_id")}`, {
+				method: "PUT",
+				data: JSON.stringify(payload),
+			})
+			.done(function() {
+				add_alert("Saved changes", `Successfully saved changes for "${name}".`, "success");
+			})
+			.fail(function(data) {
+				alert_ajax_failure(`Unable to save changes for "${name}".`, data);
+			})
+		);
+	});
+
+	$.when(requests).always(function() {
+		refresh_members();
+		$("#manage_wait").modal("hide");
+		leave = false;
+	})
 });
 // #endregion
