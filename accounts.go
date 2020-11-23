@@ -98,7 +98,115 @@ func AccountHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	} else if r.Method == "DELETE" {
+		// Start db transaction
+		tx, err := db.Begin()
+		if err != nil {
+			log.Printf("Collection DELETE - Unable to start database transaction: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
 
+		// Get a list of all user's collections
+		rows, err := tx.Query("SELECT collection_id FROM collection_members NATURAL JOIN collections WHERE user_id = $1", session.Values["user_id"])
+		if err != nil {
+			log.Printf("Account DELETE - Unable to retrieve collections from database: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		// Retrieve rows from database
+		collections := make([]int64, 0)
+		for rows.Next() {
+			var collectionID int64
+			if err := rows.Scan(&collectionID); err != nil {
+				log.Printf("Unable to retrieve row from database result: %v\n", err)
+			}
+			collections = append(collections, collectionID)
+		}
+
+		// Check for errors from iterating over rows.
+		if err := rows.Err(); err != nil {
+			log.Printf("Error retrieving collections from database result: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		// Iterate through each collection
+		for _, collectionID := range collections {
+			// Check if user is the sole admin for this collection
+			var remainingAdmins int64
+			if err = tx.QueryRow("SELECT COUNT(*) FROM collection_members WHERE collection_id = $1 AND admin = true AND user_id != $2", collectionID, session.Values["user_id"]).Scan(&remainingAdmins); err != nil {
+				log.Printf("Account DELETE - Unable to get the remaining admins from database: %v\n", err)
+				SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+				return
+			}
+
+			if remainingAdmins == 0 {
+				// Delete the collection
+				if err = deleteCollection(collectionID, tx); err != nil {
+					log.Printf("Account DELETE - Unable to delete collection %d for user %d.\n", collectionID, session.Values["user_id"])
+					SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+					return
+				}
+			} else {
+				// Leave the collection
+				if _, err = tx.Exec("DELETE FROM collection_members WHERE user_id = $1 AND collection_id = $2", session.Values["user_id"], collectionID); err != nil {
+					log.Printf("Account DELETE - User %d unable to leave collection %d: %v\n", session.Values["user_id"], collectionID, err)
+					SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+					return
+				}
+			}
+
+			log.Printf("Account DELETE - Deleted collection %d for user %d\n", collectionID, session.Values["user_id"])
+		}
+
+		// Delete pending invitations
+		if _, err = tx.Exec("DELETE FROM invitations WHERE inviter_id = $1", session.Values["user_id"]); err != nil {
+			log.Printf("Account DELETE - Unable to delete pending invitations for user %d.\n", session.Values["user_id"])
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		// Delete any password reset records
+		if _, err = tx.Exec("DELETE FROM password_reset WHERE user_id = $1", session.Values["user_id"]); err != nil {
+			log.Printf("Account DELETE - Unable to delete password reset record for user %d.\n", session.Values["user_id"])
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		// Delete any verification email records
+		if _, err = tx.Exec("DELETE FROM verification_emails WHERE user_id = $1", session.Values["user_id"]); err != nil {
+			log.Printf("Account DELETE - Unable to delete verification email record for user %d.\n", session.Values["user_id"])
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		// Finally, delete the user record
+		if _, err = tx.Exec("DELETE FROM users WHERE user_id = $1", session.Values["user_id"]); err != nil {
+			log.Printf("Account DELETE - Unable to delete user record for user %d.\n", session.Values["user_id"])
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		// Save changes
+		if err := tx.Commit(); err != nil {
+			log.Printf("Account DELETE - Unable to commit database transaction: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		// Revoke user's authentication
+		session.Values["authenticated"] = false
+		if err = session.Save(r, w); err != nil {
+			log.Printf("Account DELETE - Unable to save session state: %v\n", err)
+			SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		log.Printf("Account DELETE - Deleted user %d\n", session.Values["user_id"])
+		w.WriteHeader(http.StatusOK)
+		return
 	}
 }
 

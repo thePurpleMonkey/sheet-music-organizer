@@ -191,6 +191,7 @@ func MemberHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
+			// Verify user is not the sole admin for this collection
 			var remainingAdmins int64
 			if err = db.QueryRow("SELECT COUNT(*) FROM collection_members WHERE collection_id = $1 AND admin = true AND user_id != $2", collectionID, sourceUserID).Scan(&remainingAdmins); err != nil {
 				log.Printf("Collection Member DELETE - Unable to get the remaining admins from database: %v\n", err)

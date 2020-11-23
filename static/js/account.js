@@ -1,9 +1,10 @@
 "use strict";
 
-import { add_alert, alert_ajax_failure, getUrlParameter } from "./utilities.js";
+import { add_alert, alert_ajax_failure, getUrlParameter, add_session_alert } from "./utilities.js";
 
 let send_verification_email = false;
 let save_edit = false;
+let delete_account = false;
 
 // Show navbar options
 $("#navbar_options").removeClass("hidden");
@@ -74,7 +75,7 @@ $("#verify_wait").on("shown.bs.modal", function() {
 	})
 });
 
-// Edit Account
+// #region Edit
 $("#edit_button").click(function() {
 	$("#edit_modal").modal("show");
 });
@@ -110,3 +111,47 @@ $("#edit_wait").on("shown.bs.modal", function() {
 		$("#edit_wait").modal("hide");
 	});
 });
+// #endregion
+
+// #region Delete
+$("#delete_button").click(function() {
+	$("#delete_account_modal").modal("show");
+});
+$("#delete_account").click(function() {
+	delete_account = true;
+	$("#delete_account_modal").modal("hide");
+});
+$("#delete_account_modal").on("hidden.bs.modal", function() {
+	if (delete_account) {
+		$("#delete_account_wait").modal("show");
+		delete_account = false;
+	}
+});
+$("#delete_account_wait").on("shown.bs.modal", function() {
+	$.ajax("/user/account", {
+		method: "DELETE"
+	})
+	.done(function(data) {
+		console.log("Delete account response:");
+		console.log(data);
+		add_alert("Account deleted.", "Your account has been successfully deleted.", "success");
+		add_session_alert("Account deleted.", "Your account has been successfully deleted.", "success");
+		window.location.href = "/";
+	})
+	.fail(function(data) {
+		alert_ajax_failure("Unable to delete account.", data);
+	})
+	.always(function() {
+		$("#delete_account_wait").modal("hide");
+	});
+});
+
+$("#delete_confirm").change(function() {
+	let confirmed = this.checked;
+	if (confirmed) {
+		$("#delete_account").removeAttr("disabled");
+	} else {
+		$("#delete_account").attr("disabled", true);
+	}
+});
+// #endregion

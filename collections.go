@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -212,43 +213,14 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Remove songs from collection
-		if _, err = tx.Exec("DELETE FROM songs WHERE collection_id = $1", collection.CollectionID); err != nil {
-			log.Printf("Collection DELETE - Unable to delete songs from collection: %v\n", err)
-			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
-			return
-		}
-
-		// Remove tags from collection
-		if _, err = tx.Exec("DELETE FROM tags WHERE collection_id = $1", collection.CollectionID); err != nil {
-			log.Printf("Collection DELETE - Unable to delete tags from collection: %v\n", err)
-			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
-			return
-		}
-
-		// Remove users from collection
-		if _, err = tx.Exec("DELETE FROM collection_members WHERE collection_id = $1", collection.CollectionID); err != nil {
-			log.Printf("Collection DELETE - Unable to delete collection members: %v\n", err)
-			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
-			return
-		}
-
-		// Remove invitations from collection
-		if _, err = tx.Exec("DELETE FROM invitations WHERE collection_id = $1", collection.CollectionID); err != nil {
-			log.Printf("Collection DELETE - Unable to delete invitations: %v\n", err)
-			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
-			return
-		}
-
-		// Delete collection
-		if _, err = tx.Exec("DELETE FROM collections WHERE collection_id = $1", collection.CollectionID); err != nil {
-			log.Printf("Collection DELETE - Unable to delete collection from database: %v\n", err)
+		if err = deleteCollection(collection.CollectionID, tx); err != nil {
+			log.Printf("Collection DELETE - Unable to delete collection %d for user %d: %v\n", collection.CollectionID, session.Values["user_id"], err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
 		// Save changes
-		if err = tx.Commit(); err != nil {
+		if err := tx.Commit(); err != nil {
 			log.Printf("Collection DELETE - Unable to commit database transaction: %v\n", err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
@@ -257,4 +229,44 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
+}
+
+func deleteCollection(collectionID int64, tx *sql.Tx) error {
+	// Remove tags from songs
+	if _, err := tx.Exec("DELETE FROM tagged_songs WHERE song_id IN (SELECT song_id FROM songs WHERE collection_id = $1)", collectionID); err != nil {
+		log.Printf("deleteCollection - Unable to delete songs from collection: %v\n", err)
+		return err
+	}
+
+	// Remove songs from collection
+	if _, err := tx.Exec("DELETE FROM songs WHERE collection_id = $1", collectionID); err != nil {
+		log.Printf("deleteCollection - Unable to delete songs from collection: %v\n", err)
+		return err
+	}
+
+	// Remove tags from collection
+	if _, err := tx.Exec("DELETE FROM tags WHERE collection_id = $1", collectionID); err != nil {
+		log.Printf("deleteCollection - Unable to delete tags from collection: %v\n", err)
+		return err
+	}
+
+	// Remove users from collection
+	if _, err := tx.Exec("DELETE FROM collection_members WHERE collection_id = $1", collectionID); err != nil {
+		log.Printf("deleteCollection - Unable to delete collection members: %v\n", err)
+		return err
+	}
+
+	// Remove invitations from collection
+	if _, err := tx.Exec("DELETE FROM invitations WHERE collection_id = $1", collectionID); err != nil {
+		log.Printf("deleteCollection - Unable to delete invitations: %v\n", err)
+		return err
+	}
+
+	// Delete collection
+	if _, err := tx.Exec("DELETE FROM collections WHERE collection_id = $1", collectionID); err != nil {
+		log.Printf("deleteCollection - Unable to delete collection from database: %v\n", err)
+		return err
+	}
+
+	return nil
 }

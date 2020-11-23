@@ -122,7 +122,7 @@
 			</div>
 		</div>
 		
-    <!-- Edit tag modal -->
+    <!-- Edit account modal -->
     <div class="modal fade" id="edit_modal" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -152,7 +152,7 @@
       </div>
     </div>
 
-    <!-- Edit tag wait modal -->
+    <!-- Edit account wait modal -->
     <div class="modal fade in" tabindex="-1" role="dialog" id="edit_wait" data-backdrop="static" data-keyboard="false">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -161,6 +161,49 @@
         </div>
         <div class="modal-body">
           <p>Please wait while we save your changes to your account...</p>
+        </div>
+        </div>
+      </div>
+		</div>
+    
+    <!-- Delete account modal -->
+    <div class="modal fade" id="delete_account_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Delete account confirmation</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>
+							Are you sure you want to delete your account?
+							Collections where you are the sole admin will be deleted with all their songs, tags, and other content.
+							You will be removed from collections where there are other admins in the collection.
+							</ul>
+            </p>
+						<p>This CANNOT be undone!</p>
+						<input type="checkbox" id="delete_confirm">
+						<label for="delete_confirm">I understand the consequences. Please delete my account.</label>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger" id="delete_account" disabled>Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+		
+    <!-- Delete account wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="delete_account_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Deleting account...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Please wait while your account is deleted...</p>
         </div>
         </div>
       </div>
