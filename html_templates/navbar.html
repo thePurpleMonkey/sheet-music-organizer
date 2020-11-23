@@ -45,7 +45,7 @@
 				<a href="/account.html" class="btn btn-sm btn-outline-secondary">Account</a>
 			</li>
 			<li class="nav-item" id="navbar_logout">
-				<a class="btn btn-sm btn-outline-secondary" onclick="$.get('/user/logout'); window.location.href = '/';">Logout</a>
+				<a class="btn btn-sm btn-outline-secondary" id="navbar_logout">Logout</a>
 			</li>
 			<li class="nav-item hidden" id="navbar_register">
 				<a href="/register.html" class="nav-link">Register</a>
@@ -56,3 +56,11 @@
 		</ul>
 	</div>
 </nav>
+<script>
+	$("#navbar_logout").click(function() { 
+		$.get('/user/logout')
+		.done(function() {
+			window.location.href = '/'; 
+		});
+	});
+</script>
