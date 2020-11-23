@@ -12,7 +12,14 @@ $("#login").click(function() {
 	$("#wait").modal();
 });
 $('#wait').on('shown.bs.modal', function (e) {
-	$.post("/user/login", JSON.stringify({email: $("#email").val(), password: $("#password").val()}))
+	let payload = {
+		email: $("#email").val(),
+		password: $("#password").val(),
+		remember: $("#remember_me").prop("checked"),
+	};
+	console.log("Payload:");
+	console.log(payload);
+	$.post("/user/login", JSON.stringify(payload))
 		.done(function( data ) {
 			let redirect = new URL(window.location.href).searchParams.get("redirect");
 			if (redirect === null) {

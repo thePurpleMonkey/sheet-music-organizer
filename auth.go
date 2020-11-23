@@ -26,6 +26,7 @@ type User struct {
 	Name       string `json:"name"`
 	Verified   bool   `json:"verified"`
 	Restricted bool   `json:"restricted"`
+	RememberMe bool   `json:"remember"`
 }
 
 // PasswordResetRequest is a data structure to model incoming parameters of a password reset POST request
@@ -101,6 +102,12 @@ func login(w http.ResponseWriter, r *http.Request) {
 	session.Values["ids"] = IDs
 	session.Values["verified"] = verified
 	session.Values["restricted"] = restricted
+
+	if user.RememberMe {
+		session.Options.MaxAge = 86400 * 30 // 30 days
+	} else {
+		session.Options.MaxAge = 0 // Expire at end of session
+	}
 	if err := session.Save(r, w); err != nil {
 		log.Printf("Login - Unable to save session state: %v\n", err)
 		SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)

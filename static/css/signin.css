@@ -42,6 +42,10 @@ body {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
+.form-check {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 
 #alerts > .alert {
 	width: fit-content;
