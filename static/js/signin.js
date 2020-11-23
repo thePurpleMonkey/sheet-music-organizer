@@ -49,3 +49,10 @@ $('#password').keypress(function (e) {
 		return false;
 	}
 });
+
+$('#remember_me').keypress(function (e) {
+	if (e.which === 13) {
+		$('#login').click();
+		return false;
+	}
+});
