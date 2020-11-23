@@ -137,7 +137,10 @@ $('#edit_tag_wait').on('shown.bs.modal', function (e) {
     });
 });
 
-// Delete tag
+// #region Delete tag
+$("#delete_button").click(function() {
+    $("#delete_tag_modal").modal("show");
+});
 $("#delete_tag").click(function() {
     delete_tag = true;
     $("#delete_tag_modal").modal("hide");
@@ -165,9 +168,4 @@ $('#delete_tag_wait').on('shown.bs.modal', function (e) {
         delete_tag = false;
     });
 });
-
-// Logout button
-$("#logout").click(function() {
-    $.get("/user/logout");
-    window.location.href = "/"
-});
+// #endregion
