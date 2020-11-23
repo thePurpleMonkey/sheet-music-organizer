@@ -66,7 +66,7 @@ $("#join_wait").on("shown.bs.modal", function() {
 	.done(function(data) {
 		console.log("Accept invitation response:")
 		console.log(data);
-		if (add_session_alert("You have been added to the collection!", "You should be redirected to the collection momentarily.", "success")) {
+		if (add_session_alert("You have been added to the collection!", "You can now contribute to this collection.", "success")) {
 			window.location.href = `/collection.html?collection_id=${collection_id}`
 		}
 	})
