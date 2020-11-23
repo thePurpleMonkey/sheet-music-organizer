@@ -84,6 +84,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	go updateLoginTime(time.Now(), userID)
+
 	// Get the collections this user is authorized to access
 	IDs, err := getAuthorizedCollectionIDs(userID)
 	if err != nil {
@@ -325,6 +327,9 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Update last login time
+	go updateLoginTime(time.Now(), userID)
+
 	// Set user as authenticated
 	var session *sessions.Session
 	if session, err = store.Get(r, "session"); err != nil {
@@ -443,4 +448,10 @@ func checkAdmin(userID, collectionID int64) (bool, error) {
 	}
 
 	return admin, nil
+}
+
+func updateLoginTime(loginTime time.Time, userID int64) {
+	if _, err := db.Exec("UPDATE users SET last_login = $1 WHERE user_id = $2", loginTime, userID); err != nil {
+		log.Printf("updateLoginTime - Unable to update user %d last login time: %v\n", userID, err)
+	}
 }
