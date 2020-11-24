@@ -20,8 +20,9 @@ let tag = {
 };
 
 // Show options in navbar
-$("#navbar_options").show();
-$("#navbar_dashboard").show();
+$("#navbar_options").removeClass("hidden");
+$("#navbar_dashboard").removeClass("hidden");
+$("#search_form").removeClass("hidden");
 
 function refresh_tag() {
     $.get(`/collections/${tag.collection_id}/tags/${tag.tag_id}`)

@@ -41,6 +41,17 @@
 			</li>
 		</ul>
 		<ul class="navbar-nav ml-auto">
+			<form class="form-inline hidden" id="search_form" action="/search.html">
+				<div class="input-group input-group-sm">
+					<input type="hidden" id="form_collection_id" name="collection_id" value="">
+					<input class="form-control form-control-sm" type="search" placeholder="Search" aria-label="Search" name="query" id="search_box">
+					<div class="input-group-append">
+						<button class="btn btn-primary" type="submit" id="search-button">
+							<img src="/img/search.svg" id="search_icon" style="height: 1.25em; margin-top: -3px; filter: invert(100%);">
+						</button>
+					</div>
+				</div>
+			</form>
 			<li class="nav-item" id="navbar_account">
 				<a href="/account.html" class="btn btn-sm btn-outline-secondary">Account</a>
 			</li>
@@ -56,11 +67,15 @@
 		</ul>
 	</div>
 </nav>
-<script>
+<script type="module">
+	import { getUrlParameter } from "/js/utilities.js";
+
 	$("#navbar_logout").click(function() { 
 		$.get('/user/logout')
 		.done(function() {
 			window.location.href = '/'; 
 		});
 	});
+
+	$("#form_collection_id").val(getUrlParameter("collection_id"))
 </script>

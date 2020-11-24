@@ -23,6 +23,7 @@ $("#members_link").attr("href", "/members.html?collection_id=" + collection.id);
 $("#navbar_options").show();
 $("#navbar_members").show();
 $("#leave_button").removeClass("hidden");
+$("#search_form").removeClass("hidden");
 
 // Get collection info when document becomes ready
 $(function() {

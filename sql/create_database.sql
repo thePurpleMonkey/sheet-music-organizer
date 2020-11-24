@@ -79,3 +79,28 @@ CREATE TABLE IF NOT EXISTS tagged_songs
 	tag_id INT REFERENCES tags(tag_id),
 	PRIMARY KEY (song_id, tag_id)
 );
+
+CREATE OR REPLACE FUNCTION search_collection(collection_id INT, query VARCHAR(255))
+RETURNS TABLE (song_id INT, song_name VARCHAR(127))
+LANGUAGE plpgsql
+AS $$
+DECLARE
+-- variable declaration
+BEGIN
+RETURN QUERY
+	SELECT s_search.song_id, s_search.song_name
+	FROM (SELECT s.song_id as song_id,
+			     s.name as song_name,
+			     setweight(to_tsvector(s.name), 'A') ||
+			     setweight(to_tsvector(s.artist), 'B') ||
+			     setweight(to_tsvector(s.location), 'B') ||
+			     setweight(to_tsvector(s.notes), 'B') ||
+			     setweight(to_tsvector(coalesce(string_agg(t.name, ' '), '')), 'C') AS document
+		FROM songs AS s
+		JOIN tagged_songs AS ts ON s.song_id = ts.song_id
+		JOIN tags AS t ON t.tag_id = ts.tag_id
+		WHERE s.collection_id = search_collection.collection_id
+		GROUP BY s.song_id) s_search
+	WHERE s_search.document @@ to_tsquery(query)
+    ORDER BY ts_rank(s_search.document, to_tsquery(query)) DESC;
+END; $$

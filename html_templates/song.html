@@ -13,6 +13,11 @@
       #tag_container .deletable:hover {
         text-decoration: line-through;
       }
+
+      #edit_buttons button {
+        margin-left: 5px;
+        width: 5em;
+      }
     </style>
   </head>
 
@@ -77,10 +82,11 @@
             <a data-toggle="modal" href="#add_tag_modal" class="btn btn-success" id="add_tag_button" style="display: none;">Add tag</a>
           </div>
         </div>
-        <hr>
-        <div class="float-right" id="edit_buttons" style="display: none;">
-          <button type="button" class="btn btn-secondary" id="edit_cancel">Cancel</button>
-          <button type="button" class="btn btn-primary" id="song_save">Save</button>
+        <div class="clearfix">
+          <div class="float-right row" id="edit_buttons" style="display: none;">
+            <button type="button" class="btn btn-secondary" id="edit_cancel">Cancel</button>
+            <button type="button" class="btn btn-primary" id="song_save">Save</button>
+          </div>
         </div>
       </form>
       

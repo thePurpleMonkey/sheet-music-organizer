@@ -3,16 +3,9 @@
   <head>
     {{template "header.html"}}
 
-    <title>Tag - Sheet Music Organizer</title>
+    <title>Search Results - Sheet Music Organizer</title>
 
     <style>
-      #description {
-        font-style: italic;
-      }
-
-      #description_header {
-        font-weight: bold;
-      }
     </style>
   </head>
 
@@ -20,25 +13,16 @@
     {{template "navbar.html"}}
 
     <div class="container">
-      <!-- Header -->
       <div class="row">
-        <h1 id="page_header">Loading...</h1>
+        <h1>Search results</h1>
       </div>
-      <div class="row" id="description_row">
-        <span id="description_header">Description:</span>
-        &nbsp;
-        <span id="description"></span>
-      </div>
-
       <hr>
 
       <div id="alerts"></div>
 
       <div class="row">
-        <p style="font-weight: bold;">Songs with this tag:</p>
-      </div>
-      <div class="row">
-        <div class="list-group" id="songs_container">
+        <div class="list-group" id="search_results">
+          <a href="#" class="list-group-item list-group-item-action disabled">Loading...</a>
         </div>
       </div>
 
@@ -133,6 +117,6 @@
     <!-- #endregion -->
 
     <!-- Script -->
-    <script src="/js/tag.js" type="module"></script>
+    <script src="/js/search.js" type="module"></script>
   </body>
 </html>

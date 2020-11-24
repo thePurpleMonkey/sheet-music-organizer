@@ -9,8 +9,9 @@ let delete_tag = undefined;
 let edit_mode = false;
 
 // Show options in navbar
-$("#navbar_options").show();
-$("#navbar_dashboard").show();
+$("#navbar_options").removeClass("hidden");
+$("#navbar_dashboard").removeClass("hidden");
+$("#search_form").removeClass("hidden");
 
 let song = {
     // Parse name and collection ID from URL parameter
