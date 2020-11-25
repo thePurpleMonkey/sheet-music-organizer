@@ -137,7 +137,7 @@ function refresh_song() {
 		song.location ? $("#song_location").text(song.location) : $("#song_location").html("&nbsp;");
         song.notes ? $("#song_notes").text(song.notes) : $("#song_notes").html("&nbsp;");
         $("#song_added_by").text(song.added_by);
-        song.last_performed ? $("#song_last_performed").val(song.last_performed.toISOString().substring(0, 10)) : $("#song_last_performed").html("&nbsp;");
+        song.last_performed ? $("#song_last_performed").text(song.last_performed.toISOString().substring(0, 10)) : $("#song_last_performed").html("&nbsp;");
     })
     .fail(function(data) {
         alert_ajax_failure("Unable to get song information!", data);
@@ -208,8 +208,16 @@ function set_editing_mode(is_editing) {
         $("#song_name_input").val(song.name);
         $("#song_artist_input").val(song.artist);
         $("#song_location_input").val(song.location);
-        $("#song_notes_input").text(song.notes);
-        $("#song_last_performed_input").val(song.last_performed);
+        $("#song_notes_input").val(song.notes);
+
+        console.log(song.last_performed);
+        console.log("UTC Date: " + song.last_performed.getUTCDate());
+        let year = song.last_performed.getUTCFullYear();
+        let month = String(song.last_performed.getUTCMonth() + 1).padStart(2, '0');
+        let day = String(song.last_performed.getUTCDate()).padStart(2, '0');
+        let date_string = year + "-" + month + "-" + day;
+        console.log("Last performed: " + date_string);
+        $("#song_last_performed_input").val(date_string);
 
         // Show edit buttons
         $("#edit_buttons").removeClass("hidden");
