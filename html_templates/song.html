@@ -18,6 +18,46 @@
         margin-left: 5px;
         width: 5em;
       }
+
+      .song_value  {
+        /* background-color: #eee;
+        border-radius: 5px; */
+        margin-bottom: 1em;
+        font-size: large;
+      }
+
+      h5 {
+        margin-top: .5rem;
+        margin-bottom: 0;
+        color: gray;
+        font-size: small;;
+      }
+
+      #tag_container {
+        margin-top: 4px;
+      }
+
+      #plus {
+        filter: invert(100%);
+        height: 1.4em;
+        float: left;
+        margin-left: -4px;
+        margin-top: 2px;
+      }
+
+      textarea {
+        resize: both;
+        width: 20em;
+        height: 5em;
+      }
+
+      input {
+        margin-bottom: 1em;
+      }
+
+      #song_notes {
+        white-space: pre-line;
+      }
     </style>
   </head>
 
@@ -32,63 +72,58 @@
       <div id="alerts"></div>
 
       <!-- Main view -->
-      <form>
-        <div class="form-group row">
-          <label for="song_name" class="col-sm-2 col-form-label">Name</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="song_name" disabled>
+      <div id="song_info_container">
+        <div>
+          <h5>Name</h5>
+          <div class="song_value" id="song_name"></div>
+          <input class="song_value hidden" id="song_name_input" type="text">
+        </div>
+        <div>
+          <h5>Artist</h5>
+          <div class="song_value" id="song_artist"></div>
+          <input class="song_value hidden" id="song_artist_input" type="text">
+        </div>
+        <div>
+          <h5>Location</h5>
+          <div class="song_value" id="song_location"></div>
+          <input class="song_value hidden" id="song_location_input" type="text">
+        </div>
+        <div>
+          <h5>Last performed</h5>
+          <div class="song_value" id="song_last_performed"></div>
+          <input class="song_value hidden" id="song_last_performed_input" type="date">
+        </div>
+        <div>
+          <h5>Date added</h5>
+          <div class="song_value" id="song_date_added"></div>
+        </div>
+        <div>
+          <h5>Added by</h5>
+          <div class="song_value" id="song_added_by"></div>
+        </div>
+        <div>
+          <h5>Notes</h5>
+          <div class="song_value" id="song_notes"></div>
+          <textarea class="song_value hidden" id="song_notes_input">
+            </textarea>
+        </div>
+        <div>
+          <h5>Tags</h5>
+          <div class="song_value" id="tag_container">
+            <a data-toggle="modal" href="#add_tag_modal" class="btn btn-success hidden" id="add_tag_button"><img src="/img/plus.svg" id="plus">Add tag</a>
           </div>
         </div>
-        <div class="form-group row">
-          <label for="song_artist" class="col-sm-2 col-form-label">Artist</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="song_artist" disabled>
-          </div>
+      </div>
+
+      <hr class="hidden" id="edit_divider">
+      <div class="clearfix">
+        <div class="float-right row hidden" id="edit_buttons">
+          <button type="button" class="btn btn-secondary" id="edit_cancel">Cancel</button>
+          <button type="button" class="btn btn-primary" id="song_save">Save</button>
         </div>
-        <div class="form-group row">
-          <label for="song_location" class="col-sm-2 col-form-label">Location</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="song_location" disabled>
-          </div>
-        </div>
-        <div class="form-group row">
-          <label for="song_last_performed" class="col-sm-2 col-form-label">Last performed</label>
-          <div class="col-sm-10">
-            <input type="date" class="form-control" id="song_last_performed" disabled>
-          </div>
-        </div>
-        <div class="form-group row">
-          <label for="song_notes" class="col-sm-2 col-form-label">Notes</label>
-          <div class="col-sm-10">
-            <input type="textarea" class="form-control" id="song_notes" disabled>
-          </div>
-        </div>
-        <div class="form-group row">
-          <label for="song_date_added" class="col-sm-2 col-form-label">Date added</label>
-          <div class="col-sm-10">
-            <input type="date" class="form-control" id="song_date_added" readonly>
-          </div>
-        </div>
-        <div class="form-group row">
-          <label for="song_added_by" class="col-sm-2 col-form-label">Added by</label>
-          <div class="col-sm-10">
-            <input type="text" class="form-control" id="song_added_by" disabled>
-          </div>
-        </div>
-        <div class="form-group row">
-          <label for="tags" class="col-sm-2 col-form-label">Tags</label>
-          <div class="col-sm-10 btn-toolbar" id="tag_container">
-            <!-- TODO: List tags here -->
-            <a data-toggle="modal" href="#add_tag_modal" class="btn btn-success" id="add_tag_button" style="display: none;">Add tag</a>
-          </div>
-        </div>
-        <div class="clearfix">
-          <div class="float-right row" id="edit_buttons" style="display: none;">
-            <button type="button" class="btn btn-secondary" id="edit_cancel">Cancel</button>
-            <button type="button" class="btn btn-primary" id="song_save">Save</button>
-          </div>
-        </div>
-      </form>
+
+      <!-- Clear the floated edit buttons for the footer -->
+      <div class="clearfix"></div>
       
       {{template "footer.html"}}
     </div>

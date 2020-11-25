@@ -110,12 +110,7 @@ function refresh_available_tags(song_tags) {
     });
 }
 
-// Get song info when document becomes ready
-$(function() {
-    // Replace link for collection
-    $("#collection_link").attr("href", "/collection.html?collection_id=" + song.collection_id);
-
-    // Handler for .ready() called.
+function refresh_song() {
     $.get(`/collections/${song.collection_id}/songs/${encodeURIComponent(song.song_id)}`)
     .done(function(data) {
 		console.log("Loading song result:");
@@ -134,21 +129,27 @@ $(function() {
         console.log("Song:");
         console.log(song);
 
+        // Set page labels
 		$("#page_header").text(song.name);
-		$("#song_name").val(song.name);
-		$("#song_artist").val(song.artist);
-		$("#song_date_added").val(song.date_added.toISOString().substring(0, 10));
-		$("#song_location").val(song.location);
-		$("#song_notes").val(song.notes);
-        $("#song_added_by").val(song.added_by);
-
-        if (song.last_performed) {
-            $("#song_last_performed").val(song.last_performed.toISOString().substring(0, 10));
-        }
+		$("#song_name").text(song.name);
+		song.artist ? $("#song_artist").text(song.artist) : $("#song_artist").html("&nbsp;");
+		$("#song_date_added").text(song.date_added.toISOString().substring(0, 10));
+		song.location ? $("#song_location").text(song.location) : $("#song_location").html("&nbsp;");
+        song.notes ? $("#song_notes").text(song.notes) : $("#song_notes").html("&nbsp;");
+        $("#song_added_by").text(song.added_by);
+        song.last_performed ? $("#song_last_performed").val(song.last_performed.toISOString().substring(0, 10)) : $("#song_last_performed").html("&nbsp;");
     })
     .fail(function(data) {
         alert_ajax_failure("Unable to get song information!", data);
     });
+}
+
+// Get song info when document becomes ready
+$(function() {
+    // Replace link for collection
+    $("#collection_link").attr("href", "/collection.html?collection_id=" + song.collection_id);
+
+    refresh_song();
 
     // Load tags for song
     refresh_tags();
@@ -202,21 +203,53 @@ $('#tag_wait').on('shown.bs.modal', function (e) {
 });
 
 function set_editing_mode(is_editing) {
-    edit_mode = is_editing;
-	$("#song_artist").prop("disabled", !is_editing);
-	$("#song_location").prop("disabled", !is_editing);
-	$("#song_last_performed").prop("disabled", !is_editing);
-    $("#song_notes").prop("disabled", !is_editing);
-    $("#song_name").prop("disabled", !is_editing);
-
     if (is_editing) {
-        $("#edit_buttons").show(500);
-        $("#add_tag_button").show(500);
+        // Update input values
+        $("#song_name_input").val(song.name);
+        $("#song_artist_input").val(song.artist);
+        $("#song_location_input").val(song.location);
+        $("#song_notes_input").text(song.notes);
+        $("#song_last_performed_input").val(song.last_performed);
+
+        // Show edit buttons
+        $("#edit_buttons").removeClass("hidden");
+        $("#add_tag_button").removeClass("hidden");
+        $("#edit_divider").removeClass("hidden");
+
+        // Show form inputs
+        $("#song_name_input").removeClass("hidden");
+        $("#song_artist_input").removeClass("hidden");
+        $("#song_last_performed_input").removeClass("hidden");
+        $("#song_location_input").removeClass("hidden");
+        $("#song_notes_input").removeClass("hidden");
+
+        // Hide labels
+        $("#song_name").addClass("hidden");
+        $("#song_artist").addClass("hidden");
+        $("#song_last_performed").addClass("hidden");
+        $("#song_location").addClass("hidden");
+        $("#song_notes").addClass("hidden");
     
         $("#tag_container").children().not($("#add_tag_button")).addClass("deletable");
     } else {
-        $("#edit_buttons").hide(500);
-        $("#add_tag_button").hide(500);
+        // Hide input buttons
+        $("#edit_buttons").addClass("hidden");
+        $("#add_tag_button").addClass("hidden");
+        $("#edit_divider").addClass("hidden");
+
+        // Hide form inputs
+        $("#song_name_input").addClass("hidden");
+        $("#song_artist_input").addClass("hidden");
+        $("#song_last_performed_input").addClass("hidden");
+        $("#song_location_input").addClass("hidden");
+        $("#song_notes_input").addClass("hidden");
+
+        // Show labels
+        $("#song_name").removeClass("hidden");
+        $("#song_artist").removeClass("hidden");
+        $("#song_last_performed").removeClass("hidden");
+        $("#song_location").removeClass("hidden");
+        $("#song_notes").removeClass("hidden");
 
         $("#tag_container").children().not($("#add_tag_button")).removeClass("deletable");
     }
@@ -232,13 +265,11 @@ $("#song_save").click(function() {
 });
 $('#edit_song_wait').on('shown.bs.modal', function (e) {
     let payload = JSON.stringify({
-        name: $("#song_name").val(),
-		artist: $("#song_artist").val(),
-		//date_added: $("#song_date_added").val(),
-		location: $("#song_location").val(),
-		last_performed: $("#song_last_performed").val(),
-		notes: $("#song_notes").val(),
-		added_by: $("#song_added_by").val()
+        name: $("#song_name_input").val(),
+		artist: $("#song_artist_input").val(),
+		location: $("#song_location_input").val(),
+		last_performed: $("#song_last_performed_input").val(),
+		notes: $("#song_notes_input").val()
 	});
     $.ajax({
         method: "PUT",
@@ -265,6 +296,7 @@ $('#edit_song_wait').on('shown.bs.modal', function (e) {
     .always(function() {
         $("#edit_song_wait").modal("hide");
         set_editing_mode(false);
+        refresh_song();
     });
 });
 
