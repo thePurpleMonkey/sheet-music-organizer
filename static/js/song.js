@@ -210,14 +210,16 @@ function set_editing_mode(is_editing) {
         $("#song_location_input").val(song.location);
         $("#song_notes_input").val(song.notes);
 
-        console.log(song.last_performed);
-        console.log("UTC Date: " + song.last_performed.getUTCDate());
-        let year = song.last_performed.getUTCFullYear();
-        let month = String(song.last_performed.getUTCMonth() + 1).padStart(2, '0');
-        let day = String(song.last_performed.getUTCDate()).padStart(2, '0');
-        let date_string = year + "-" + month + "-" + day;
-        console.log("Last performed: " + date_string);
-        $("#song_last_performed_input").val(date_string);
+        // Get correct date for the last performed input widget
+        if (song.last_performed) {
+            console.log("Last performed UTC Date: " + song.last_performed.getUTCDate());
+            let year = song.last_performed.getUTCFullYear();
+            let month = String(song.last_performed.getUTCMonth() + 1).padStart(2, '0');
+            let day = String(song.last_performed.getUTCDate()).padStart(2, '0');
+            let date_string = year + "-" + month + "-" + day;
+            console.log("Last performed: " + date_string);
+            $("#song_last_performed_input").val(date_string);
+        }
 
         // Show edit buttons
         $("#edit_buttons").removeClass("hidden");
