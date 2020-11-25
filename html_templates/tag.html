@@ -21,26 +21,16 @@
 
     <div class="container">
       <!-- Header -->
-      <div class="row">
-        <h1 id="page_header">Loading...</h1>
-      </div>
-      <div class="row" id="description_row">
-        <span id="description_header">Description:</span>
-        &nbsp;
-        <span id="description"></span>
-      </div>
+      <h1 id="page_header">Loading...</h1>
+      <span id="description_header">Description:</span>
+      <span id="description"></span>
 
       <hr>
 
       <div id="alerts"></div>
 
-      <div class="row">
-        <p style="font-weight: bold;">Songs with this tag:</p>
-      </div>
-      <div class="row">
-        <div class="list-group" id="songs_container">
-        </div>
-      </div>
+      <p style="font-weight: bold;">Songs with this tag:</p>
+      <div class="list-group" id="songs_container"></div>
 
       {{template "footer.html"}}
     </div>
