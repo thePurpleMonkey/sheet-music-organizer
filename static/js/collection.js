@@ -149,27 +149,6 @@ $('#song_wait').on('shown.bs.modal', function (e) {
     });
 });
 
-// Make tag POST API call after tag wait dialog is shown
-$('#tag_wait').on('shown.bs.modal', function (e) {
-    let payload = JSON.stringify({
-        name: $("#tag_name").val(),
-        description: $("#tag_description").val(),
-    });
-    console.log("Adding tag: " + payload);
-    $.post(`/collections/${collection.id}/tags`, payload)
-    .done(function(data) {
-        console.log(data);
-        add_alert("Tag created!", "The tag was successfully created. You may now start tagging your songs with it.", "success");
-    })
-    .fail(function(data) {
-        alert_ajax_failure("Unable to add tag!", data);
-    })
-    .always(function() {
-        $("#tag_wait").modal("hide");
-        reloadTags();
-    });
-});
-
 // Attach to navbar buttons
 $("#edit_button").click(function() {
     $("#edit_collection_modal").modal("show");
@@ -247,13 +226,37 @@ $('#add_song_modal').on('hidden.bs.modal', function (e) {
     }
 });
 
-// Show tag wait dialog after add tag modal is closed
-$('#add_tag_modal').on('hidden.bs.modal', function (e) {
-    if (add_tag) {
-        $("#tag_wait").modal("show");
-    }
-});
+// #region Add Tag
 $("#add_tag_modal_button").click(function() {
     add_tag = true
     $("#add_tag_modal").modal("hide");
 });
+$('#add_tag_modal').on('hidden.bs.modal', function (e) {
+    if (add_tag) {
+        add_tag = false;
+        $("#tag_wait").modal("show");
+    }
+});
+// Make tag POST API call after tag wait dialog is shown
+$('#tag_wait').on('shown.bs.modal', function (e) {
+    let payload = JSON.stringify({
+        name: $("#tag_name").val(),
+        description: $("#tag_description").val(),
+    });
+    console.log("Adding tag: " + payload);
+    $.post(`/collections/${collection.id}/tags`, payload)
+    .done(function(data) {
+        console.log(data);
+        add_alert("Tag created!", "The tag was successfully created. You may now start tagging your songs with it.", "success");
+    })
+    .fail(function(data) {
+        alert_ajax_failure("Unable to add tag!", data);
+    })
+    .always(function() {
+        $("#tag_wait").modal("hide");
+        reloadTags();
+        $("#add_tag").val("");
+        $("#tag_description").val("");
+    });
+});
+// #endregion

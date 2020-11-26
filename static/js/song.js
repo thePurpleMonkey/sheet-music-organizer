@@ -100,14 +100,26 @@ function refresh_available_tags(song_tags) {
         
         // Add tags to option list
         $("#tag_list").empty();
-        $("#tag_list").append($("<option>").attr("value", "").attr("selected", "selected").attr("disabled", true).attr("hidden", true).text("Please select a tag"));
+        // $("#tag_list").append($("<option>").attr("value", "").attr("selected", "selected").attr("disabled", true).attr("hidden", true).text("Please select a tag"));
         available_tags.forEach(item => {
-            $("#tag_list").append($("<option>").attr("value", item.tag_id).text(item.name))
+            // $("#tag_list").append($("<option>").attr("value", item.tag_id).text(item.name))
+            let button = $("<button type='button' class='btn btn-light'>")
+                            .text(item.name)
+                            .data("tag_id", item.tag_id)
+                            .click(tag_button_clicked);
+            $("#tag_list").append(button);
         });
     })
     .fail(function(data) {
         alert_ajax_failure("Unable to get your tags!", data);
     });
+}
+
+function tag_button_clicked(e) {
+    let tag_id = $(this).data("tag_id");
+    
+    $(this).toggleClass("btn-light");
+    $(this).toggleClass("btn-success");
 }
 
 function refresh_song() {
@@ -156,18 +168,7 @@ $(function() {
 });
 
 // Cancel edits
-$("#edit_cancel").click(function() {
-    edit_mode = false;
-    $("#page_header").text(song.name);
-    $("#song_name").val(song.name);
-    $("#song_artist").val(song.artist);
-    $("#song_date_added").val(song.date_added.toISOString().substring(0, 10));
-    $("#song_location").val(song.location);
-    if (song.last_performed)
-        $("#song_last_performed").val(song.last_performed.toISOString().substring(0, 10));
-    $("#song_notes").val(song.notes);
-    $("#song_added_by").val(song.added_by);
-    
+$("#edit_cancel").click(function() {    
     // Disable inputs
     set_editing_mode(false);
 });
@@ -184,25 +185,47 @@ $('#add_tag_modal').on('hidden.bs.modal', function (e) {
         $("#tag_wait").modal("show");
     }
 });
-$('#tag_wait').on('shown.bs.modal', function (e) {
-    let payload = JSON.stringify({song_id: parseInt(song.song_id, 10), tag_id: parseInt($("#tag_list").val(), 10)});
-    $.post(`/collections/${song.collection_id}/songs/${song.song_id}/tags`, payload)
-    .done(function(data) {
-        console.log(data);
-        add_alert("Tag added!", "The tag was successfully added to this song.", "success");
-        refresh_tags();
-        set_editing_mode(false);
-    })
-    .fail(function(data) {
-        alert_ajax_failure("Unable to add tag.", data);
-    })
-    .always(function() {
-        add_tag = false;
-        $("#tag_wait").modal("hide");
-    });
+$('#tag_wait').on('shown.bs.modal', function () {
+    let requests = [];
+
+     $("#tag_list > .btn-success").each(function() {
+        let tag_id = $(this).data("tag_id");
+        console.log("Tag ID:");
+        console.log(tag_id);
+        let payload = JSON.stringify({song_id: parseInt(song.song_id, 10), tag_id: parseInt(tag_id)});
+
+        requests.push(
+            $.post(`/collections/${song.collection_id}/songs/${song.song_id}/tags`, payload)
+            .done(function(data) {
+                console.log("Response for adding tag " + tag_id + " to song " + song.song_id);
+                console.log(data);
+            })
+            .fail(function(data) {
+                alert_ajax_failure("Unable to add tag.", data);
+            })
+        );
+
+        $.when(requests)
+        .done(function() {
+            console.log("When done function");
+            add_alert("Tags added!", "The tags were successfully added to this song.", "success");
+        })
+        .always(function() {
+            console.log("When always function");
+            set_editing_mode(false);
+            refresh_song();
+            refresh_tags();
+            refresh_available_tags();
+            $("#tag_wait").modal("hide");
+            add_tag = false;
+        })
+     })
+
 });
 
 function set_editing_mode(is_editing) {
+    edit_mode = is_editing;
+
     if (is_editing) {
         // Update input values
         $("#song_name_input").val(song.name);
@@ -264,7 +287,6 @@ function set_editing_mode(is_editing) {
         $("#tag_container").children().not($("#add_tag_button")).removeClass("deletable");
     }
 }
-
 
 // Saves changes to song
 $("#edit_button").click(function() {
