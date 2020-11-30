@@ -94,8 +94,6 @@ export function substitute_URLs(text) {
 		return '<a href="' + prefix + url + '" target="_blank" rel="noreferrer noopener">' + url + '</a>' + suffix;
 	});
 
-	console.log("Result: " + result);
-	console.log("URLs: " + urls);
 	return {html: result, URLs: urls};
   };
 
