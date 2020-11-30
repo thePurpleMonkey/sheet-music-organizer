@@ -40,7 +40,7 @@ function refresh_tag() {
         if (tag.description) {
             $("#description").text(tag.description);
         } else {
-            $("#description_row").hide();
+            $("#description_row").addClass("hidden");
         }
     })
     .fail(function(data) {

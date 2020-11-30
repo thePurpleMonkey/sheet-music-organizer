@@ -47,7 +47,7 @@ $(function() {
         if (collection.description) {
             $("#description").text(collection.description);
         } else {
-            $("#description_header").hide();
+            $("#description_row").hide();
         }
     })
     .fail(function(data) {
