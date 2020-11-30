@@ -74,3 +74,33 @@ export function get_session_alert() {
 		return null;
 	}
 };
+
+export function substitute_URLs(text) {
+	let urls = [];
+	// var urlRegex = /(https?:\/\/[^\s]+)/g;
+	let urlRegex = /(https?:\/\/)?[\w\-~]+(\.[\w\-~]+)+(\/[\w\-~@:%]*)*(#[\w\-]*)?(\?[^\s]*)?/gi;
+	let result = text.replace(urlRegex, function(match) {
+		let url = match;
+		let suffix = "";
+		let prefix = "";
+		if (match.endsWith('?')) {
+			url = url.substring(0, url.length - 1);
+			suffix = '?';
+		}
+		if (!match.startsWith("http")) {
+			prefix = "//";
+		}
+		urls.push(url);
+		return '<a href="' + prefix + url + '" target="_blank" rel="noreferrer noopener">' + url + '</a>' + suffix;
+	});
+
+	console.log("Result: " + result);
+	console.log("URLs: " + urls);
+	return {html: result, URLs: urls};
+  };
+
+export function get_youtube_video_id(url){
+    var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    var match = url.match(regExp);
+    return (match&&match[7].length==11)? match[7] : false;
+}

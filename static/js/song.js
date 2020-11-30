@@ -1,6 +1,6 @@
 "use strict";
 
-import { add_alert, alert_ajax_failure } from "./utilities.js";
+import { add_alert, alert_ajax_failure, get_youtube_video_id, substitute_URLs } from "./utilities.js";
 
 let url = new URL(window.location.href);
 let delete_song = false;
@@ -150,6 +150,32 @@ function refresh_song() {
         song.notes ? $("#song_notes").text(song.notes) : $("#song_notes").html("&nbsp;");
         $("#song_added_by").text(song.added_by);
         song.last_performed ? $("#song_last_performed").text(song.last_performed.toISOString().substring(0, 10)) : $("#song_last_performed").html("&nbsp;");
+
+        // Detect URL in song location
+        let result = substitute_URLs(song.location);
+        console.log("Result from location link substitution:");
+        console.log(result);
+        if (result.html) {
+            $("#song_location").html(result.html);
+        }
+
+        // Detect URLs in song notes
+        result = substitute_URLs(song.notes);
+        console.log("Result from link substitution:");
+        console.log(result);
+        $("#song_notes").html(result.html);
+
+        // Check for links to YouTube videos and show thumbnails
+        $("#thumbnail_container").empty();
+        result.URLs.forEach(url => {
+            let video_id = get_youtube_video_id(url);
+            if (video_id) {
+                let img = $("<img>").attr("src", `https://img.youtube.com/vi/${video_id}/default.jpg`);
+                let a = $(`<a href="${url}" target="_blank" rel="noreferrer noopener">`);
+                a.append(img);
+                $("#thumbnail_container").append(a);
+            }
+        });
     })
     .fail(function(data) {
         alert_ajax_failure("Unable to get song information!", data);

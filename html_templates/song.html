@@ -24,8 +24,6 @@
       }
 
       .song_value  {
-        /* background-color: #eee;
-        border-radius: 5px; */
         margin-bottom: 1em;
         font-size: large;
       }
@@ -50,9 +48,10 @@
       }
 
       textarea {
-        resize: both;
-        width: 20em;
-        height: 5em;
+        resize: vertical;
+        /* width: 20em; */
+        width: 100%;
+        height: 10em;
       }
 
       input {
@@ -61,6 +60,12 @@
 
       #song_notes {
         white-space: pre-line;
+      }
+      
+      #thumbnail_container img {
+        margin-right: .5em;
+        margin-bottom: .5em;
+        display: inline-block;
       }
     </style>
   </head>
@@ -108,8 +113,8 @@
         <div>
           <h5>Notes</h5>
           <div class="song_value" id="song_notes"></div>
-          <textarea class="song_value hidden" id="song_notes_input">
-            </textarea>
+          <textarea class="song_value hidden" id="song_notes_input"></textarea>
+          <div id="thumbnail_container"></div>
         </div>
         <div>
           <h5>Tags</h5>
