@@ -261,7 +261,14 @@ $('#tag_wait').on('shown.bs.modal', function (e) {
     console.log("Adding tag: " + payload);
     $.post(`/collections/${collection.id}/tags`, payload)
     .done(function(data) {
+        console.log("Add tag response:");
         console.log(data);
+
+        // Clear add tag fields
+        $("#tag_name").val("");
+        $("#tag_description").val("");
+
+        // Display success message
         add_alert("Tag created!", "The tag was successfully created. You may now start tagging your songs with it.", "success");
     })
     .fail(function(data) {
