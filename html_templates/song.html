@@ -69,6 +69,17 @@
         margin-bottom: .5em;
         display: inline-block;
       }
+
+      #location_help {
+        margin-top: -3px;
+        filter: invert(50%);
+        transition: .5s;
+      }
+
+      #location_help:hover {
+        filter: invert(25%);
+        transition: .5s;
+      }
     </style>
   </head>
 
@@ -98,6 +109,7 @@
           <h5>Location</h5>
           <div class="song_value" id="song_location"></div>
           <input class="song_value hidden" id="song_location_input" type="text">
+          <img src="/img/help-circle.svg"  class="hidden" id="location_help" alt="location help" title="Use this field to link to the digital copy of the sheet music, or provide a short description of where the physical copy of the sheet music is.">
         </div>
         <div>
           <h5>Last performed</h5>

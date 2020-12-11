@@ -13,6 +13,9 @@ $("#navbar_options").removeClass("hidden");
 $("#navbar_dashboard").removeClass("hidden");
 $("#search_form").removeClass("hidden");
 
+// Enable tooltips
+$("#location_help").tooltip();
+
 let song = {
     // Parse name and collection ID from URL parameter
     song_id: url.searchParams.get("song_id"),
@@ -279,6 +282,7 @@ function set_editing_mode(is_editing) {
         $("#song_artist_input").removeClass("hidden");
         $("#song_last_performed_input").removeClass("hidden");
         $("#song_location_input").removeClass("hidden");
+        $("#location_help").removeClass("hidden");
         $("#song_notes_input").removeClass("hidden");
 
         // Hide labels
@@ -300,6 +304,7 @@ function set_editing_mode(is_editing) {
         $("#song_artist_input").addClass("hidden");
         $("#song_last_performed_input").addClass("hidden");
         $("#song_location_input").addClass("hidden");
+        $("#location_help").addClass("hidden");
         $("#song_notes_input").addClass("hidden");
 
         // Show labels
