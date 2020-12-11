@@ -149,7 +149,17 @@ $('#song_wait').on('shown.bs.modal', function (e) {
 
     $.post(`/collections/${collection.id}/songs`, payload)
     .done(function(data) {
+        console.log("Add song response:");
         console.log(data);
+
+        // Clear form fields
+        $("#name").val("");
+        $("#artist").val("");
+        $("#location").val("");
+        $("#last_performed").val("");
+        $("#notes").val("");
+
+        // Display success message
         add_alert("Song added!", "The song was successfully added to your collection.", "success");
     })
     .fail(function(data) {

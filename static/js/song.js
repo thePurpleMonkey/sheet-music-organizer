@@ -356,7 +356,7 @@ $('#edit_song_wait').on('shown.bs.modal', function (e) {
     });
 });
 
-// Delete song
+// #region Delete song
 $("#delete_button").click(function() {
     $("#delete_song_modal").modal("show");
 });
@@ -387,8 +387,9 @@ $('#delete_song_wait').on('shown.bs.modal', function (e) {
         delete_song = false;
     });
 });
+// #endregion
 
-// Remove tag
+// #region Remove tag
 $('#delete_tag_wait_modal').on('shown.bs.modal', function (e) {
     let payload = JSON.stringify({
         tag_id: delete_tag
@@ -416,3 +417,4 @@ $('#delete_tag_wait_modal').on('shown.bs.modal', function (e) {
         refresh_tags();
     });
 });
+// #endregion
