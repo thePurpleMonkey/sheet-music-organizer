@@ -59,6 +59,9 @@ function refresh_tags() {
                     .addClass("btn btn-secondary")
                     .text(tag.name)
                     .click(tag_button_handler);
+                if (edit_mode) {
+                    tag_button.addClass("deletable");
+                }
                 $("#tag_container").children().last().before(tag_button);
             });
         }
@@ -197,12 +200,11 @@ $("#edit_cancel").click(function() {
     set_editing_mode(false);
 });
 
-// Add tag button clicked
+// #region Add tags
 $("#add_tag").click(function() {
     add_tag = true
     $("#add_tag_modal").modal("hide");
 });
-
 // Show tag wait dialog after add tag modal is closed
 $('#add_tag_modal').on('hidden.bs.modal', function (e) {
     if (add_tag) {
@@ -228,24 +230,23 @@ $('#tag_wait').on('shown.bs.modal', function () {
                 alert_ajax_failure("Unable to add tag.", data);
             })
         );
+     });
 
-        $.when(requests)
-        .done(function() {
-            console.log("When done function");
-            add_alert("Tags added!", "The tags were successfully added to this song.", "success");
-        })
-        .always(function() {
-            console.log("When always function");
-            set_editing_mode(false);
-            refresh_song();
-            refresh_tags();
-            refresh_available_tags();
-            $("#tag_wait").modal("hide");
-            add_tag = false;
-        })
+     $.when(requests)
+     .done(function() {
+         console.log("When done function");
+         add_alert("Tags added!", "The tags were successfully added to this song.", "success");
      })
-
+     .always(function() {
+         set_editing_mode(false);
+         refresh_song();
+         refresh_tags();
+         refresh_available_tags();
+         $("#tag_wait").modal("hide");
+         add_tag = false;
+     });
 });
+// #endregion
 
 function set_editing_mode(is_editing) {
     edit_mode = is_editing;
