@@ -100,9 +100,7 @@ function refresh_available_tags(song_tags) {
         
         // Add tags to option list
         $("#tag_list").empty();
-        // $("#tag_list").append($("<option>").attr("value", "").attr("selected", "selected").attr("disabled", true).attr("hidden", true).text("Please select a tag"));
         available_tags.forEach(item => {
-            // $("#tag_list").append($("<option>").attr("value", item.tag_id).text(item.name))
             let button = $("<button type='button' class='btn btn-light'>")
                             .text(item.name)
                             .data("tag_id", item.tag_id)
@@ -163,7 +161,9 @@ function refresh_song() {
         result = substitute_URLs(song.notes);
         console.log("Result from link substitution:");
         console.log(result);
-        $("#song_notes").html(result.html);
+        if (result.html) {
+            $("#song_notes").html(result.html);
+        }
 
         // Check for links to YouTube videos and show thumbnails
         $("#thumbnail_container").empty();
@@ -188,8 +188,6 @@ $(function() {
     $("#collection_link").attr("href", "/collection.html?collection_id=" + song.collection_id);
 
     refresh_song();
-
-    // Load tags for song
     refresh_tags();
 });
 
@@ -417,10 +415,4 @@ $('#delete_tag_wait_modal').on('shown.bs.modal', function (e) {
         delete_tag = undefined;
         refresh_tags();
     });
-});
-
-// Logout button
-$("#logout").click(function() {
-    $.get("/user/logout");
-    window.location.href = "/"
 });

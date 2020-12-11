@@ -6,6 +6,10 @@
     <title>Search Results - Sheet Music Organizer</title>
 
     <style>
+      #advanced_filter_text {
+        font-size: small;
+        color: gray;
+      }
     </style>
   </head>
 
@@ -13,17 +17,14 @@
     {{template "navbar.html"}}
 
     <div class="container">
-      <div class="row">
-        <h1>Search results</h1>
-      </div>
+      <h1>Search results</h1>
+      <div id="advanced_filter_text">Looking for more ways to find the songs you want? Try <a href="#" id="advanced_search_link">Advanced Search</a></div>
       <hr>
 
       <div id="alerts"></div>
 
-      <div class="row">
-        <div class="list-group" id="search_results">
-          <a href="#" class="list-group-item list-group-item-action disabled">Loading...</a>
-        </div>
+      <div class="list-group" id="search_results">
+        <a href="#" class="list-group-item list-group-item-action disabled">Loading...</a>
       </div>
 
       {{template "footer.html"}}

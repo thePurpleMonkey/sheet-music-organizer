@@ -18,6 +18,9 @@ const SERVER_ERROR_MESSAGE string = `{"error": "There was an error attempting to
 // URL_ERROR_MESSAGE is a generic error message for parsing URLs
 const URL_ERROR_MESSAGE string = `{"error": "Unable to parse URL."}`
 
+// REQUEST_ERROR_MESSAGE is a generic error message for parsing request bodies
+const REQUEST_ERROR_MESSAGE string = `{"error": "Unable to parse request."}`
+
 // PERMISSION_ERROR_MESSAGE is a generic error message for attempting an action that you do not have permission for.
 const PERMISSION_ERROR_MESSAGE string = `{"error": "That action is not permitted."}`
 

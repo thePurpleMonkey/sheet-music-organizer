@@ -16,8 +16,10 @@ let collection = {
     description: undefined
 };
 
-// Replace link for members
+// Replace links
 $("#members_link").attr("href", "/members.html?collection_id=" + collection.id);
+$("#filter_link").attr("href", "/advanced_search.html?collection_id=" + collection.id);
+$("#advanced_search_dropdown_link").attr("href", "/advanced_search.html?collection_id=" + collection.id);
 
 // Show options in navbar
 $("#navbar_options").show();
@@ -120,6 +122,17 @@ function reloadTags() {
     });
 };
 
+// #region Add song
+$("#add_song_modal_button").click(function() {
+    add_song = true;
+    $("#add_song_modal").modal("hide");
+});
+$('#add_song_modal').on('hidden.bs.modal', function (e) {
+    if (add_song) {
+        $("#song_wait").modal("show");
+    }
+});
+
 // Make Song POST API call after wait dialog is shown
 $('#song_wait').on('shown.bs.modal', function (e) {
     let payload = JSON.stringify({
@@ -148,6 +161,7 @@ $('#song_wait').on('shown.bs.modal', function (e) {
         reloadSongs();
     });
 });
+//#endregion
 
 // Attach to navbar buttons
 $("#edit_button").click(function() {
@@ -157,7 +171,7 @@ $("#delete_button").click(function() {
     $("#delete_collection_modal").modal("show");
 });
 
-// Saves changes to collection
+// #region Save changes to collection
 $("#save_collection").click(function() {
     edit_collection = true;
     $("#edit_collection_modal").modal("hide");
@@ -187,8 +201,9 @@ $('#edit_collection_wait').on('shown.bs.modal', function (e) {
         $("#edit_collection_wait").modal("hide");
     });
 });
+//#endregion
 
-// Delete collection
+// #region Delete collection
 $("#delete_collection").click(function() {
     delete_collection = true;
     $("#delete_collection_modal").modal("hide");
@@ -214,17 +229,7 @@ $('#delete_collection_wait').on('shown.bs.modal', function (e) {
         alert_ajax_failure("Unable to delete collection!", data);
     });
 });
-
-// Show wait dialog after add song modal is closed
-$("#add_song_modal_button").click(function() {
-    add_song = true;
-    $("#add_song_modal").modal("hide");
-});
-$('#add_song_modal').on('hidden.bs.modal', function (e) {
-    if (add_song) {
-        $("#song_wait").modal("show");
-    }
-});
+//#endregion
 
 // #region Add Tag
 $("#add_tag_modal_button").click(function() {

@@ -45,7 +45,7 @@ func makeRouter() *mux.Router {
 	r.HandleFunc("/collections/{collection_id}/members/{user_id}", VerifyCollectionID(RequireAuthentication(MemberHandler))).Methods("PUT", "DELETE")
 	r.HandleFunc("/collections/{collection_id}/invitations", VerifyCollectionID(RequireAuthentication(CollectionInvitationsHandler))).Methods("GET", "POST")
 	r.HandleFunc("/collections/{collection_id}/invitations/{invitation_id}", VerifyCollectionID(RequireAuthentication(CollectionInvitationsHandler))).Methods("DELETE")
-	r.HandleFunc("/collections/{collection_id}/search", VerifyCollectionID(RequireAuthentication(SearchHandler))).Methods("GET")
+	r.HandleFunc("/collections/{collection_id}/search", VerifyCollectionID(RequireAuthentication(SearchHandler))).Methods("GET", "POST")
 
 	// Songs
 	r.HandleFunc("/collections/{collection_id}/songs", VerifyCollectionID(RequireAuthentication(SongsHandler))).Methods("GET", "POST")

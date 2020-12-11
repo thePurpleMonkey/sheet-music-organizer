@@ -12,9 +12,19 @@ $("#search_box").val(query);
 
 $(function() {
     // Replace link for collection
-	$("#collection_link").attr("href", "/collection.html?collection_id=" + collection_id);
-	
-	let payload = { query: encodeURIComponent(query) }
+    $("#collection_link").attr("href", "/collection.html?collection_id=" + collection_id);
+
+    // Construct link for advanced search page
+    let search_link = new URL(window.location.origin);
+    search_link.pathname = "/advanced_search.html";
+    search_link.searchParams.set("collection_id", collection_id);
+    search_link.searchParams.set("query", query);
+    console.log("Advanced Search href: " + search_link);
+	$("#advanced_search_link").attr("href", search_link.href);
+    
+    console.log("Query: " + query);
+    // let payload = { query: encodeURIComponent(query) };
+    let payload = {query: query};
     $.get(`/collections/${collection_id}/search`, payload)
     .done(function(data) {
 		console.log("Search response:");

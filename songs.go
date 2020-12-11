@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -206,7 +207,8 @@ func SongHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			// If there is something wrong with the request body, return a 400 status
 			log.Printf("Song PUT - Unable to parse request body: %v\n", err)
-			log.Printf("Body: %v\n", r.Body)
+			body, _ := ioutil.ReadAll(r.Body)
+			log.Printf("Body: %s\n", body)
 			SendError(w, `{"error": "Unable to parse request."}`, http.StatusBadRequest)
 			return
 		}
