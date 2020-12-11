@@ -90,14 +90,14 @@ export function is_user_logged_in(default_value = false) {
 export function substitute_URLs(text) {
 	let urls = [];
 	// var urlRegex = /(https?:\/\/[^\s]+)/g;
-	let urlRegex = /(https?:\/\/)?[\w\-~]+(\.[\w\-~]+)+(\/[\w\-~@:%]*)*(#[\w\-]*)?(\?[^\s]*)?/gi;
+	let urlRegex = /(https?:\/\/)?[\w\-~]+(\.[\w\-~]+)+(\/[\w\-~@:%\!\.]*)*(#[\w\-]*)?(\?[^\s]*)?/gi;
 	let result = text.replace(urlRegex, function(match) {
 		let url = match;
 		let suffix = "";
 		let prefix = "";
-		if (match.endsWith('?')) {
-			url = url.substring(0, url.length - 1);
-			suffix = '?';
+		if (match.endsWith('?') || match.endsWith('!')) {
+			suffix = url.substr(url.length - 1, 1); // Get the last character of the url
+			url = url.substring(0, url.length - 1); // Trim the last character of the url
 		}
 		if (!match.startsWith("http")) {
 			prefix = "//";
