@@ -21,6 +21,15 @@ $('#wait').on('shown.bs.modal', function (e) {
 	console.log(payload);
 	$.post("/user/login", JSON.stringify(payload))
 		.done(function( data ) {
+			// Set the user to be logged in
+			try {
+				window.localStorage.setItem("logged_in", true);
+			} catch (err) {
+				console.log("Unable to set localStorage variable 'logged_in' to true.");
+				console.log(err);
+			}
+
+			// Redirect to next URL
 			let redirect = new URL(window.location.href).searchParams.get("redirect");
 			if (redirect === null) {
 				redirect = "/collections.html";

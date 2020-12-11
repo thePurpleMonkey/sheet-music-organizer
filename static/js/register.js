@@ -19,6 +19,15 @@ $("#wait").on('shown.bs.modal', function (e) {
 	}
 	$.post( "/user/register", JSON.stringify({ email: $("#email").val(), password: $("#password").val(), name: $("#name").val() }) )
 		.done(function( data ) {
+			// Set the user to be logged in
+			try {
+				window.localStorage.setItem("logged_in", true);
+			} catch (err) {
+				console.log("Unable to set localStorage variable 'logged_in' to true.");
+				console.log(err);
+			}
+
+			// Redirect to next URL
 			let redirect = new URL(window.location.href).searchParams.get("redirect");
 			if (redirect === null) {
 				redirect = "/collections.html";
