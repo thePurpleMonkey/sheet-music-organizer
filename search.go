@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -48,7 +49,14 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		log.Printf("Raw query: '%v'\n", rawQuery)
-		query := strings.Join(strings.Fields(rawQuery), " & ")
+		var reg *regexp.Regexp
+		if reg, err = regexp.Compile("[^a-zA-Z0-9 ']+"); err != nil {
+			log.Printf("Search GET - Unable to compile search RegEx: %v\n", err)
+			SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+		sanitizedQuery := reg.ReplaceAllString(rawQuery, "")
+		query := strings.Join(strings.Fields(sanitizedQuery), " & ")
 		log.Printf("Processed query: '%v'\n", query)
 
 		// Get URL parameter
@@ -123,8 +131,34 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		includeQuery := strings.Join(search.Include, " & ")
-		excludeQuery := strings.Join(search.Exclude, " & ")
+		var reg *regexp.Regexp
+		if reg, err = regexp.Compile("[^a-zA-Z0-9 ']+"); err != nil {
+			log.Printf("Search POST - Unable to compile search RegEx: %v\n", err)
+			SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		var includedKeywords, excludedKeywords []string
+		var sanitizedKeyword string
+
+		for _, keyword := range search.Include {
+			log.Println("Keyword: " + keyword)
+			sanitizedKeyword = reg.ReplaceAllString(keyword, "")
+			if len(sanitizedKeyword) > 0 {
+				includedKeywords = append(includedKeywords, sanitizedKeyword)
+			}
+			log.Println("Sanitized keyword: " + sanitizedKeyword)
+		}
+
+		for _, keyword := range search.Exclude {
+			sanitizedKeyword = reg.ReplaceAllString(keyword, "")
+			if len(sanitizedKeyword) > 0 {
+				excludedKeywords = append(excludedKeywords, sanitizedKeyword)
+			}
+		}
+
+		includeQuery := strings.Join(includedKeywords, " & ")
+		excludeQuery := strings.Join(excludedKeywords, " & ")
 
 		log.Printf("Collection ID: %v\n", search.CollectionID)
 		log.Printf("Tags: %v\n", search.Tags)
