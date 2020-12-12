@@ -142,12 +142,11 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 		var sanitizedKeyword string
 
 		for _, keyword := range search.Include {
-			log.Println("Keyword: " + keyword)
 			sanitizedKeyword = reg.ReplaceAllString(keyword, "")
 			if len(sanitizedKeyword) > 0 {
 				includedKeywords = append(includedKeywords, sanitizedKeyword)
 			}
-			log.Println("Sanitized keyword: " + sanitizedKeyword)
+			// log.Printf("Keyword: '%v' -> Sanitized keyword: '%v'\n", keyword, sanitizedKeyword)
 		}
 
 		for _, keyword := range search.Exclude {
@@ -160,14 +159,14 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 		includeQuery := strings.Join(includedKeywords, " & ")
 		excludeQuery := strings.Join(excludedKeywords, " & ")
 
-		log.Printf("Collection ID: %v\n", search.CollectionID)
-		log.Printf("Tags: %v\n", search.Tags)
-		log.Printf("Before: %v\n", search.Before)
-		log.Printf("After: %v\n", search.After)
-		log.Printf("Include: %v\n", search.Include)
-		log.Printf("Exclude: %v\n", search.Exclude)
-		log.Printf("Include Query: %v\n", includeQuery)
-		log.Printf("Exclude Query: %v\n", excludeQuery)
+		// log.Printf("Collection ID: %v\n", search.CollectionID)
+		// log.Printf("Tags: %v\n", search.Tags)
+		// log.Printf("Before: %v\n", search.Before)
+		// log.Printf("After: %v\n", search.After)
+		// log.Printf("Include: %v\n", search.Include)
+		// log.Printf("Exclude: %v\n", search.Exclude)
+		// log.Printf("Include Query: %v\n", includeQuery)
+		// log.Printf("Exclude Query: %v\n", excludeQuery)
 
 		// Call the database function
 		rows, err := db.Query("SELECT * FROM advanced_search_collection($1, $2, $3, $4, $5, $6)",
