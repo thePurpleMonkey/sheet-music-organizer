@@ -1,6 +1,6 @@
 "use strict";
 
-import { add_alert, getUrlParameter, alert_ajax_failure, get_session_alert } from "./utilities.js";
+import { add_alert, getUrlParameter, alert_ajax_failure, get_session_alert, dates } from "./utilities.js";
 
 let add_song = false;
 let add_tag = false;
@@ -13,8 +13,12 @@ let collection = {
 
     // These attributes get set after an AJAX call to server
     name: undefined,
-    description: undefined
+    description: undefined,
 };
+
+// Object for storing collection settings
+let settingsKey = `collection_${collection.id}`;
+let settings = undefined;
 
 // Replace links
 $("#members_link").attr("href", "/members.html?collection_id=" + collection.id);
@@ -26,9 +30,12 @@ $("#navbar_options").show();
 $("#navbar_members").show();
 $("#leave_button").removeClass("hidden");
 $("#search_form").removeClass("hidden");
+$("#navbar_settings").removeClass("hidden");
 
 // Get collection info when document becomes ready
 $(function() {
+    reloadSettings();
+
     // Handler for .ready() called.
     $.get(`/collections/${collection.id}`)
     .done(function(data) {
@@ -66,14 +73,34 @@ $(function() {
 	}
 });
 
+function name_compare(item1, item2) {
+    return item1.name.localeCompare(item2.name);
+}
+
+function added_compare(item1, item2) {
+    return dates.compare(item1.date_added, item2.date_added)
+}
+
 function reloadSongs() {
     $("#songs").empty();
     $("#songs").append('<a class="list-group-item">Loading songs, please wait...</a>');
-    $.get(`/collections/${collection.id}/songs`)
+    let payload = undefined;
+    if (settings.hidden_tags.length > 0) {
+        payload = { exclude_tags: JSON.stringify(settings.hidden_tags) };
+    }
+    $.get(`/collections/${collection.id}/songs`, payload)
     .done(function(data) {
         console.log("Get songs result:");
         console.log(data);
         $("#songs").empty();
+
+        if (settings.song_sort === "name") {
+            data.sort(name_compare);
+        } else if (settings.song_sort === "date_added") {
+            data.sort(added_compare);
+        } else {
+            console.log("Unknown song sorting function: " + settings.song_sort);
+        }
 
         data.forEach(song => {
             let a = $("<a>");
@@ -85,7 +112,7 @@ function reloadSongs() {
         });
     })
     .fail(function(data) {
-        if (data.status == 403) {
+        if (data.status === 403) {
             window.location.replace("/404.html");
         }
 
@@ -98,6 +125,8 @@ function reloadSongs() {
 
 function reloadTags() {
     $("#tags").empty();
+    $("#hide_tag_list").empty();
+
     $("#tags").append('<a class="list-group-item">Loading tags, please wait...</a>');
     $.get(`/collections/${collection.id}/tags`)
     .done(function(data) {
@@ -105,13 +134,40 @@ function reloadTags() {
         console.log(data);
         $("#tags").empty();
 
+        if (settings.tag_sort === "name") {
+            data.sort(name_compare);
+        } else if (settings.tag_sort === "date_added") {
+            // data.sort(added_compare);
+            data.sort((a, b) => a.tag_id - b.tag_id);
+        } else {
+            console.log("Unknown tag sorting function: " + settings.tag_sort);
+        }
+
         data.forEach(tag => {
-            let a = $("<a>");
-            a.addClass("list-group-item");
-            a.addClass("list-group-item-action");
-            a.attr("href", `/tag.html?tag_id=${encodeURIComponent(tag.tag_id)}&collection_id=${collection.id}`);
-            a.text(tag.name);
-            $("#tags").append(a);
+            // Do not add tag to dashboard if hidden
+            if (!settings.hidden_tags.includes(tag.tag_id)) {
+                let a = $("<a>");
+                a.addClass("list-group-item");
+                a.addClass("list-group-item-action");
+                a.attr("href", `/tag.html?tag_id=${encodeURIComponent(tag.tag_id)}&collection_id=${collection.id}`);
+                a.text(tag.name);
+                $("#tags").append(a);
+            }
+            
+            // Add tag to collection settings
+            let button = $("<button type='button' class='btn'>")
+                            .text(tag.name)
+                            .data("tag_id", tag.tag_id)
+                            .click(function() {
+                                $(this).toggleClass("btn-light");
+                                $(this).toggleClass("btn-dark");
+                            });
+            if (settings.hidden_tags.includes(tag.tag_id)) {
+                button.addClass("btn-dark");
+            } else {
+                button.addClass("btn-light");
+            }
+            $("#hide_tag_list").append(button);
         });
     })
     .fail(function(data) {
@@ -121,6 +177,79 @@ function reloadTags() {
         $("#loading").remove();
     });
 };
+
+function reloadSettings() {
+    // Get settings from local storage
+    console.log("Loading settings from key: " + settingsKey);
+
+    let settings_string = localStorage.getItem(settingsKey);
+    if (settings_string === null) {
+        console.log("No settings found. Initializing settings object");
+        settings = {
+            hidden_tags: [],
+            song_sort: "name",
+            tag_sort: "name",
+        };
+        saveSettings();
+    } else {
+        try {
+            console.log("Settings string: " + settings_string);
+            settings = JSON.parse(settings_string);
+        } catch (err) {
+            console.error("Unable to load settings!");
+            console.error(err);
+            add_alert("Unable to load settings", "There was a problem loading the settings for this collection. Please refresh the page and try again.", "warning");
+            return
+        }
+    }
+    
+    console.log("Settings:");
+    console.log(settings);
+
+    // Update song sort settings UI
+    if (settings.song_sort === "name") {
+        $("#song_sort_name").prop("checked", true);
+    } else if (settings.song_sort === "date_added") {
+        $("#song_sort_added").prop("checked", true);
+    } else {
+        console.warn("Unknown song sort name: " + settings.song_sort);
+    }
+
+    // Update tag sort settings UI
+    if (settings.tag_sort === "name") {
+        $("#tag_sort_name").prop("checked", true);
+    } else if (settings.tag_sort === "date_added") {
+        $("#tag_sort_added").prop("checked", true);
+    } else {
+        console.warn("Unknown tag sort name: " + settings.tag_sort);
+    }
+
+    // Update hidden tags settings UI
+    $("#hide_tag_list").children().each(function() {
+        let tag = $(this);
+        let tag_id = tag.data("tag_id");
+        tag.removeClass("btn-light btn-dark");
+        if (settings.hidden_tags.includes(tag_id)) {
+            tag.addClass("btn-dark");
+        } else {
+            tag.addClass("btn-light");
+        }
+    });
+}
+
+function saveSettings() {
+    let settings_string = JSON.stringify(settings);
+    try {
+        console.log("Saving settings to: " + settingsKey);
+        localStorage.setItem(settingsKey, settings_string);
+        console.log("Saved settings:");
+        console.log(settings);
+    } catch (err) {
+        console.error("Unable to save settings to local storage!");
+        console.error(err);
+        add_alert("Unable to save settings", "The settings for this collection were unable to be saved. Please refresh the page and try again.", "danger");
+    }
+}
 
 // #region Add song
 $("#add_song_modal_button").click(function() {
@@ -280,5 +409,28 @@ $('#tag_wait').on('shown.bs.modal', function (e) {
         $("#add_tag").val("");
         $("#tag_description").val("");
     });
+});
+// #endregion
+
+// #region Save Settings
+$("#settings_save_button").click(function() {
+    settings.hidden_tags = [];
+    $("#hide_tag_list .btn-dark").each(function() {
+        settings.hidden_tags.push($(this).data("tag_id"));
+    });
+
+    // Save song sort order
+    settings.song_sort = $('input[name=song_sort_order]:checked').val();
+    settings.tag_sort = $('input[name=tag_sort_order]:checked').val();
+    saveSettings();
+
+    reloadSongs();
+    reloadTags();
+
+    $("#settings_modal").modal("hide");
+});
+
+$("#settings_modal").on("hidden.bs.modal", function() {
+    reloadSettings();
 });
 // #endregion

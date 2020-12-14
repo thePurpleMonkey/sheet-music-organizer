@@ -120,8 +120,6 @@ function refresh_available_tags(song_tags) {
 }
 
 function tag_button_clicked(e) {
-    let tag_id = $(this).data("tag_id");
-    
     $(this).toggleClass("btn-light");
     $(this).toggleClass("btn-success");
 }

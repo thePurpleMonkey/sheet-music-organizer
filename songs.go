@@ -86,8 +86,29 @@ func SongsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "GET" {
+		// Get excluded tags list
+		var excludedTags []int64
+		var queryString string = r.URL.Query().Get("exclude_tags")
+		log.Printf("Songs GET - Query string: '%v'\n", queryString)
+		if len(queryString) > 0 {
+			if err := json.Unmarshal([]byte(queryString), &excludedTags); err != nil {
+				log.Printf("Songs GET - Unable to get list of excluded tags from query string: %v\n", err)
+				SendError(w, URL_ERROR_MESSAGE, http.StatusBadRequest)
+				return
+			}
+		}
+		log.Printf("Songs GET - Excluded tags: %v\n", excludedTags)
+
 		// Retrieve songs in collection
-		rows, err := db.Query("SELECT song_id, name FROM songs WHERE collection_id = $1", collectionID)
+		// rows, err := db.Query("SELECT song_id, name, date_added FROM songs WHERE collection_id = $1", collectionID)
+		rows, err := db.Query(`
+			SELECT s.song_id, s.name, s.date_added 
+			FROM songs AS s 
+			LEFT JOIN tagged_songs AS ts 
+				ON s.song_id = ts.song_id 
+			   AND ts.tag_id = ANY($2) 
+			WHERE s.collection_id = $1 
+			AND ts.tag_id IS NULL`, collectionID, pq.Array(excludedTags))
 		if err != nil {
 			log.Printf("Songs GET - Unable to get songs from database: %v\n", err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
@@ -99,7 +120,7 @@ func SongsHandler(w http.ResponseWriter, r *http.Request) {
 		songs := make([]Song, 0)
 		for rows.Next() {
 			var song Song
-			if err := rows.Scan(&song.SongID, &song.Name); err != nil {
+			if err := rows.Scan(&song.SongID, &song.Name, &song.DateAdded); err != nil {
 				log.Printf("Songs GET - Unable to get song from database result: %v\n", err)
 			}
 			songs = append(songs, song)

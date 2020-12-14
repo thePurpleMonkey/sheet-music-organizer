@@ -15,6 +15,7 @@
         font-style: italic;
       }
 
+      /* Filter icon */
 			#filter {
         margin-left: .2em;
 				height: .6em;
@@ -25,6 +26,33 @@
 			#filter:hover {
 				filter: invert(30%);
 			}
+
+      /* Tag list in collection settings */
+      #hide_tag_list button {
+        margin-right: .25em;
+        margin-bottom: .25em;
+      }
+
+      #hide_tag_list {
+        margin-bottom: 1em;
+      }
+
+      /* Side-by-side sorting */
+      #sort_container {
+        display: flex;
+      }
+
+      #name_sort, #tag_sort {
+        width: 50%;
+      }
+
+      .form-check label {
+        width: 100%
+      }
+
+      #alert_info_icon {
+        height: 1em;
+      }
     </style>
   </head>
 
@@ -167,20 +195,6 @@
       </div>
     </div>
 
-    <!-- Edit collection wait modal -->
-    <div class="modal fade in" tabindex="-1" role="dialog" id="edit_collection_wait">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Saving changes...</h5>
-        </div>
-        <div class="modal-body">
-          <p>Please wait while we save your changes to this collection...</p>
-        </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Delete collection wait modal -->
     <div class="modal fade in" tabindex="-1" role="dialog" id="delete_collection_wait">
       <div class="modal-dialog" role="document">
@@ -224,6 +238,20 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit collection wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="edit_collection_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Saving changes...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Please wait while we save your changes to this collection...</p>
+        </div>
+        </div>
+      </div>
+    </div>
     
     <!-- Delete collection modal -->
     <div class="modal fade" id="delete_collection_modal" tabindex="-1" role="dialog">
@@ -246,6 +274,82 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
             <button type="button" class="btn btn-danger" id="delete_collection">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Settings modal -->
+    <div class="modal fade" id="settings_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Collection Settings</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info">
+              <img src="img/alert-circle-info.svg" alt="Alert circle" id="alert_info_icon">
+              These settings are saved locally on your machine, and will only affect
+              the dashboard for this collection on this device.
+              Clearing your cookies and local storage for this browser will reset your settings.
+            </div>
+            <form>
+              <h4>Hide tags</h4>
+              <p>
+                Choose which tags to hide from the dashboard.
+                Selected tags and songs with those tags will not be shown on the dashboard.
+                Songs will still appear in search results.
+              </p>
+              <div id="hide_tag_list"></div>
+
+              <h4>Sort order</h4>
+              <p>
+                Choose the order which tags and songs are displayed on the dashboard.
+              </p>
+              <div id="sort_container">
+                <div id="name_sort">
+                  <h5>Songs</h5>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="song_sort_order" id="song_sort_name" value="name">
+                    <label class="form-check-label" for="song_sort_name">
+                      Name
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="song_sort_order" id="song_sort_added" value="date_added">
+                    <label class="form-check-label" for="song_sort_added">
+                      Date added
+                    </label>
+                  </div>
+                </div>
+                <div id="tag_sort">
+                  <h5>Tags</h5>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="tag_sort_order" id="tag_sort_name" value="name">
+                    <label class="form-check-label" for="tag_sort_name">
+                      Name
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="tag_sort_order" id="tag_sort_added" value="date_added">
+                    <label class="form-check-label" for="tag_sort_added">
+                      Date added
+                    </label>
+                  </div>
+                </div>
+              </div>
+            <!-- <div class="form-group">
+              <label for="collection_name" class="col-form-label">Collection name:</label>
+              <input type="text" class="form-control" id="collection_name">
+            </div> -->
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="settings_save_button">Save</button>
           </div>
         </div>
       </div>
