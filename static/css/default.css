@@ -5,3 +5,7 @@
 .hidden {
 	display: none;
 }
+
+#navbar_options {
+	min-width: 91px; /* Just enough to prevent the content inside to wrap */
+}

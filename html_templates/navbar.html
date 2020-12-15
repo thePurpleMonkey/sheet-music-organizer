@@ -1,7 +1,11 @@
 <nav class="navbar navbar-expand-sm navbar-light bg-light">
-	<div class="navbar-brand">
+	<div class="navbar-brand d-xs-block d-sm-none d-md-block">
 		<img src="img/sheet-music-icon.png" alt="Sheet Music Organizer Logo" loading="lazy" width=30 height=30>
 		Sheet Music Organizer
+	</div>
+	<div class="navbar-brand d-none d-sm-block d-md-none">
+		<img src="img/sheet-music-icon.png" alt="Sheet Music Organizer Logo" loading="lazy" width=30 height=30>
+		SMO
 	</div>
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 		<span class="navbar-toggler-icon"></span>
@@ -16,10 +20,10 @@
 				<a class="nav-link" href="#" id="collection_link">Dashboard</a>
 			</li>
 			<li class="nav-item dropdown hidden" id="navbar_options">
-				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<a class="nav-link dropdown-toggle" href="#" id="options_dropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				Options
 				</a>
-				<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+				<div class="dropdown-menu" aria-labelledby="options_dropdown">
 					<div id="navbar_members" class="hidden">
 						<a class="dropdown-item" href="#" id="members_link">Members</a>
 						<a class="dropdown-item" href="#" id="advanced_search_dropdown_link">Advanced Search</a>
