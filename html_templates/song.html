@@ -30,7 +30,7 @@
         font-size: large;
       }
 
-      h5 {
+      .song_header {
         margin-top: .5rem;
         margin-bottom: 0;
         color: gray;
@@ -96,42 +96,42 @@
       <!-- Main view -->
       <div id="song_info_container">
         <div>
-          <h5>Name</h5>
+          <h5 class="song_header">Name</h5>
           <div class="song_value" id="song_name"></div>
           <input class="song_value hidden" id="song_name_input" type="text">
         </div>
         <div>
-          <h5>Artist</h5>
+          <h5 class="song_header">Artist</h5>
           <div class="song_value" id="song_artist"></div>
           <input class="song_value hidden" id="song_artist_input" type="text">
         </div>
         <div>
-          <h5>Location</h5>
+          <h5 class="song_header">Location</h5>
           <div class="song_value" id="song_location"></div>
           <input class="song_value hidden" id="song_location_input" type="text">
           <img src="/img/help-circle.svg"  class="hidden" id="location_help" alt="location help" title="Use this field to link to the digital copy of the sheet music, or provide a short description of where the physical copy of the sheet music is.">
         </div>
         <div>
-          <h5>Last performed</h5>
+          <h5 class="song_header">Last performed</h5>
           <div class="song_value" id="song_last_performed"></div>
           <input class="song_value hidden" id="song_last_performed_input" type="date">
         </div>
         <div>
-          <h5>Date added</h5>
+          <h5 class="song_header">Date added</h5>
           <div class="song_value" id="song_date_added"></div>
         </div>
         <div>
-          <h5>Added by</h5>
+          <h5 class="song_header">Added by</h5>
           <div class="song_value" id="song_added_by"></div>
         </div>
         <div>
-          <h5>Notes</h5>
+          <h5 class="song_header">Notes</h5>
           <div class="song_value" id="song_notes"></div>
           <textarea class="song_value hidden" id="song_notes_input"></textarea>
           <div id="thumbnail_container"></div>
         </div>
         <div>
-          <h5>Tags</h5>
+          <h5 class="song_header">Tags</h5>
           <div class="song_value" id="tag_container">
             <a data-toggle="modal" href="#add_tag_modal" class="btn btn-success hidden" id="add_tag_button"><img src="/img/plus.svg" id="plus">Add tag</a>
           </div>
