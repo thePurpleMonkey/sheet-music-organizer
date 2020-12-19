@@ -1,6 +1,6 @@
 "use strict";
 
-export function add_alert(title, message, style="info") {
+export function add_alert(title, message, style="info", id=undefined) {
 	let alert = $("<div class='alert alert-dismissible' role='alert'>");
 	alert.addClass("alert-" + style)
 	alert.append($("<strong>").text(title));
@@ -8,6 +8,10 @@ export function add_alert(title, message, style="info") {
 	let close = $("<button type='button' class='close' aria-label='Close' data-dismiss='alert'>");
 	close.append($("<span aria-hidden='true'>").html("&times;"));
 	alert.append(close);
+
+	if (id) {
+		alert.attr("id", id);
+	}
 
 	$("#alerts").append(alert);
 }

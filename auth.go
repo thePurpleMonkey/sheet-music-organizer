@@ -398,7 +398,7 @@ func VerifyCollectionID(f http.HandlerFunc) http.HandlerFunc {
 		collectionID, err := strconv.ParseInt(mux.Vars(r)["collection_id"], 10, 64)
 		if err != nil {
 			log.Printf("Collection ID middleware - Unable to get collection id: %v\n", err)
-			SendError(w, `{"error": "Unable to parse collection id."}`, http.StatusBadRequest)
+			SendError(w, URL_ERROR_MESSAGE, http.StatusBadRequest)
 			return
 		}
 
@@ -411,6 +411,44 @@ func VerifyCollectionID(f http.HandlerFunc) http.HandlerFunc {
 
 		log.Printf("%v | %v not found in authorized collection IDs: %v", session.Values["email"], collectionID, acceptableIDs)
 		SendError(w, "Forbidden", http.StatusForbidden)
+	}
+}
+
+// VerifySetlistID is a middleware that checks if the user is authorized
+// to access a setlist, and returns a 403 Forbidden error if not.
+func VerifySetlistID(f http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, err := store.Get(r, "session")
+		if err != nil {
+			log.Printf("Verify Setlist ID - Unable to get session: %v\n", err)
+			SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		// var userID = session.Values["user_id"].(int64)
+
+		// Get URL parameter
+		setlistID, err := strconv.ParseInt(mux.Vars(r)["setlist_id"], 10, 64)
+		if err != nil {
+			log.Printf("Setlist ID middleware - Unable to get setlist id: %v\n", err)
+			SendError(w, URL_ERROR_MESSAGE, http.StatusBadRequest)
+			return
+		}
+
+		var userID int64
+		if err = db.QueryRow("SELECT user_id FROM setlists WHERE setlist_id = $1", setlistID).Scan(&userID); err != nil {
+			log.Printf("Setlist ID middleware - Unable to get retrieve setlist user_id: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		if userID != session.Values["user_id"].(int64) {
+			log.Printf("Setlist ID middleware - User %d attempted to access setlist owned by user %d.", session.Values["user_id"], userID)
+			SendError(w, `{"error": "Setlist not found"}`, http.StatusNotFound)
+			return
+		}
+
+		f(w, r)
 	}
 }
 

@@ -316,7 +316,7 @@ function set_editing_mode(is_editing) {
     }
 }
 
-// Saves changes to song
+// #region Saves changes to song
 $("#edit_button").click(function() {
     set_editing_mode(true);
 });
@@ -359,6 +359,7 @@ $('#edit_song_wait').on('shown.bs.modal', function (e) {
         refresh_song();
     });
 });
+// #endregion
 
 // #region Delete song
 $("#delete_button").click(function() {

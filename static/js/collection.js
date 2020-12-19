@@ -23,6 +23,7 @@ let settings = undefined;
 // Replace links
 $("#members_link").attr("href", "/members.html?collection_id=" + collection.id);
 $("#filter_link").attr("href", "/advanced_search.html?collection_id=" + collection.id);
+$("#setlists_link").attr("href", "/setlists.html?collection_id=" + collection.id);
 $("#advanced_search_dropdown_link").attr("href", "/advanced_search.html?collection_id=" + collection.id);
 
 // Show options in navbar
@@ -31,6 +32,7 @@ $("#navbar_members").show();
 $("#leave_button").removeClass("hidden");
 $("#search_form").removeClass("hidden");
 $("#navbar_settings").removeClass("hidden");
+$("#navbar_setlists").removeClass("hidden");
 
 // Get collection info when document becomes ready
 $(function() {

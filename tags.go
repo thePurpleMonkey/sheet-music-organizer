@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -78,7 +79,8 @@ func TagsHandler(w http.ResponseWriter, r *http.Request) {
 		if err := json.NewDecoder(r.Body).Decode(tag); err != nil {
 			// If there is something wrong with the request body, return a 400 status
 			log.Printf("Tags POST - Unable to decode request body: %v\n", err)
-			log.Printf("Body: %v\n", r.Body)
+			body, _ := ioutil.ReadAll(r.Body)
+			log.Printf("Body: %s\n", body)
 			SendError(w, `{"error": "Unable to decode request body."}`, http.StatusBadRequest)
 			return
 		}
@@ -156,7 +158,8 @@ func TagHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			// If there is something wrong with the request body, return a 400 status
 			log.Printf("Tag PUT - Unable to parse request body: %v\n", err)
-			log.Printf("Body: %v\n", r.Body)
+			body, _ := ioutil.ReadAll(r.Body)
+			log.Printf("Body: %s\n", body)
 			SendError(w, `{"error": "Unable to parse request."}`, http.StatusBadRequest)
 			return
 		}

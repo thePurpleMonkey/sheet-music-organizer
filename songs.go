@@ -59,6 +59,9 @@ type Song struct {
 	Notes         string     `json:"notes" db:"notes"`
 	AddedBy       string     `json:"added_by" db:"added_by"`
 	CollectionID  int64      `json:"collection_id" db:"collection_id"`
+
+	// Order of song in setlist
+	Order int64 `json:"order,omitempty" db:"order"`
 }
 
 // TaggedSong is a struct that models tagging a song
@@ -89,15 +92,15 @@ func SongsHandler(w http.ResponseWriter, r *http.Request) {
 		// Get excluded tags list
 		var excludedTags []int64
 		var queryString string = r.URL.Query().Get("exclude_tags")
-		log.Printf("Songs GET - Query string: '%v'\n", queryString)
 		if len(queryString) > 0 {
+			log.Printf("Songs GET - Query string: '%v'\n", queryString)
 			if err := json.Unmarshal([]byte(queryString), &excludedTags); err != nil {
 				log.Printf("Songs GET - Unable to get list of excluded tags from query string: %v\n", err)
 				SendError(w, URL_ERROR_MESSAGE, http.StatusBadRequest)
 				return
 			}
+			log.Printf("Songs GET - Excluded tags: %v\n", excludedTags)
 		}
-		log.Printf("Songs GET - Excluded tags: %v\n", excludedTags)
 
 		// Retrieve songs in collection
 		// rows, err := db.Query("SELECT song_id, name, date_added FROM songs WHERE collection_id = $1", collectionID)
@@ -145,7 +148,8 @@ func SongsHandler(w http.ResponseWriter, r *http.Request) {
 		if err := json.NewDecoder(r.Body).Decode(song); err != nil {
 			// If there is something wrong with the request body, return a 400 status
 			log.Printf("Songs POST - Unable to decode request body: %v\n", err)
-			log.Printf("Body: %v\n", r.Body)
+			body, _ := ioutil.ReadAll(r.Body)
+			log.Printf("Body: %s\n", body)
 			SendError(w, `{"error": "Unable to decode request body."}`, http.StatusBadRequest)
 			return
 		}

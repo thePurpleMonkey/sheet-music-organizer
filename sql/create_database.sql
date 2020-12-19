@@ -80,10 +80,28 @@ CREATE TABLE IF NOT EXISTS tagged_songs
 	PRIMARY KEY (song_id, tag_id)
 );
 
-CREATE OR REPLACE FUNCTION search_collection(collection_id INT, query VARCHAR(255))
-RETURNS TABLE (song_id INT, song_name VARCHAR(127))
-LANGUAGE plpgsql
-AS $$
+CREATE TABLE IF NOT EXISTS setlists
+(
+	setlist_id SERIAL PRIMARY KEY,
+	name TEXT NOT NULL,
+	date DATE,
+	notes TEXT,
+	user_id INT NOT NULL REFERENCES users(user_id),
+	collection_id INT NOT NULL REFERENCES collections(collection_id)
+);
+
+CREATE TABLE IF NOT EXISTS setlist_songs
+(
+	setlist_id INT NOT NULL REFERENCES setlists(setlist_id),
+	song_id INT NOT NULL REFERENCES songs(song_id),
+	"order" INT NOT NULL DEFAULT 0,
+	PRIMARY KEY (setlist_id, song_id)
+);
+
+CREATE OR REPLACE FUNCTION search_collection(collection_id INTEGER,	query TEXT)
+    RETURNS TABLE(song_id INTEGER, song_name TEXT) 
+    LANGUAGE 'plpgsql'
+AS $BODY$
 DECLARE
 -- variable declaration
 BEGIN
@@ -97,10 +115,47 @@ RETURN QUERY
 			     setweight(to_tsvector(s.notes), 'B') ||
 			     setweight(to_tsvector(coalesce(string_agg(t.name, ' '), '')), 'C') AS document
 		FROM songs AS s
-		JOIN tagged_songs AS ts ON s.song_id = ts.song_id
-		JOIN tags AS t ON t.tag_id = ts.tag_id
+		LEFT JOIN tagged_songs AS ts ON s.song_id = ts.song_id
+		LEFT JOIN tags AS t ON t.tag_id = ts.tag_id
 		WHERE s.collection_id = search_collection.collection_id
 		GROUP BY s.song_id) s_search
 	WHERE s_search.document @@ to_tsquery(query)
     ORDER BY ts_rank(s_search.document, to_tsquery(query)) DESC;
-END; $$
+END;
+$BODY$;
+
+CREATE OR REPLACE FUNCTION advanced_search_collection(
+	collection_id INTEGER,
+	tags INTEGER[],
+	before DATE,
+	after DATE,
+	include_keywords TEXT,
+	exclude_keywords TEXT)
+    RETURNS TABLE(song_id INTEGER, song_name TEXT) 
+    LANGUAGE 'plpgsql'
+
+AS $BODY$
+DECLARE
+-- variable declaration
+BEGIN	
+RETURN QUERY
+	SELECT s_search.song_id, s_search.song_name
+	FROM (SELECT s.song_id as song_id,
+			     s.name as song_name,
+			     setweight(to_tsvector(s.name), 'A') ||
+			     setweight(to_tsvector(s.artist), 'B') ||
+			     setweight(to_tsvector(s.location), 'B') ||
+			     setweight(to_tsvector(s.notes), 'B') ||
+			     setweight(to_tsvector(coalesce(string_agg(t.name, ' '), '')), 'C') AS document
+		  FROM songs AS s
+		  LEFT JOIN tagged_songs AS ts ON s.song_id = ts.song_id
+		  LEFT JOIN tags AS t ON t.tag_id = ts.tag_id
+		  WHERE s.collection_id = advanced_search_collection.collection_id
+		    AND (ts.tag_id = ANY(tags) OR tags IS NULL OR tags = '{}')
+		    AND (s.last_performed <= before OR s.last_performed IS NULL OR before IS NULL)
+		    AND (s.last_performed >= after OR s.last_performed IS NULL OR after IS NULL)
+		  GROUP BY s.song_id) s_search
+	WHERE s_search.document @@ (to_tsquery(include_keywords) && (!! to_tsquery(exclude_keywords)))
+    ORDER BY ts_rank(s_search.document, to_tsquery(include_keywords) && (!! to_tsquery(exclude_keywords))) DESC;
+END;
+$BODY$;
