@@ -7,11 +7,13 @@ let delete_song = false;
 let add_tag = false;
 let delete_tag = undefined;
 let edit_mode = false;
+let add_to_setlist = false;
 
 // Show options in navbar
 $("#navbar_options").removeClass("hidden");
 $("#navbar_dashboard").removeClass("hidden");
 $("#search_form").removeClass("hidden");
+$("#navbar_setlist_add").removeClass("hidden");
 
 // Enable tooltips
 $("#location_help").tooltip();
@@ -116,6 +118,34 @@ function refresh_available_tags(song_tags) {
     })
     .fail(function(data) {
         alert_ajax_failure("Unable to get your tags!", data);
+    });
+}
+
+// Get all setlists in this collection
+function refresh_setlists() {
+    $.get(`/collections/${song.collection_id}/setlists`)
+    .done(function(setlists) {
+        console.log("Setlists in this collection:");
+        console.log(setlists);
+
+        // Clear old options before adding new ones
+        $("#setlist_select option:not(:first-child)").remove();
+
+        // Change loading text to select text
+      $("#setlist_select option").first().text("Choose setlist...");
+
+        setlists
+            // .sort((a, b) => a.name.localeCompare(b.name))
+            .forEach(function(setlist) {
+                let option = $("<option>")
+                    .attr("value", setlist.setlist_id)
+                    .text(setlist.name);
+                $("#setlist_select").append(option);
+            });
+    })
+    .fail(function(data) {
+        alert_ajax_failure("Unable to get setlists!", data);
+        $("#add_to_setlist_modal").modal("hide");
     });
 }
 
@@ -420,6 +450,58 @@ $('#delete_tag_wait_modal').on('shown.bs.modal', function (e) {
         $("#delete_tag_wait_modal").modal("hide");
         delete_tag = undefined;
         refresh_tags();
+    });
+});
+// #endregion
+
+// #region Add to setlist
+$("#add_to_setlist_modal").on("show.bs.modal", function() {
+    $("#setlist_select option").first().text("Loading...");
+    $("#add_to_setlist_modal_button").prop("disabled", true);
+    refresh_setlists();
+});
+$("#setlist_select").change(function() {
+    $("#add_to_setlist_modal_button").prop("disabled", false);
+})
+$("#add_to_setlist_modal_button").click(function() {
+    add_to_setlist = true;
+    $("#add_to_setlist_modal").modal("hide");
+});
+$("#add_to_setlist_modal").on("hidden.bs.modal", function() {
+    if (add_to_setlist) {
+        $("#add_to_setlist_wait").modal("show");
+    }
+});
+$("#add_to_setlist_wait").on("shown.bs.modal", function() {
+    let payload = [parseInt(song.song_id, 10)];
+    let setlist_id = $("#setlist_select").val();
+
+    if (!setlist_id) {
+        console.error("Unable to get setlist ID!");
+        add_alert("Unable to add to setlist", "There was a problem adding this song to the setlist. Please refresh the page and try again.", "danger");
+        $("#add_to_setlist_wait").modal("hide");
+        add_to_setlist = false;
+        return;
+    }
+
+    console.log(`Adding ${song.song_id} to setlist ${setlist_id}...`);
+    console.log("Payload: " + JSON.stringify(payload));
+    $.post({
+        url: `/collections/${song.collection_id}/setlists/${setlist_id}/songs`,
+        data: JSON.stringify(payload),
+        contentType: "application/json; charset=utf-8",
+    })
+    .done(function(data) {
+        console.log("Add setlist response:");
+        console.log(data);
+        add_alert("Added to setlist", "This song has been successfully added to the playlist.", "success");
+    })
+    .fail(function(data) {
+        alert_ajax_failure("Unable to add songs to setlist.", data);
+    })
+    .always(function() {
+        $("#add_to_setlist_wait").modal("hide");
+        add_to_setlist = false;
     });
 });
 // #endregion
