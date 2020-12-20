@@ -1,0 +1,73 @@
+#tag_container button {
+	margin-right: 5px;
+	margin-bottom: .25em;
+}
+
+#tag_list button {
+	margin-left: .25em;
+	margin-bottom: .25em;
+}
+
+#tag_container .deletable:hover {
+	text-decoration: line-through;
+}
+
+#edit_buttons button {
+	margin-left: 5px;
+	width: 5em;
+}
+
+.song_value  {
+	margin-bottom: 1em;
+	font-size: large;
+}
+
+.song_header {
+	margin-top: .5rem;
+	margin-bottom: 0;
+	color: gray;
+	font-size: small;;
+}
+
+#tag_container {
+	margin-top: 4px;
+}
+
+#plus {
+	filter: invert(100%);
+	height: 1.4em;
+	float: left;
+	margin-left: -4px;
+	margin-top: 2px;
+}
+
+textarea {
+	resize: vertical;
+	width: 100%;
+	height: 10em;
+}
+
+input {
+	margin-bottom: 1em;
+}
+
+#song_notes {
+	white-space: pre-line;
+}
+
+#thumbnail_container img {
+	margin-right: .5em;
+	margin-bottom: .5em;
+	display: inline-block;
+}
+
+#location_help {
+	margin-top: -3px;
+	filter: invert(50%);
+	transition: filter .5s;
+}
+
+#location_help:hover {
+	filter: invert(25%);
+	transition: filter .5s;
+}

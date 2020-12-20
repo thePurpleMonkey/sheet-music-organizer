@@ -2,58 +2,9 @@
 <html lang="en">
   <head>
     {{template "header.html"}}
+    <link href="css/collection.css" rel="stylesheet">
 
     <title>Dashboard - Sheet Music Organizer</title>
-
-    <style>
-      #add_song, #add_tag {
-        margin-top: 10px;
-        width: 10em;
-      }
-      
-      #description {
-        font-style: italic;
-      }
-
-      /* Filter icon */
-			#filter {
-        margin-left: .2em;
-				height: .6em;
-				filter: invert(60%);
-				transition: filter .5s;
-			}
-
-			#filter:hover {
-				filter: invert(30%);
-			}
-
-      /* Tag list in collection settings */
-      #hide_tag_list button {
-        margin-right: .25em;
-        margin-bottom: .25em;
-      }
-
-      #hide_tag_list {
-        margin-bottom: 1em;
-      }
-
-      /* Side-by-side sorting */
-      #sort_container {
-        display: flex;
-      }
-
-      #name_sort, #tag_sort {
-        width: 50%;
-      }
-
-      .form-check label {
-        width: 100%
-      }
-
-      #alert_info_icon {
-        height: 1em;
-      }
-    </style>
   </head>
 
   <body>
