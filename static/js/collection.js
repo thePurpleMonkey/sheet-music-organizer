@@ -254,6 +254,33 @@ function saveSettings() {
 }
 
 // #region Add song
+function tag_button_clicked(e) {
+    $(this).toggleClass("btn-light");
+    $(this).toggleClass("btn-dark");
+}
+
+$("#add_song_modal").on("show.bs.modal", function() {
+    $.get(`/collections/${collection.id}/tags`)
+    .done(function(data) {
+
+        console.log("All tags in this collection:");
+        console.log(data);
+        
+        // Add tags to option list
+        $("#tags_list").empty();
+        data.forEach(item => {
+            let button = $("<button type='button' class='btn btn-light'>")
+                            .text(item.name)
+                            .data("tag_id", item.tag_id)
+                            .click(tag_button_clicked);
+            $("#tags_list").append(button);
+        });
+    })
+    .fail(function(data) {
+        alert_ajax_failure("Unable to get your tags!", data);
+    });
+});
+
 $("#add_song_modal_button").click(function() {
     add_song = true;
     $("#add_song_modal").modal("hide");
@@ -280,7 +307,7 @@ $('#song_wait').on('shown.bs.modal', function (e) {
 
     $.post(`/collections/${collection.id}/songs`, payload)
     .done(function(data) {
-        console.log("Add song response:");
+        console.log("Successfully added song! API response:");
         console.log(data);
 
         // Clear form fields
@@ -290,18 +317,45 @@ $('#song_wait').on('shown.bs.modal', function (e) {
         $("#last_performed").val("");
         $("#notes").val("");
 
-        // Display success message
-        add_alert("Song added!", "The song was successfully added to your collection.", "success");
+        add_song_tags(data.song_id);
     })
     .fail(function(data) {
         alert_ajax_failure("Unable to add song!", data);
     })
     .always(function() {
         add_song = false;
-        $("#song_wait").modal("hide");
         reloadSongs();
     });
 });
+function add_song_tags(song_id) {
+    let requests = [];
+
+    $("#tags_list > .btn-dark").each(function() {
+        let tag_id = $(this).data("tag_id");
+        console.log(`Adding tag ID ${tag_id} to song ID ${song_id}`);
+        let payload = JSON.stringify({song_id: song_id, tag_id: parseInt(tag_id, 10)});
+
+        requests.push(
+            $.post(`/collections/${collection.id}/songs/${song_id}/tags`, payload)
+            .done(function(data) {
+                console.log("Response for adding tag " + tag_id + " to song " + song_id);
+                console.log(data);
+            })
+            .fail(function(data) {
+                alert_ajax_failure("Unable to add tag to new song.", data);
+            })
+        );
+    });
+
+    $.when(requests)
+    .done(function() {
+        console.log(`Successfully added tags to song ${song_id}`);
+        add_alert("Song added!", "The song was successfully added to your collection.", "success");
+    })
+    .always(function() {
+        $("#song_wait").modal("hide");
+    });
+}
 //#endregion
 
 // Attach to navbar buttons

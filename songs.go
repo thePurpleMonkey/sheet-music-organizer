@@ -162,21 +162,24 @@ func SongsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Create collection in database
-		if _, err = db.Exec("INSERT INTO songs(name, artist, location, last_performed, notes, added_by, collection_id) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-			song.Name, song.Artist, song.Location, song.LastPerformed, song.Notes, session.Values["user_id"], collectionID); err != nil {
-			if err.(*pq.Error).Code == "23505" {
-				// Song already exists
-				w.Header().Add("Content-Type", "application/json")
-				SendError(w, `{"error": "Song already exists."}`, http.StatusBadRequest)
-				return
-			}
+		var songID int64
+		if err = db.QueryRow("INSERT INTO songs(name, artist, location, last_performed, notes, added_by, collection_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING song_id",
+			song.Name, song.Artist, song.Location, song.LastPerformed, song.Notes, session.Values["user_id"], collectionID).Scan(&songID); err != nil {
 			log.Printf("Songs POST - Unable to insert song record in database: %v\n", err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
-		// Respond with success
-		w.WriteHeader(http.StatusCreated)
+		// Send response
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(struct {
+			SongID int64 `json:"song_id"`
+		}{
+			songID,
+		})
+		return
+
 	}
 }
 

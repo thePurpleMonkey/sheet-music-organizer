@@ -38,10 +38,16 @@
 	width: 50%;
 }
 
-  .form-check label {
+.form-check label {
 	width: 100%
-  }
+}
 
-  #alert_info_icon {
+#alert_info_icon {
 	height: 1em;
-  }
+}
+
+/* Tag list */
+#tags_list button {
+	margin-left: .25em;
+	margin-bottom: .25em;
+}
