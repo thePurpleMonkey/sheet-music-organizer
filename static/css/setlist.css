@@ -1,0 +1,88 @@
+#description {
+	font-style: italic;
+}
+
+#description_header {
+	font-weight: bold;
+}
+
+#button_toolbar {
+	margin-top: 10px;
+}
+
+.deleting {
+	text-decoration-line: line-through;
+}
+
+.setlist_value  {
+	margin-bottom: 1em;
+	font-size: large;
+}
+
+.setlist_header {
+	margin-top: .5rem;
+	margin-bottom: 0;
+	color: gray;
+	font-size: small;
+}
+
+#songs_container, #songs_container_delete, #songs_container_reorder {
+	margin-top: .5em;
+}
+
+#song_tools_label {
+	margin-bottom: .5em;
+}
+
+#remove_alert, #reorder_help {
+	margin-top: .5em;
+}
+
+/* Sortable CSS */
+#songs_container_reorder {
+	cursor: grab;
+}
+
+/* Sharing setlist */
+#saving {
+	color: orange;
+	margin-top: .5em;
+	font-weight: bold;
+}
+
+#spinner {
+	border: 3px solid #f3f3f3;
+	border-top: 3px solid #3498db;
+	border-radius: 50%;
+	width: 1em;
+	height: 1em;
+	animation: spin 2s linear infinite;
+
+	display: inline-block;
+	margin-right: .5em;
+	/* margin-top: -2px; */
+	vertical-align: middle;
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+#share_result {
+	margin-top: 1em;
+}
+
+.setlist_header label {
+	margin-bottom: 0;
+}
+
+#share_code_form_group {
+	margin-top: 1em;
+}
+
+#copy_link_success {
+	color: green;
+	vertical-align: middle;
+	margin-left: .25em;
+}

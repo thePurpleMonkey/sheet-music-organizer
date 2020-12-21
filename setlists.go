@@ -7,8 +7,10 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/dchest/uniuri"
 	"github.com/gorilla/mux"
 	"github.com/lib/pq"
 )
@@ -19,6 +21,8 @@ type Setlist struct {
 	Name      string     `json:"name"`
 	Date      *time.Time `json:"date,omitempty"`
 	Notes     string     `json:"notes,omitempty"`
+	Shared    bool       `json:"shared"`
+	ShareCode *string    `json:"share_code,omitempty"`
 }
 
 // ReorderRequest is a struct that modes a request to reorder a setlist
@@ -137,7 +141,7 @@ func SetlistHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		// Find the setlist in the database
-		if err := db.QueryRow("SELECT setlist_id, name, date, notes FROM setlists WHERE setlist_id = $1 AND user_id = $2", setlistID, session.Values["user_id"]).Scan(&setlist.SetlistID, &setlist.Name, &setlist.Date, &setlist.Notes); err != nil {
+		if err := db.QueryRow("SELECT setlist_id, name, date, notes, shared, share_code FROM setlists WHERE setlist_id = $1 AND user_id = $2", setlistID, session.Values["user_id"]).Scan(&setlist.SetlistID, &setlist.Name, &setlist.Date, &setlist.Notes, &setlist.Shared, &setlist.ShareCode); err != nil {
 			log.Printf("Setlist GET - Unable to get setlist from database: %v\n", err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
@@ -229,6 +233,113 @@ func SetlistHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.WriteHeader(http.StatusOK)
+		return
+	}
+}
+
+// SetlistVisibilityHandler handles updating a setlist's visibility
+func SetlistVisibilityHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := store.Get(r, "session")
+	if err != nil {
+		log.Printf("Setlist Visibility handler - Unable to get session store: %v\n", err)
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+		return
+	}
+
+	// Get URL parameters
+	setlistID, err := strconv.ParseInt(mux.Vars(r)["setlist_id"], 10, 64)
+	if err != nil {
+		log.Printf("Setlist Visibility Handler - Unable to parse setlist ID: %v\n", err)
+		w.Header().Add("Content-Type", "application/json")
+		SendError(w, URL_ERROR_MESSAGE, http.StatusBadRequest)
+		return
+	}
+
+	collectionID, err := strconv.ParseInt(mux.Vars(r)["collection_id"], 10, 64)
+	if err != nil {
+		log.Printf("Setlist Visibility Handler - Unable to parse collection ID: %v\n", err)
+		SendError(w, URL_ERROR_MESSAGE, http.StatusBadRequest)
+		return
+	}
+
+	if r.Method == "PUT" {
+		var visibility string
+
+		if result, err := ioutil.ReadAll(r.Body); err != nil {
+			// If there is something wrong with the request body, return a 400 status
+			log.Printf("Setlist Visibility PUT - Unable to parse request body: %v\n", err)
+			log.Printf("Setlist Visibility PUT - Request body: '%s'\n", string(result))
+			w.Header().Add("Content-Type", "application/json")
+			SendError(w, REQUEST_ERROR_MESSAGE, http.StatusBadRequest)
+			return
+		} else {
+			visibility = string(result)
+		}
+
+		// err := json.NewDecoder(r.Body).Decode(&visibility)
+		// if err != nil {
+		// 	// If there is something wrong with the request body, return a 400 status
+		// 	log.Printf("Setlist Visibility PUT - Unable to parse request body: %v\n", err)
+		// 	w.Header().Add("Content-Type", "application/json")
+		// 	SendError(w, REQUEST_ERROR_MESSAGE, http.StatusBadRequest)
+		// 	return
+		// }
+
+		var result sql.Result
+		var shareCode string
+
+		switch strings.ToLower(visibility) {
+		case "private":
+			// Remove all sharing
+			result, err = db.Exec("UPDATE setlists SET shared = false, share_code = NULL WHERE setlist_id = $1 AND collection_id = $2 AND user_id = $3", setlistID, collectionID, session.Values["user_id"])
+			break
+
+		case "collection":
+			// Share with only collection members
+			result, err = db.Exec("UPDATE setlists SET shared = true, share_code = NULL WHERE setlist_id = $1 AND collection_id = $2 AND user_id = $3", setlistID, collectionID, session.Values["user_id"])
+			break
+
+		case "public":
+			// Share with anybody
+			shareCode = uniuri.New()
+			result, err = db.Exec("UPDATE setlists SET shared = true, share_code = $1 WHERE setlist_id = $2 AND collection_id = $3 AND user_id = $4", shareCode, setlistID, collectionID, session.Values["user_id"])
+			break
+
+		default:
+			// Not a known visibility value
+			log.Printf("Setlist Visibility PUT - Unknown visibility value '%v'\n", visibility)
+			SendError(w, `{"error": "Unknown visibility value."}`, http.StatusBadRequest)
+			return
+		}
+
+		// Check for errors during update
+		if err != nil {
+			log.Printf("Setlist Visibility PUT - Unable to update setlist in database: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		// Check to make sure at least 1 row was affected
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			log.Printf("Setlist Visibility PUT - Unable to get rows affected by UPDATE: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		if rowsAffected == 0 {
+			log.Printf("Setlist Visibility PUT - No rows updated for UPDATE query.\n")
+			SendError(w, `{"error": "Setlist not found."}`, http.StatusNotFound)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		if visibility == "public" {
+			w.Header().Add("Content-Type", "application/json")
+			if _, err = w.Write([]byte(shareCode)); err != nil {
+				log.Printf("Setlist Visibility PUT -  Unable to send share code to client: %v\n", err)
+			}
+		}
 		return
 	}
 }

@@ -425,8 +425,6 @@ func VerifySetlistID(f http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		// var userID = session.Values["user_id"].(int64)
-
 		// Get URL parameter
 		setlistID, err := strconv.ParseInt(mux.Vars(r)["setlist_id"], 10, 64)
 		if err != nil {
@@ -436,13 +434,15 @@ func VerifySetlistID(f http.HandlerFunc) http.HandlerFunc {
 		}
 
 		var userID int64
-		if err = db.QueryRow("SELECT user_id FROM setlists WHERE setlist_id = $1", setlistID).Scan(&userID); err != nil {
+		var shared bool
+		if err = db.QueryRow("SELECT user_id, shared FROM setlists WHERE setlist_id = $1", setlistID).Scan(&userID, &shared); err != nil {
 			log.Printf("Setlist ID middleware - Unable to get retrieve setlist user_id: %v\n", err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
-		if userID != session.Values["user_id"].(int64) {
+		// Don't check user_id if setlist is shared
+		if !shared && userID != session.Values["user_id"].(int64) {
 			log.Printf("Setlist ID middleware - User %d attempted to access setlist owned by user %d.", session.Values["user_id"], userID)
 			SendError(w, `{"error": "Setlist not found"}`, http.StatusNotFound)
 			return

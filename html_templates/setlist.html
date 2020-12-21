@@ -10,52 +10,7 @@
 
     <title>Setlist - Sheet Music Organizer</title>
 
-    <style>
-      #description {
-        font-style: italic;
-      }
-
-      #description_header {
-        font-weight: bold;
-      }
-
-      #button_toolbar {
-        margin-top: 10px;
-      }
-
-      .deleting {
-        text-decoration-line: line-through;
-      }
-
-      .setlist_value  {
-        margin-bottom: 1em;
-        font-size: large;
-      }
-
-      .setlist_header {
-        margin-top: .5rem;
-        margin-bottom: 0;
-        color: gray;
-        font-size: small;;
-      }
-
-      #songs_container, #songs_container_delete, #songs_container_reorder {
-        margin-top: .5em;
-      }
-
-      #song_tools_label {
-        margin-bottom: .5em;
-      }
-
-      #remove_alert, #reorder_help {
-        margin-top: .5em;
-      }
-
-      /* Sortable CSS */
-      #songs_container_reorder {
-        cursor: grab;
-      }
-    </style>
+    <link href="css/setlist.css" rel="stylesheet">
   </head>
 
   <body>
@@ -111,6 +66,7 @@
 
     <!-- #region Modals -->
 
+    <!-- #region Edit setlist -->
     <!-- Edit setlist modal -->
     <div class="modal fade" id="edit_setlist_modal" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-lg" role="document">
@@ -158,7 +114,9 @@
         </div>
       </div>
     </div>
+    <!-- #endregion -->
     
+    <!-- #region Delete setlist -->
     <!-- Delete setlist modal -->
     <div class="modal fade" id="delete_setlist_modal" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-lg" role="document">
@@ -197,8 +155,10 @@
         </div>
       </div>
     </div>
+    <!-- #endregion -->
     
-    <!-- Add song to setlist modal -->
+    <!-- #region Add songs -->
+    <!-- Add songs to setlist modal -->
     <div class="modal fade" id="setlist_add_song_modal" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -240,6 +200,85 @@
         </div>
       </div>
     </div>
+    <!-- #endregion -->
+
+    <!-- #region Share setlist -->
+    <!-- Share setlist modal -->
+    <div class="modal fade" id="share_setlist_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Share Setlist</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <p>Please select the visibility for this setlist:</p>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="visibility_radio" id="private_radio" value="private">
+                <label class="form-check-label" for="private_radio">
+                  Only Me
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="visibility_radio" id="collection_radio" value="collection">
+                <label class="form-check-label" for="collection_radio">
+                  Members of this collection
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="visibility_radio" id="public_radio" value="public">
+                <label class="form-check-label" for="public_radio">
+                  Public
+                </label>
+              </div>
+              <div class="form-group" id="share_code_form_group">
+                <h5 class="setlist_header"><label for="share_code_input">Share link</label></h5>
+                <input type="text" class="form-control-plaintext" id="share_link_input" placeholder="" readonly>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="copy_link_button">Copy link</button>
+                <span id="copy_link_success" class="hidden">Link copied to clipboard!</span>
+              </div>
+            </form>
+            <div class="hidden" id="saving"><div id="spinner"></div>Saving...</div>
+            <!-- <div class="hidden" id="share_result"></div> -->
+            
+            <div id="share_result" class="alert alert-success hidden" role="alert">
+              <strong>Visibility updated</strong>
+              <div id="private_result" class="hidden">
+                This setlist is no longer shared and is only visible to you.
+              </div>
+              <div id="collection_result" class="hidden">
+                This setlist is now visible by anyone in this collection.
+              </div>
+              <div id="public_result" class="hidden">
+                This setlist is now publicly viewable by anyone with the link.
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="save_setlist_visibility_button" disabled>Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Share setlist wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="share_setlist_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Sharing setlist...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Please wait while we save your changes to this setlist...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- #endregion -->
 
     <!-- Save setlist order wait modal -->
     <div class="modal fade in" tabindex="-1" role="dialog" id="setlist_order_wait_modal" data-backdrop="static" data-keyboard="false">

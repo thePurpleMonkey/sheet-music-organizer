@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {{template "header.html"}}
+
+    <title>Setlist - Sheet Music Organizer</title>
+
+    <link href="css/view_setlist.css" rel="stylesheet">
+  </head>
+
+  <body>
+    {{template "navbar.html"}}
+
+    <div class="container">
+      <!-- Header -->
+      <h1 id="page_header">Loading...</h1>
+      <hr>
+
+      <div id="alerts"></div>
+
+      
+      <div>
+        <h5 class="setlist_header">Date</h5>
+        <div class="setlist_value" id="setlist_date"></div>
+      </div>
+      <div>
+        <h5 class="setlist_header">Notes</h5>
+        <div class="setlist_value" id="setlist_notes"></div>
+      </div>
+
+      <h5 class="setlist_header">Songs</h5>
+      <div class="list-group" id="songs_container"></div>
+
+      {{template "footer.html"}}
+    </div>
+
+    <!-- Script -->
+    <script src="/js/view_setlist.js" type="module"></script>
+  </body>
+</html>

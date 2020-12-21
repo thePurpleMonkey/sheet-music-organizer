@@ -14,6 +14,7 @@ let songs = [];
 let all_songs = [];
 let save_setlist = false;
 let add_songs = false;
+let share = false;
 let mode = modes.NORMAL;
 
 let setlist = {
@@ -26,12 +27,15 @@ let setlist = {
     name: undefined,
     date: undefined,
     notes: undefined,
+    shared: undefined,
+    share_code: undefined,
 };
 
 // Show options in navbar
 $("#navbar_options").removeClass("hidden");
 $("#navbar_dashboard").removeClass("hidden");
 $("#navbar_setlists").removeClass("hidden");
+$("#navbar_setlist_share").removeClass("hidden");
 $("#search_form").removeClass("hidden");
 
 // Replace link for collection
@@ -47,6 +51,8 @@ function refresh_setlist() {
         setlist.name = data.name;
         setlist.date = data.date ? new Date(data.date) : undefined;
         setlist.notes = data.notes;
+        setlist.shared = data.shared;
+        setlist.share_code = data.share_code;
         
         console.log("Setlist:");
         console.log(setlist);
@@ -232,6 +238,8 @@ $('#edit_setlist_wait').on('shown.bs.modal', function (e) {
     };
     if (payload.date.length > 0) {
         payload.date = new Date(payload.date).toISOString();
+    } else {
+        payload.date = undefined;
     }
     console.log("Updating setlist: " + payload);
     $.ajax({
@@ -400,6 +408,133 @@ $("#setlist_order_wait_modal").on("shown.bs.modal", function() {
     })
     .always(function() {
         $("#setlist_order_wait_modal").modal("hide");
+    });
+});
+// #endregion
+
+// #region Share setlist
+$("#share_setlist_modal").on("show.bs.modal", function() {
+    $("#share_result").addClass("hidden");
+    let visibility = undefined;
+
+    if (setlist.shared) {
+        if (setlist.share_code) {
+            $("#public_radio").prop("checked", true);
+            visibility = "public";
+        } else {
+            $("#collection_radio").prop("checked", true);
+            visibility = "collection";
+        }
+    } else {
+        $("#private_radio").prop("checked", true);
+        visibility = "private";
+    }
+    
+    update_share_link(visibility);
+});
+
+function update_share_link(visibility) {
+    let share_link = get_share_link(visibility)
+    if (share_link) {
+        $("#share_link_input").val(share_link);
+        $("#share_code_form_group").removeClass("hidden");
+    } else {
+        $("#share_code_form_group").addClass("hidden");
+    }
+}
+
+$("input[name=visibility_radio]").change(function() {
+    $("#save_setlist_visibility_button").prop("disabled", false);
+});
+
+function get_share_link(visibility) {
+    switch (visibility) {
+        case "private":
+            return "";
+            
+        case "collection":
+            return window.location.href;
+
+        case "public":
+            return `${window.location.origin}/view_setlist.html?code=${setlist.share_code}`;
+
+        default:
+            console.error("Unknown visibility value: " + visibility);
+            return undefined;
+    }
+}
+
+$("#save_setlist_visibility_button").click(function() {
+    let visibility = $("input[name=visibility_radio]:checked").val();
+    
+    $("#save_setlist_visibility_button").prop("disabled", true);
+    $("#saving").removeClass("hidden");
+
+    console.log("Updating setlist visibility to: " + visibility);
+    $.ajax({
+        method: "PUT",
+        url: `/collections/${setlist.collection_id}/setlists/${setlist.setlist_id}/visibility`,
+        data: visibility,
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .done(function(data) {
+		console.log("Edit setlist visibility result:");
+        console.log(data);
+
+        $("#share_result").removeClass("hidden");
+
+        switch (visibility) {
+            case "private":
+                $("#private_result").removeClass("hidden");
+                $("#collection_result").addClass("hidden");
+                $("#public_result").addClass("hidden");
+                break;
+                
+            case "collection":
+                $("#private_result").addClass("hidden");
+                $("#collection_result").removeClass("hidden");
+                $("#public_result").addClass("hidden");
+                break;
+
+            case "public":
+                $("#private_result").addClass("hidden");
+                $("#collection_result").addClass("hidden");
+                $("#public_result").removeClass("hidden");
+                setlist.share_code = data;
+                break;
+        }
+        
+        update_share_link(visibility);
+
+        // $("#share_result").text("Setlist visibility has been updated!").removeClass("hidden");
+        // add_alert("Changes saved.", "Changes to this setlist have been saved.", "success");
+    })
+    .fail(function(data) {
+        alert_ajax_failure("Unable to update setlist visibility.", data);
+        $("#share_setlist_modal").modal("hide");
+    })
+    .always(function() {
+        $("#saving").addClass("hidden");
+        refresh_setlist();
+    });
+});
+
+$("#copy_link_button").click(function() {
+    navigator.clipboard.writeText($("#share_link_input").val()).then(function() {
+        // Clipboard successfully set
+        $("#copy_link_success").fadeIn(100, function() {
+            $("#copy_link_success").fadeOut(5000);
+        })
+        console.log("Copied link to clipboard");
+    }, function() {
+        // Clipboard write failed, try using execCommand
+        console.warn("Clipboard API failed, trying execCommand");
+        var copyText = document.querySelector("#input");
+        $("#share_link_input").select();
+        document.execCommand("copy");
+        console.log("Copied link to clipboard with execCommand API");
     });
 });
 // #endregion

@@ -60,8 +60,13 @@ func makeRouter() *mux.Router {
 	// Setlists
 	r.HandleFunc("/collections/{collection_id}/setlists", VerifyCollectionID(RequireAuthentication(SetlistsHandler))).Methods("GET", "POST")
 	r.HandleFunc("/collections/{collection_id}/setlists/{setlist_id}", VerifySetlistID(VerifyCollectionID(RequireAuthentication(SetlistHandler)))).Methods("GET", "PUT", "DELETE")
+	r.HandleFunc("/collections/{collection_id}/setlists/{setlist_id}/visibility", VerifySetlistID(VerifyCollectionID(RequireAuthentication(SetlistVisibilityHandler)))).Methods("PUT")
 	r.HandleFunc("/collections/{collection_id}/setlists/{setlist_id}/songs", VerifySetlistID(VerifyCollectionID(RequireAuthentication(SetlistSongsHandler)))).Methods("GET", "POST", "PUT")
 	r.HandleFunc("/collections/{collection_id}/setlists/{setlist_id}/songs/{song_id}", VerifySetlistID(VerifyCollectionID(RequireAuthentication(SetlistSongHandler)))).Methods("DELETE")
+
+	// Public setlist
+	r.HandleFunc("/setlists/{share_code}", PublicSetlistHandler).Methods("GET")
+	r.HandleFunc("/setlists/{share_code}/songs", PublicSetlistSongsHandler).Methods("GET")
 
 	// r.HandleFunc("/books/{title}/page/{page}", func(w http.ResponseWriter, r *http.Request) {
 	// 	vars := mux.Vars(r)

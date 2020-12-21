@@ -86,6 +86,8 @@ CREATE TABLE IF NOT EXISTS setlists
 	name TEXT NOT NULL,
 	date DATE,
 	notes TEXT,
+	shared BOOL NOT NULL DEFAULT false,
+	share_code VARCHAR(16) UNIQUE,
 	user_id INT NOT NULL REFERENCES users(user_id),
 	collection_id INT NOT NULL REFERENCES collections(collection_id)
 );
