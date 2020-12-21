@@ -63,9 +63,7 @@ func PublicSetlistHandler(w http.ResponseWriter, r *http.Request) {
 // PublicSetlistSongsHandler handles returning songs from a public setlist
 func PublicSetlistSongsHandler(w http.ResponseWriter, r *http.Request) {
 	// Get URL parameters
-	shareCode := mux.Vars(r)["share_code"]
-
-	log.Printf("Public Setlist Songs GET - Share code: %v\n", shareCode)
+	shareCode := mux.Vars(r)["share_code"])
 
 	if r.Method == "GET" {
 		// Retrieve songs in setlist
