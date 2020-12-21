@@ -11,15 +11,12 @@
 		{{template "navbar.html"}}
 
 		<div class="container">
-			<div class="row">
-				<h1>Sheet Music Organizer</h1>
-			</div>
-			
+			<h1>Sheet Music Organizer</h1>
 			<hr>
 			
 			<div id="alerts"></div>
 
-			<div class="row">
+			<div>
 				<p>
 					Welcome to Sheet Music Organizer. The goal of this project is to help you organize and
 					categorize your sheet music, and keep you focused on your performance. Please
@@ -106,14 +103,7 @@
 			{{template "footer.html"}}
 		</div>
 
-		<script type="module">
-			import { add_alert, get_session_alert } from "/js/utilities.js";
-
-			// Check for any alerts
-			let alert = get_session_alert();
-			if (alert) {
-				add_alert(alert.title, alert.message, alert.style);
-			}
-		</script>
+		<!-- Script -->
+		<script src="/js/index.js" type="module"></script>
 	</body>
 </html>
