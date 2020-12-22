@@ -102,10 +102,14 @@
 			window.location.href = '/'; 
 		});
 	});
-	
+
+	$("#navbar_login a").attr("href", "/signin.html?redirect=" + encodeURIComponent(window.location.pathname + window.location.search));
+	$("#navbar_register a").attr("href", "/register.html?redirect=" + encodeURIComponent(window.location.pathname + window.location.search));
+
 	if (!is_user_logged_in()) {
 		$("#navbar_account").addClass("hidden");
 		$("#navbar_logout").addClass("hidden");
+		$("#navbar_collections").addClass("hidden");
 		$("#navbar_register").removeClass("hidden");
 		$("#navbar_login").removeClass("hidden");
 	}

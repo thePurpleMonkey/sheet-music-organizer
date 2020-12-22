@@ -18,9 +18,6 @@ let setlist = {
     shared: undefined,
 };
 
-// Hide navbar links
-$("#navbar_collections").addClass("hidden");
-
 function refresh_setlist() {
     $.get(`/setlists/${setlist.share_code}`)
     .done(function(data) {
