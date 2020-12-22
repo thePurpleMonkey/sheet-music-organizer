@@ -3,8 +3,9 @@
 	<head>
 		{{template "header.html"}}
 
-		<title>Accept Invitation - Sheet Music Organizer</title>
+		<link href="css/accept_invite.css" rel="stylesheet">
 
+		<title>Accept Invitation - Sheet Music Organizer</title>
 	</head>
 
 	<body>
@@ -16,49 +17,49 @@
 			<!-- Form -->
 
 			<div id="loading">
-				<h1 class="row">Loading...</h1>
-				<p class="row">Please wait while your invitation is loaded...</p>
+				<h1>Loading...</h1>
+				<p>Please wait while your invitation is loaded...</p>
 			</div>
 
 			<div id="failed" class="hidden">
-				<h1 class="row">Failure</h1>
-				<p class="row">There was a problem processing the invitation.</p>
-				<a href="#" id="logout" style="display: none;" class="row">Logout</a>
+				<h1>Failure</h1>
+				<p>There was a problem processing the invitation.</p>
+				<a href="#" id="logout" style="display: none;">Logout</a>
 			</div>
 
 			<div id="unauthorized" class="hidden">
-				<h1 class="row">You're almost there!</h1>
-				<p class="row">
+				<h1>You're almost there!</h1>
+				<p>
 					In order to join this collection, you must have an account.
 					Please login or register to finish.
 				</p>
-				<span class="row"><a href="/signin.html" class="needs_token">Login</a></span>
-				<span class="row"><a href="/register.html" class="needs_token">Register</a></span>
+				<span><a href="/signin.html" class="needs_token">Login</a></span>
+				<span><a href="/register.html" class="needs_token">Register</a></span>
 			</div>
 
 			<div id="confirm_invite" class="hidden">
-				<h1 class="row">Confirm</h1>
+				<h1>Confirm</h1>
 				<p>Please confirm the following information before accepting the invitation:</p>
 				<hr>
 
-				<div class="row">
-					<p class="col-sm-4">Inviter name:</p>
-					<p class="col-sm-8" id="name"></p>
+				<div>
+					<h5 class="invite_label">Inviter name</h5>
+					<div class="invite_value" id="name"></div>
 				</div>
 
-				<div class="row">
-					<p class="col-sm-4">Inviter email:</p>
-					<p class="col-sm-8" id="email"></p>
+				<div>
+					<h5 class="invite_label">Inviter email</h5>
+					<div class="invite_value" id="email"></div>
 				</div>
 
-				<div class="row">
-					<p class="col-sm-4">Collection:</p>
-					<p class="col-sm-8" id="collection"></p>
+				<div>
+					<h5 class="invite_label">Collection name</h5>
+					<div class="invite_value" id="collection"></div>
 				</div>
 
-				<div class="row">
-					<p class="col-sm-4">Administrator:</p>
-					<p class="col-sm-8" id="admin"></p>
+				<div>
+					<h5 class="invite_label">Administrator</h5>
+					<div class="invite_value" id="admin"></div>
 				</div>
 
 				<p>If this information looks correct, click Join to join this collection.</p>
@@ -86,6 +87,6 @@
 		</div>
 		
 		<!-- Script -->
-		<script src="js/accept_invite.js" type="module"></script>
+		<script src="/js/accept_invite.js" type="module"></script>
   </body>
 </html>

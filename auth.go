@@ -61,8 +61,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
 		// If there is something wrong with the request body, return a 400 status
 		log.Printf("Login - Error decoding request body: %v\n", err)
-		log.Printf("Body: %v\n", r.Body)
-		SendError(w, "Bad Request", http.StatusBadRequest)
+		SendError(w, `{"error": "Bad Request"}`, http.StatusBadRequest)
 		return
 	}
 

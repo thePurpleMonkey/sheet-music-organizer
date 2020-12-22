@@ -1,0 +1,11 @@
+.invite_value  {
+	margin-bottom: 1em;
+	font-size: large;
+}
+
+.invite_label {
+	margin-top: .5rem;
+	margin-bottom: 0;
+	color: gray;
+	font-size: small;
+}

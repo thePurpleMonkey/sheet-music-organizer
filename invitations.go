@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -35,6 +34,16 @@ type AcceptInvite struct {
 	InviterName    string `json:"inviter_name"`
 	InviterEmail   string `json:"inviter_email"`
 	Administrator  bool   `json:"administrator"`
+}
+
+// PendingInvite is a struct that is sent to a logged in user checking their pending invitations
+type PendingInvite struct {
+	InvitationID   int64  `json:"invitation_id"`
+	CollectionName string `json:"collection_name"`
+	InviterName    string `json:"inviter_name"`
+	InviterEmail   string `json:"inviter_email"`
+	Administrator  bool   `json:"administrator"`
+	Token          string `json:"token"`
 }
 
 // InvitationsHandler handles accepting invitations
@@ -109,8 +118,6 @@ func InvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			// If there is something wrong with the request body, return a 400 status
 			log.Printf("Invitations POST - Unable to parse request body: %v\n", err)
-			body, _ := ioutil.ReadAll(r.Body)
-			log.Printf("Body: %s\n", body)
 			SendError(w, `{"error": "Unable to parse request body."}`, http.StatusBadRequest)
 			return
 		}
@@ -232,8 +239,6 @@ func CollectionInvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			// If there is something wrong with the request body, return a 400 status
 			log.Printf("Invitations POST - Unable to parse request body: %v\n", err)
-			body, _ := ioutil.ReadAll(r.Body)
-			log.Printf("Body: %s\n", body)
 			SendError(w, `{"error": "Unable to parse request body."}`, http.StatusBadRequest)
 			return
 		}
@@ -405,6 +410,58 @@ func CollectionInvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.WriteHeader(http.StatusOK)
+		return
+	}
+}
+
+// UserInvitationsHandler handles checking for pending invitation for the current
+func UserInvitationsHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := store.Get(r, "session")
+	if err != nil {
+		log.Printf("User Invitations handler - Unable to get session: %v\n", err)
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
+		return
+	}
+
+	if r.Method == "GET" {
+		// Get all invitations for this user
+		rows, err := db.Query(`
+		SELECT invitation_id, collections.name, users.name, users.email, admin_invite, token
+		FROM invitations
+		JOIN users ON invitations.inviter_id = users.user_id
+		JOIN collections on invitations.collection_id = collections.collection_id
+		WHERE invitee_email = $1 
+		  AND retracted = false 
+		  AND invite_sent > CURRENT_TIMESTAMP - INTERVAL '7 days'`,
+			session.Values["email"])
+		if err != nil {
+			log.Printf("User Invitations GET - Unable to retrieve invitations from database for user %v: %v\n", session.Values["user_email"], err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		// Retrieve rows from database
+		invitations := make([]PendingInvite, 0)
+		for rows.Next() {
+			var invite PendingInvite
+			if err := rows.Scan(&invite.InvitationID, &invite.CollectionName, &invite.InviterName, &invite.InviterEmail, &invite.Administrator, &invite.Token); err != nil {
+				log.Printf("User Invitations GET - Unable to retrieve row from database result: %v\n", err)
+			}
+			invitations = append(invitations, invite)
+		}
+
+		// Check for errors from iterating over rows.
+		if err := rows.Err(); err != nil {
+			log.Printf("User Invitations GET - Error retrieving user invitations from database result: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
+		// Send response
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(invitations)
 		return
 	}
 }

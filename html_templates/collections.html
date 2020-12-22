@@ -3,11 +3,7 @@
   <head>
     {{template "header.html"}}
 
-    <style>
-      #new_collection {
-        margin-top: 10px;
-      }
-    </style>
+    <link href="/css/collections.css" rel="stylesheet">
 
     <title>Collections - Sheet Music Organizer</title>
   </head>
@@ -23,9 +19,7 @@
       <div id="alerts"></div>
 
       <!-- Collection list -->
-      <div id="collections" class="list-group">
-        <!-- <li id="loading">Loading collections, please wait...</li> -->
-      </div>
+      <div id="collections" class="list-group"></div>
       <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#new_collection_modal" id="new_collection">New collection</button>
 
       {{template "footer.html"}}
@@ -72,6 +66,27 @@
         </div>
         <div class="modal-body">
           <p>Please wait while we create your collection...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending invitations modal -->
+    <div class="modal fade" id="pending_invitations_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Pending invitations</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Click on an invitation to view it.</p>
+          <div class="list-group" id="pending_invitations_list"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         </div>
         </div>
       </div>

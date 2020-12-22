@@ -6,8 +6,6 @@ var collection_id;
 let token = getUrlParameter("token");
 
 // Hide options in navbar
-$("#navbar_logout").hide();
-$("#navbar_account").hide();
 $("#navbar_collections").hide();
 
 $(function() {
