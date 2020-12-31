@@ -93,8 +93,8 @@ export function is_user_logged_in(default_value = false) {
 	try {
 		return window.localStorage.getItem("logged_in") === "true";
 	} catch (err) {
-		console.log(`Error checking user login status. Returning default value ${default_value}`);
-		console.log(err);
+		console.error(`Error checking user login status. Returning default value ${default_value}`);
+		console.error(err);
 		return default_value;
 	}
 }
