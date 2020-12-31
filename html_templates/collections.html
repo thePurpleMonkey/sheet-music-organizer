@@ -4,7 +4,6 @@
     {{template "header.html"}}
 
     <link href="/css/collections.css" rel="stylesheet">
-
     <title>Collections - Sheet Music Organizer</title>
   </head>
 
@@ -17,6 +16,30 @@
       <hr>
 
       <div id="alerts"></div>
+
+      <div class="alert alert-info hidden tutorial" role="alert" id="new_collection_tutorial_alert">
+        <strong>Welcome to Sheet Music Organizer!</strong>
+        <div>
+          This page lists all of the collections you are a part of.
+          You can create as many collections as you need to keep your music organized.
+          Collections you have been invited to will also appear in this list.
+          There's nothing here at the moment, so let's create your first collection!
+          Click New collection to begin.
+          <br>
+          <br>
+          <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
+        </div>
+      </div>
+
+      <div class="alert alert-info hidden tutorial" role="alert" id="open_collection_tutorial_alert">
+        <strong>Open collection</strong>
+        <div>
+          Click on your newly created collection to start adding songs.
+          <br>
+          <br>
+          <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
+        </div>
+      </div>
 
       <!-- Collection list -->
       <div id="collections" class="list-group"></div>
@@ -38,10 +61,27 @@
           </button>
         </div>
         <div class="modal-body">
-          <form>
+
+          <!-- Tutorial alerts -->
+          <div class="alert alert-info hidden tutorial" role="alert" id="create_collection_tutorial_alert">
+            <strong>Create a new collection</strong>
+            <div>
+              Choose a name for your collection. 
+              You may also add a description to describe this collection.
+              Collection descriptions are shown in the collection details page,
+              as well as when users are invited to the collection.
+              <br>
+              Once you are finished, click Create collection.
+              <br>
+              <br>
+              <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
+            </div>
+          </div>
+
+          <form id="create_collection_form">
           <div class="form-group">
             <label for="name" class="col-form-label">Collection name:</label>
-            <input type="text" class="form-control" id="name">
+            <input type="text" class="form-control" id="name" required>
           </div>
           <div class="form-group">
             <label for="description" class="col-form-label">Collection description:</label>

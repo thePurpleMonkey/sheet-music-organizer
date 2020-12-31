@@ -21,6 +21,55 @@
 
       <div id="alerts"></div>
 
+      <!-- Tutorial alerts -->
+      <div class="alert alert-info hidden tutorial" role="alert" id="dashboard_add_tag_tutorial_alert">
+        <strong>Dashboard</strong>
+        <div>
+          This is the dashboard for your collection.
+          It is where you can see all the songs and tags in your collection.
+          <br>
+          <span class="Click">Click</span> Add tag to start your collection.
+          <br>
+          <br>
+          <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
+        </div>
+      </div>
+      <div class="alert alert-info hidden tutorial" role="alert" id="dashboard_add_song_tutorial_alert">
+        <strong>Dashboard</strong>
+        <div>
+          Now you can organize your songs with tags.
+          <br>
+          <span class="Click">Click</span> Add song to continue.
+          <br>
+          <br>
+          <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
+        </div>
+      </div>
+      <div class="alert alert-info hidden tutorial" role="alert" id="dashboard_complete_tutorial_alert">
+        <strong>Tutorial complete!</strong>
+        <div>
+          <p>
+            Congratulations! Now you know how to add songs and tags to your collection.
+            Keep adding and tagging songs and your collection will be organized in no time!
+          </p>
+          <p>
+            Here are some more tips to get you started:
+          </p>
+          <ul style="margin-top: -.5rem">
+            <li><span class="Click">Click</span> on a song or tag to view more details about it.</li>
+            <li>You can edit the item you are viewing by <span class="clicking">clicking</span> the Edit button in the Options menu.</li>
+            <li>Similarly, you can delete an item by <span class="clicking">clicking</span> the Delete button in the Options menu. This action is immediate and permanent, so make sure you're absolutely certain.</li>
+            <li>Use setlists to create a list of songs to plan and share future performances.</li>
+            <li>Customize your dashboard  by <span class="clicking">clicking</span> on Settings in the Options menu.</li>
+            <li>Invite members to view and manage your collection with you  by <span class="clicking">clicking</span> on Members in the Options menu from the dashboard.</li>
+            <li>You can quickly search for a song by keyword using the quick search at the top of the screen at any time.</li>
+            <li>Use Advanced Search to search for songs based on keywords, exclude keywords, tags, and last performed date by <span class="clicking">clicking</span> the Advanced Search button in the Options menu of the dashboard or <span class="click">clicking</span> the link in the quick search results page.</li>
+          </ul>
+          <p>That's it! If you have any questions, don't hesitate to reach out to <a href="mailto:sheetmusicorganizer@michaelhumphrey.dev">sheetmusicorganizer@michaelhumphrey.dev</a> for assistance.</p>
+          <a href="javascript:;" class="alert-link hide_tutorial">Close tutorial</a>
+        </div>
+      </div>
+
       <!-- Main view -->
       <div class="row row-cols-2">
         <!-- All songs list -->
@@ -58,10 +107,25 @@
           </button>
         </div>
         <div class="modal-body">
-          <form>
+
+          <!-- Tutorial alerts -->
+          <div class="alert alert-info hidden tutorial" role="alert" id="add_song_tutorial_alert">
+            Here is where you can add details about a song.
+            You must specify a name for the song, but everything else is optional.
+            The Artist, Location, and Notes fields are all searchable, and you can use the Last Performed date to filter songs in search results.
+            The Location field will recognize links and make them <span class="click">click</span>able, so you can easily access sheet music stored online.
+            Links will also be made <span class="click">click</span>able in the Notes field, as well as provide thumbnails for links to YouTube videos.
+            You may also select from the available tags at the bottom to create the song with.
+            <br><br>
+            Once you have added a name and any other information you wish, <span class="click">click</span> Add song.
+            <br><br>
+            <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
+          </div>
+
+          <form id="add_song_form">
           <div class="form-group">
             <label for="name" class="col-form-label">Name:</label>
-            <input type="text" class="form-control" id="name">
+            <input type="text" class="form-control" id="name" required>
           </div>
           <div class="form-group">
             <label for="artist" class="col-form-label">Artist:</label>
@@ -95,7 +159,7 @@
     </div>
 
     <!-- Add song wait modal -->
-    <div class="modal fade in" tabindex="-1" role="dialog" id="song_wait">
+    <div class="modal fade in" tabindex="-1" role="dialog" id="song_wait" data-backdrop="static" data-keyboard="false">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
         <div class="modal-header">
@@ -121,10 +185,21 @@
           </button>
         </div>
         <div class="modal-body">
-          <form>
+
+          <!-- Tutorial alerts -->
+          <div class="alert alert-info hidden tutorial" role="alert" id="add_tag_tutorial_alert">
+            Choose a name for this tag, and optionally any information you want to include in this tag's description.
+            Tag descriptions can be viewed when viewing tag details.
+            <br><br>
+            Once you have added a name, <span class="click">click</span> Add tag.
+            <br><br>
+            <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
+          </div>
+
+          <form id="add_tag_form">
           <div class="form-group">
             <label for="tag_name" class="col-form-label">Name:</label>
-            <input type="text" class="form-control" id="tag_name">
+            <input type="text" class="form-control" id="tag_name" required>
           </div>
           <div class="form-group">
             <label for="tag_description" class="col-form-label">Description:</label>
@@ -141,7 +216,7 @@
     </div>
 
     <!-- Add tag wait modal -->
-    <div class="modal fade in" tabindex="-1" role="dialog" id="tag_wait">
+    <div class="modal fade in" tabindex="-1" role="dialog" id="tag_wait" data-backdrop="static" data-keyboard="false">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
         <div class="modal-header">

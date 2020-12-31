@@ -1,11 +1,14 @@
 "use strict";
 
 import { add_alert, getUrlParameter, alert_ajax_failure, get_session_alert, dates } from "./utilities.js";
+import "./modernizr-touch.js";
 
 let add_song = false;
 let add_tag = false;
 let edit_collection = false;
 let delete_collection = false;
+
+let tutorial = false;
 
 let collection = {
     // Parse collection ID from URL parameter
@@ -36,9 +39,21 @@ $("#navbar_setlists").removeClass("hidden");
 
 // Get collection info when document becomes ready
 $(function() {
+	// Enable form validation
+    $("#add_song_form").validate();
+    $("#add_tag_form").validate();
+
+    // Load dashboard settings
     reloadSettings();
 
-    // Handler for .ready() called.
+    console.log("Touch enabled: " + Modernizr.touchevents)
+    if (Modernizr.touchevents) {
+        $(".clicking").text("tapping");
+        $(".click").text("tap");
+        $(".Click").text("Tap");
+    }
+    
+    // Get collection data
     $.get(`/collections/${collection.id}`)
     .done(function(data) {
         console.log(data);
@@ -65,14 +80,17 @@ $(function() {
         alert_ajax_failure("Unable to get collection information!", data);
     });
 
-    reloadSongs();
-    reloadTags();
-
 	// Check for any alerts
 	let alert = get_session_alert();
 	if (alert) {
 		add_alert(alert.title, alert.message, alert.style);
-	}
+    }
+    
+    // Show tutorial when dashboard has fully loaded
+    $.when(reloadSongs(), reloadTags()).then(function() {
+        console.log("Showing tutorial");
+        initialize_tutorial();
+    });
 });
 
 function name_compare(item1, item2) {
@@ -90,6 +108,9 @@ function reloadSongs() {
     if (settings.hidden_tags.length > 0) {
         payload = { exclude_tags: JSON.stringify(settings.hidden_tags) };
     }
+
+    let result = $.Deferred();
+
     $.get(`/collections/${collection.id}/songs`, payload)
     .done(function(data) {
         console.log("Get songs result:");
@@ -112,6 +133,10 @@ function reloadSongs() {
             a.text(song.name);
             $("#songs").append(a);
         });
+
+        if (tutorial) { update_tutorial() }
+
+        result.resolve(data);
     })
     .fail(function(data) {
         if (data.status === 403) {
@@ -119,10 +144,13 @@ function reloadSongs() {
         }
 
         alert_ajax_failure("Unable to get songs!", data);
+        result.reject(data);
     })
     .always(function() {
         $("#loading").remove();
     });
+
+    return result.promise();
 };
 
 function reloadTags() {
@@ -130,6 +158,9 @@ function reloadTags() {
     $("#hide_tag_list").empty();
 
     $("#tags").append('<a class="list-group-item">Loading tags, please wait...</a>');
+
+    let result = $.Deferred();
+    
     $.get(`/collections/${collection.id}/tags`)
     .done(function(data) {
         console.log("Get tags result:");
@@ -171,13 +202,20 @@ function reloadTags() {
             }
             $("#hide_tag_list").append(button);
         });
+
+        if (tutorial) { update_tutorial() }
+
+        result.resolve(data);
     })
     .fail(function(data) {
         alert_ajax_failure("Unable to get tags!", data);
+        result.reject(data);
     })
     .always(function() {
         $("#loading").remove();
     });
+
+    return result.promise();
 };
 
 function reloadSettings() {
@@ -282,8 +320,10 @@ $("#add_song_modal").on("show.bs.modal", function() {
 });
 
 $("#add_song_modal_button").click(function() {
-    add_song = true;
-    $("#add_song_modal").modal("hide");
+    if ($("#add_song_form").valid()) {
+        add_song = true;
+        $("#add_song_modal").modal("hide");
+    }
 });
 $('#add_song_modal').on('hidden.bs.modal', function (e) {
     if (add_song) {
@@ -321,6 +361,7 @@ $('#song_wait').on('shown.bs.modal', function (e) {
     })
     .fail(function(data) {
         alert_ajax_failure("Unable to add song!", data);
+        $("#song_wait").modal("hide");
     })
     .always(function() {
         add_song = false;
@@ -428,8 +469,10 @@ $('#delete_collection_wait').on('shown.bs.modal', function (e) {
 
 // #region Add Tag
 $("#add_tag_modal_button").click(function() {
-    add_tag = true
-    $("#add_tag_modal").modal("hide");
+    if ($("#add_tag_form").valid()) {
+        add_tag = true
+        $("#add_tag_modal").modal("hide");
+    }
 });
 $('#add_tag_modal').on('hidden.bs.modal', function (e) {
     if (add_tag) {
@@ -489,4 +532,52 @@ $("#settings_save_button").click(function() {
 $("#settings_modal").on("hidden.bs.modal", function() {
     reloadSettings();
 });
+// #endregion
+
+// #region Tutorial
+function hide_tutorial() {
+	console.log("Hide tutorial clicked.");
+	try {
+		window.localStorage.setItem("show_tutorial", false);
+	} catch (err) {
+		console.warn("Unable to hide tutorial");
+		console.warn(err);
+	} finally {
+		$(".tutorial").hide(500);
+	}
+}
+
+function initialize_tutorial() {
+	tutorial = window.localStorage.getItem("show_tutorial");
+	console.log("Tutorial: " + tutorial);
+	if (tutorial != "false") {
+        // Show tutorials
+        $("#add_song_tutorial_alert").removeClass("hidden");
+        $("#add_tag_tutorial_alert").removeClass("hidden");
+
+        update_tutorial();
+
+		$(".hide_tutorial").click(hide_tutorial);
+	}
+}
+
+// Updates the tutorial alert on the dashboard
+function update_tutorial() {
+    console.log("Updating tutorial");
+    console.log("Tags: " + $("#tags").children().length);
+    console.log("Songs: " + $("#songs").children().length);
+    if ($("#tags").children().length == 0) {
+        $("#dashboard_add_tag_tutorial_alert").removeClass("hidden");
+        $("#dashboard_add_song_tutorial_alert").addClass("hidden");
+        $("#dashboard_complete_tutorial_alert").addClass("hidden");
+    } else if ($("#songs").children().length == 0) {
+        $("#dashboard_add_song_tutorial_alert").removeClass("hidden");
+        $("#dashboard_add_tag_tutorial_alert").addClass("hidden");
+        $("#dashboard_complete_tutorial_alert").addClass("hidden");
+    } else {
+        $("#dashboard_add_song_tutorial_alert").addClass("hidden");
+        $("#dashboard_add_tag_tutorial_alert").addClass("hidden");
+        $("#dashboard_complete_tutorial_alert").removeClass("hidden");
+    }
+}
 // #endregion

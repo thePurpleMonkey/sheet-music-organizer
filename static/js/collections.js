@@ -1,6 +1,6 @@
 "use strict";
 
-import { add_alert, alert_ajax_failure, get_session_alert } from "./utilities.js";
+import { add_alert, alert_ajax_failure, create_alert, get_session_alert } from "./utilities.js";
 
 let create_collection = false;
 let pending_invitations = [];
@@ -20,6 +20,10 @@ function refreshCollections() {
 				.text(collection.name);
 			$("#collections").append(a);
 		});
+		
+		if (data.length == 0) {
+			show_tutorial();
+		}
 	})
 	.fail(function(data) {
 		if (data.status == 403) {
@@ -35,6 +39,10 @@ function refreshCollections() {
 };
 
 $(function() {
+	// Enable form validation
+	$("#create_collection_form").validate();
+
+	// Load collections
 	refreshCollections();
 
 	// Check for any alerts
@@ -43,17 +51,22 @@ $(function() {
 		add_alert(alert.title, alert.message, alert.style);
 	}
 
+	// Check for any pending invitations for this user
 	check_pending_invitations();
 });
 
 // #region Create collection
 $("#create_collection").click(function() {
-	create_collection = true;
-	$("#new_collection_modal").modal("hide");
+	if ($("#create_collection_form").valid()) {
+		create_collection = true;
+		$("#new_collection_modal").modal("hide");
+	}
 });
 
 $('#new_collection_modal').on('hidden.bs.modal', function (e) {
-	$("#wait").modal("show");
+	if (create_collection) {
+		$("#wait").modal("show");
+	}
 });
 
 $('#wait').on('shown.bs.modal', function (e) {
@@ -62,6 +75,10 @@ $('#wait').on('shown.bs.modal', function (e) {
 	.done(function(data) {
 		console.log(data);
 		add_alert("Collection created!", "The collection was successfully created.", "success");
+
+		// Show next step of tutorial
+		$("#new_collection_tutorial_alert").hide();
+		$("#open_collection_tutorial_alert").show();
 	})
 	.fail(function(data) {
 		alert_ajax_failure("Unable to create collection!", data);
@@ -104,4 +121,28 @@ $("#pending_invitations_modal").on("show.bs.modal", function() {
 	});
 });
 
+// #endregion
+
+// #region Tutorial
+function hide_tutorial() {
+	console.log("Hide tutorial clicked.");
+	try {
+		window.localStorage.setItem("show_tutorial", false);
+	} catch (err) {
+		console.warn("Unable to hide tutorial");
+		console.warn(err);
+	} finally {
+		$(".tutorial").hide(500);
+	}
+}
+
+function show_tutorial() {
+	let tutorial = window.localStorage.getItem("show_tutorial");
+	console.log("Tutorial: " + tutorial);
+	if (tutorial != "false") {
+		$("#new_collection_tutorial_alert").removeClass("hidden");
+		$("#create_collection_tutorial_alert").removeClass("hidden");
+		$(".hide_tutorial").click(hide_tutorial);
+	}
+}
 // #endregion

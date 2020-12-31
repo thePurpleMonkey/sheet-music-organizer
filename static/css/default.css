@@ -5,3 +5,11 @@
 #navbar_options {
 	min-width: 91px; /* Just enough to prevent the content inside to wrap */
 }
+
+.error {
+	color: red;
+}
+
+input.error {
+	border: 1px solid red;
+}
