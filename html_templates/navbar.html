@@ -103,8 +103,10 @@
 		});
 	});
 
-	$("#navbar_login a").attr("href", "/signin.html?redirect=" + encodeURIComponent(window.location.pathname + window.location.search));
-	$("#navbar_register a").attr("href", "/register.html?redirect=" + encodeURIComponent(window.location.pathname + window.location.search));
+	if (window.location.pathname.length > 1) {
+		$("#navbar_login a").attr("href", "/signin.html?redirect=" + encodeURIComponent(window.location.pathname + window.location.search));
+		$("#navbar_register a").attr("href", "/register.html?redirect=" + encodeURIComponent(window.location.pathname + window.location.search));
+	}
 
 	if (is_user_logged_in()) {
 		$("#navbar_account").removeClass("hidden");
