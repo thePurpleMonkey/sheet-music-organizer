@@ -90,12 +90,12 @@
 	$("#navbar_logout").click(function() { 
 		$.get('/user/logout')
 		.done(function() {
-			// Set the user to be logged in
+			// Set the user to be logged out
 			try {
 				window.localStorage.setItem("logged_in", false);
 			} catch (err) {
-				console.log("Unable to set local storage variable 'logged_in'");
-				console.log(err);
+				console.warn("Unable to set local storage variable 'logged_in'");
+				console.warn(err);
 			}
 
 			// Redirect to homepage

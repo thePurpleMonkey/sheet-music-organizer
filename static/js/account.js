@@ -134,8 +134,20 @@ $("#delete_account_wait").on("shown.bs.modal", function() {
 	.done(function(data) {
 		console.log("Delete account response:");
 		console.log(data);
+		
+		// Set the user to be logged out
+		try {
+			window.localStorage.setItem("logged_in", false);
+		} catch (err) {
+			console.warn("Unable to set local storage variable 'logged_in'");
+			console.warn(err);
+		}
+
+		// Add success messages
 		add_alert("Account deleted.", "Your account has been successfully deleted.", "success");
 		add_session_alert("Account deleted.", "Your account has been successfully deleted.", "success");
+
+		// Redirect user to home page
 		window.location.href = "/";
 	})
 	.fail(function(data) {
