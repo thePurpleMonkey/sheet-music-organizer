@@ -30,8 +30,8 @@ $("#setlists_link").attr("href", "/setlists.html?collection_id=" + collection.id
 $("#advanced_search_dropdown_link").attr("href", "/advanced_search.html?collection_id=" + collection.id);
 
 // Show options in navbar
-$("#navbar_options").show();
-$("#navbar_members").show();
+$("#navbar_options").removeClass("hidden");
+$("#navbar_members").removeClass("hidden");
 $("#leave_button").removeClass("hidden");
 $("#search_form").removeClass("hidden");
 $("#navbar_settings").removeClass("hidden");
