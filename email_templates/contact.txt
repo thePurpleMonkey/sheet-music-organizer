@@ -1,0 +1,22 @@
+Sheet Music Organizer - Contact Us Form Response
+
+New message from the Contact Us form on Sheet Music Organizer.
+
+User Message:
+
+Name: {{.Name}}
+Email Address: {{.Email}}
+Message: {{.Message}}
+
+
+
+User information:
+
+Authenticated message: {{.UserAuthenticated}}
+{{- if .UserAuthenticated}}
+User ID: {{.UserID}}
+Account Name: {{.UserName}}
+Account Email: {{.UserEmail}}
+Account Verified: {{.UserVerified}}
+Account Restricted: {{.UserRestricted}}
+{{- end}}

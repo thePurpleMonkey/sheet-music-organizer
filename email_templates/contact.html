@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<head>
+	<style>
+		.bold {
+			font-weight: bold;
+		}
+
+		.value  {
+			margin-bottom: 1em;
+			font-size: large;
+		}
+
+		.label {
+			margin-top: .5rem;
+			margin-bottom: 0;
+			color: gray;
+			font-size: small;;
+		}
+
+		.header {
+			margin-top: 2em;
+			/* margin-bottom: -.25em; */
+		}
+	</style>
+</head>
+<body>
+	<h1>Sheet Music Organizer</h1>
+	<h2>Contact Us Form Response</h2>
+	<hr>
+
+	<p class="value">New message from the Contact Us form on Sheet Music Organizer.</p>
+
+	<div>
+		<h2 class="header">User Message:</h2>
+        <div>
+          <h5 class="label">Name</h5>
+          <div class="value">{{.Name}}</div>
+		</div>
+        <div>
+          <h5 class="label">Email Address</h5>
+          <div class="value">{{.Email}}</div>
+		</div>
+        <div>
+          <h5 class="label">Message</h5>
+          <div class="value">{{.Message}}</div>
+		</div>
+		
+		<h2 class="header">User information:</h2>
+        <div>
+			<h5 class="label">Authenticated message</h5>
+			<div class="value">{{.UserAuthenticated}}</div>
+		</div>
+
+		{{if .UserAuthenticated}}
+        <div>
+          <h5 class="label">User ID</h5>
+          <div class="value">{{.UserID}}</div>
+		</div>
+        <div>
+          <h5 class="label">Account Name</h5>
+          <div class="value">{{.UserName}}</div>
+		</div>
+        <div>
+          <h5 class="label">Account Email</h5>
+          <div class="value">{{.UserEmail}}</div>
+		</div>
+        <div>
+          <h5 class="label">Account Verified</h5>
+          <div class="value">{{.UserVerified}}</div>
+		</div>
+        <div>
+          <h5 class="label">Account Restricted</h5>
+          <div class="value">{{.UserRestricted}}</div>
+		</div>
+		{{end}}
+	</div>
+</body>

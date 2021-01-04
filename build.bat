@@ -9,6 +9,7 @@ set KEY_FILE=C:\Users\mhump\.ssh\localhost.key
 set PORT=8000
 set DB_USERNAME=smo
 set DB_PASSWORD=smo-test
+set ADMIN_EMAIL=sheetmusicorganizer@michaelhumphrey.dev
 go build -ldflags="-linkmode=internal -extld=none"
 if /I "%ERRORLEVEL%" NEQ "0" (
 	echo Build failed.

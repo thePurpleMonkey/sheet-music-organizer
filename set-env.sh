@@ -6,4 +6,4 @@ export KEY_FILE=/etc/letsencrypt/live/michaelhumphrey.dev/privkey.pem
 export PORT=8000
 export DB_USERNAME=smo_user
 export DB_PASSWORD=$(cat db_password.txt)
-
+export ADMIN_EMAIL=sheetmusicorganizer@michaelhumphrey.dev

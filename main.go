@@ -69,6 +69,9 @@ func makeRouter() *mux.Router {
 	r.HandleFunc("/setlists/{share_code}", PublicSetlistHandler).Methods("GET")
 	r.HandleFunc("/setlists/{share_code}/songs", PublicSetlistSongsHandler).Methods("GET")
 
+	// Contact Us
+	r.HandleFunc("/contact", ContactHandler).Methods("POST")
+
 	// r.HandleFunc("/books/{title}/page/{page}", func(w http.ResponseWriter, r *http.Request) {
 	// 	vars := mux.Vars(r)
 	// 	title := vars["title"]
@@ -109,6 +112,10 @@ func main() {
 
 	if os.Getenv("KEY_FILE") == "" {
 		panic("Key path not set!")
+	}
+
+	if os.Getenv("ADMIN_EMAIL") == "" {
+		panic("Administrator email address not set!")
 	}
 
 	var port string
