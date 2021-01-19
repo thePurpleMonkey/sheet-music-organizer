@@ -179,3 +179,24 @@ export var dates = {
         );
     }
 };
+
+// #region Tutorial
+
+export function disable_tutorial(user_id) {
+	console.log(`Disabling tutorial for user ${user_id}`);
+	try {
+		window.localStorage.setItem(`show_tutorial_user_${user_id}`, false);
+	} catch (err) {
+		console.warn("Unable to disable tutorial");
+		console.warn(err);
+	}
+}
+
+export function is_tutorial_enabled(user_id) {
+	let key = `show_tutorial_user_${user_id}`;
+	console.log("Loading local storage key: " + key);
+	let tutorial = window.localStorage.getItem(key);
+	console.log("Tutorial: " + tutorial);
+	return tutorial != "false";
+}
+// #endregion

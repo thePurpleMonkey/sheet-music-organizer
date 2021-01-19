@@ -1,19 +1,24 @@
 "use strict";
 
-import { add_alert, alert_ajax_failure, create_alert, get_session_alert } from "./utilities.js";
+import { add_alert, alert_ajax_failure, create_alert, get_session_alert, disable_tutorial, is_tutorial_enabled } from "./utilities.js";
 
 let create_collection = false;
 let pending_invitations = [];
+let user_id = undefined;
 
 function refreshCollections() {
 	$("#collections").empty();
 	$("#collections").append("<li>Loading collections, please wait...</li>");
 	$.get("/collections")
 	.done(function(data) {
+		console.log("Get collections response:");
 		console.log(data);
 		$("#collections").empty();
 
-		data.forEach(collection => {
+		user_id = data.user_id;
+		console.log(`User ID: ${user_id}`);
+
+		data.collections.forEach(collection => {
 			let a = $("<a>")
 				.attr("href", "/collection.html?collection_id=" + collection.collection_id)
 				.addClass("list-group-item list-group-item-action")
@@ -21,7 +26,7 @@ function refreshCollections() {
 			$("#collections").append(a);
 		});
 		
-		if (data.length == 0) {
+		if (data.collections.length == 0) {
 			show_tutorial();
 		}
 	})
@@ -125,21 +130,12 @@ $("#pending_invitations_modal").on("show.bs.modal", function() {
 
 // #region Tutorial
 function hide_tutorial() {
-	console.log("Hide tutorial clicked.");
-	try {
-		window.localStorage.setItem("show_tutorial", false);
-	} catch (err) {
-		console.warn("Unable to hide tutorial");
-		console.warn(err);
-	} finally {
-		$(".tutorial").hide(500);
-	}
+	disable_tutorial(user_id);
+	$(".tutorial").hide(500);
 }
 
 function show_tutorial() {
-	let tutorial = window.localStorage.getItem("show_tutorial");
-	console.log("Tutorial: " + tutorial);
-	if (tutorial != "false") {
+	if (is_tutorial_enabled(user_id)) {
 		$("#new_collection_tutorial_alert").removeClass("hidden");
 		$("#create_collection_tutorial_alert").removeClass("hidden");
 		$(".hide_tutorial").click(hide_tutorial);

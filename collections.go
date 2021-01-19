@@ -18,6 +18,12 @@ type Collection struct {
 	Admin        *bool  `json:"admin,omitempty"`
 }
 
+// CollectionsResponse is the data that is returned when the user requests their list of collections
+type CollectionsResponse struct {
+	UserID      int64        `json:"user_id"`
+	Collections []Collection `json:"collections"`
+}
+
 // CollectionsHandler handles GETting all of the user's collections and POSTing a new collection.
 func CollectionsHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "session")
@@ -28,8 +34,13 @@ func CollectionsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "GET" {
+		response := CollectionsResponse{
+			session.Values["user_id"].(int64),
+			make([]Collection, 0),
+		}
+
 		// Get a list of all user's collections
-		rows, err := db.Query("SELECT collection_id, name, description FROM collection_members NATURAL JOIN collections WHERE user_id = $1", session.Values["user_id"])
+		rows, err := db.Query("SELECT collection_id, name, description FROM collection_members NATURAL JOIN collections WHERE user_id = $1", response.UserID)
 		if err != nil {
 			log.Printf("Collections GET - Unable to retrieve collections from database: %v\n", err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
@@ -38,13 +49,12 @@ func CollectionsHandler(w http.ResponseWriter, r *http.Request) {
 		defer rows.Close()
 
 		// Retrieve rows from database
-		collections := make([]Collection, 0)
 		for rows.Next() {
 			var collection Collection
 			if err := rows.Scan(&collection.CollectionID, &collection.Name, &collection.Description); err != nil {
 				log.Printf("Unable to retrieve row from database result: %v\n", err)
 			}
-			collections = append(collections, collection)
+			response.Collections = append(response.Collections, collection)
 		}
 
 		// Check for errors from iterating over rows.
@@ -57,7 +67,7 @@ func CollectionsHandler(w http.ResponseWriter, r *http.Request) {
 		// Send response
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(collections)
+		json.NewEncoder(w).Encode(response)
 		return
 
 	} else if r.Method == "POST" {

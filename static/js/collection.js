@@ -548,8 +548,11 @@ function hide_tutorial() {
 }
 
 function initialize_tutorial() {
-	tutorial = window.localStorage.getItem("show_tutorial");
-	console.log("Tutorial: " + tutorial);
+	let key = `show_tutorial_user_${user_id}`;
+	console.log("Loading local storage key: " + key);
+	let tutorial = window.localStorage.getItem(key);
+    console.log("Tutorial: " + tutorial);
+    
 	if (tutorial != "false") {
         // Show tutorials
         $("#add_song_tutorial_alert").removeClass("hidden");
