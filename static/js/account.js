@@ -19,9 +19,9 @@ $("#edit_email").tooltip({
 function reset_ui() {
 	$("#email").text("Loading...");
 	$("#name").text("Loading...");
-	$("#verified").hide();
-	$("#not_verified").hide();
-	$("#verify_loading").show();
+	$("#verified").addClass("hidden");
+	$("#not_verified").addClass("hidden");
+	$("#verify_loading").removeClass("hidden");
 }
 
 function refresh_account() {
@@ -34,11 +34,11 @@ function refresh_account() {
 		$("#edit_email").val(data.email);
 		$("#name").text(data.name);
 		$("#edit_name").val(data.name);
-		$("#verify_loading").hide();
+		$("#verify_loading").addClass("hidden");
 		if (data.verified) {
-			$("#verified").show();
+			$("#verified").removeClass("hidden");
 		} else {
-			$("#not_verified").show();
+			$("#not_verified").removeClass("hidden");
 		}
 		$("#name").text(data.name);
 	})
