@@ -49,7 +49,7 @@ func checkPasswordHash(password, hash string) bool {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, "session")
+	session, err := getSession(r)
 	if err != nil {
 		log.Printf("Login - Unable to retrieve session store: %v\n", err)
 		SendError(w, err.Error(), http.StatusInternalServerError)
@@ -104,6 +104,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 	if user.RememberMe {
 		session.Options.MaxAge = 86400 * 30 // 30 days
+		// session.Options.MaxAge = 1 // Expire after 60 seconds for debugging
 	} else {
 		session.Options.MaxAge = 0 // Expire at end of session
 	}
@@ -116,7 +117,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 }
 
 func logout(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, "session")
+	session, err := getSession(r)
 	if err != nil {
 		log.Printf("Logout - Unable to retrieve session store: %v\n", err)
 		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
@@ -135,7 +136,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func register(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, "session")
+	session, err := getSession(r)
 	if err != nil {
 		log.Printf("Register - Unable to retrieve session store: %v\n", err)
 		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
@@ -338,7 +339,7 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 
 	// Set user as authenticated
 	var session *sessions.Session
-	if session, err = store.Get(r, "session"); err != nil {
+	if session, err = getSession(r); err != nil {
 		log.Printf("Password Reset - Unable to get session variables: %v\n", err)
 		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
@@ -356,7 +357,7 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 // and returns a 403 Forbidden error if not.
 func RequireAuthentication(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := store.Get(r, "session")
+		session, err := getSession(r)
 		if err != nil {
 			log.Printf("Require Authentication - Unable to get session: %v\n", err)
 			SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
@@ -378,7 +379,7 @@ func RequireAuthentication(f http.HandlerFunc) http.HandlerFunc {
 // to access a collection, and returns a 403 Forbidden error if not.
 func VerifyCollectionID(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := store.Get(r, "session")
+		session, err := getSession(r)
 		if err != nil {
 			log.Printf("Verify Collection ID - Unable to get session: %v\n", err)
 			SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
@@ -417,7 +418,7 @@ func VerifyCollectionID(f http.HandlerFunc) http.HandlerFunc {
 // to access a setlist, and returns a 403 Forbidden error if not.
 func VerifySetlistID(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := store.Get(r, "session")
+		session, err := getSession(r)
 		if err != nil {
 			log.Printf("Verify Setlist ID - Unable to get session: %v\n", err)
 			SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
@@ -498,4 +499,21 @@ func updateLoginTime(loginTime time.Time, userID int64) {
 	if _, err := db.Exec("UPDATE users SET last_login = $1 WHERE user_id = $2", loginTime, userID); err != nil {
 		log.Printf("updateLoginTime - Unable to update user %d last login time: %v\n", userID, err)
 	}
+}
+
+func getSession(r *http.Request) (*sessions.Session, error) {
+	session, err := store.Get(r, "session")
+	if err != nil {
+		log.Printf("getSession - Unable to get session: %v\n", err)
+
+		session, err = store.New(r, "session")
+		if err != nil {
+			log.Printf("getSession - Unable to create new session: %v\n", err)
+			return nil, err
+		}
+
+		log.Printf("getSession - Created new session.\n")
+	}
+
+	return session, nil
 }
