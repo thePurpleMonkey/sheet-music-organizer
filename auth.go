@@ -49,13 +49,6 @@ func checkPasswordHash(password, hash string) bool {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	session, err := getSession(r)
-	if err != nil {
-		log.Printf("Login - Unable to retrieve session store: %v\n", err)
-		SendError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	// Parse and decode the request body into a new `User` instance
 	user := &User{}
 	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
@@ -90,6 +83,14 @@ func login(w http.ResponseWriter, r *http.Request) {
 	IDs, err := getAuthorizedCollectionIDs(userID)
 	if err != nil {
 		SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+		return
+	}
+
+	// Create new session
+	session, err := store.New(r, "session")
+	if err != nil {
+		log.Printf("Login - Unable to create new session: %v\n", err)
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
@@ -136,13 +137,6 @@ func logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func register(w http.ResponseWriter, r *http.Request) {
-	session, err := getSession(r)
-	if err != nil {
-		log.Printf("Register - Unable to retrieve session store: %v\n", err)
-		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
-		return
-	}
-
 	// Parse and decode the request body into a new `User` instance
 	user := &User{}
 	if err := json.NewDecoder(r.Body).Decode(user); err != nil {
@@ -185,6 +179,14 @@ func register(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Register - Unable to insert new user into database: %v\n", err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 		}
+		return
+	}
+
+	// Create new session
+	session, err := store.New(r, "session")
+	if err != nil {
+		log.Printf("Register - Unable to create new session: %v\n", err)
+		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
