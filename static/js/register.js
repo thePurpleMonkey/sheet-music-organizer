@@ -26,6 +26,16 @@ $("#wait").on('shown.bs.modal', function (e) {
 				console.log("Unable to set localStorage variable 'logged_in' to true.");
 				console.log(err);
 			}
+			
+			// Save the user_id
+			try {
+				console.log("Login response data:");
+				console.log(data);
+				window.localStorage.setItem("user_id", data.user_id);
+			} catch (err) {
+				console.log("Unable to set localStorage variable 'user_id'");
+				console.log(err);
+			}
 
 			// Redirect to next URL
 			let redirect = new URL(window.location.href).searchParams.get("redirect");

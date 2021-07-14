@@ -366,6 +366,7 @@ $('#song_wait').on('shown.bs.modal', function (e) {
     .always(function() {
         add_song = false;
         reloadSongs();
+        update_tutorial();
     });
 });
 function add_song_tags(song_id) {
@@ -507,6 +508,9 @@ $('#tag_wait').on('shown.bs.modal', function (e) {
         reloadTags();
         $("#add_tag").val("");
         $("#tag_description").val("");
+        
+        // Update tutorial
+        update_tutorial();
     });
 });
 // #endregion
@@ -548,9 +552,19 @@ function hide_tutorial() {
 }
 
 function initialize_tutorial() {
+    // Get stored user_id
+    let user_id;
+    try {
+        user_id = window.localStorage.getItem("user_id");
+        console.log("Retrieved user_id = " + user_id)
+    } catch (err) {
+        console.log("Unable to retrieve localStorage variable 'user_id'");
+        console.log(err);
+    }
+
 	let key = `show_tutorial_user_${user_id}`;
 	console.log("Loading local storage key: " + key);
-	let tutorial = window.localStorage.getItem(key);
+	tutorial = window.localStorage.getItem(key);
     console.log("Tutorial: " + tutorial);
     
 	if (tutorial != "false") {

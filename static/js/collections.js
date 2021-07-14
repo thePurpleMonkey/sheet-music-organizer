@@ -82,8 +82,8 @@ $('#wait').on('shown.bs.modal', function (e) {
 		add_alert("Collection created!", "The collection was successfully created.", "success");
 
 		// Show next step of tutorial
-		$("#new_collection_tutorial_alert").hide();
-		$("#open_collection_tutorial_alert").show();
+		$("#new_collection_tutorial_alert").addClass("hidden");
+		$("#open_collection_tutorial_alert").removeClass("hidden");
 	})
 	.fail(function(data) {
 		alert_ajax_failure("Unable to create collection!", data);

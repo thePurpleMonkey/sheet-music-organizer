@@ -113,7 +113,14 @@ func login(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Login - Unable to save session state: %v\n", err)
 		SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 	} else {
+		// Send response
+		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(struct {
+			UserID int64 `json:"user_id"`
+		}{
+			userID,
+		})
 	}
 }
 
@@ -202,7 +209,14 @@ func register(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Login - Unable to save session state: %v\n", err)
 		SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 	} else {
-		w.WriteHeader(http.StatusCreated)
+		// Send response
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(struct {
+			UserID int64 `json:"user_id"`
+		}{
+			user.UserID,
+		})
 	}
 }
 

@@ -254,20 +254,42 @@ func SongHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	} else if r.Method == "DELETE" {
+		// Start db transaction
+		tx, err := db.Begin()
+		if err != nil {
+			log.Printf("Song DELETE - Unable to start database transaction: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+		}
+
+		// Removed song tags
+		if _, err = tx.Exec("DELETE FROM tagged_songs WHERE song_id = $1", song.SongID); err != nil {
+			log.Printf("Song DELETE - Unable to remove song tags from database: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
+			return
+		}
+
 		// Delete song
 		var result sql.Result
-		if result, err = db.Exec("DELETE FROM songs WHERE collection_id = $1 AND song_id = $2", song.CollectionID, song.SongID); err != nil {
+		if result, err = tx.Exec("DELETE FROM songs WHERE collection_id = $1 AND song_id = $2", song.CollectionID, song.SongID); err != nil {
 			log.Printf("Song DELETE - Unable to delete song from database: %v\n", err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 
+		// Check if a song was actually deleted
 		var rowsAffected int64
 		if rowsAffected, err = result.RowsAffected(); err != nil {
 			log.Printf("Song DELETE - Unable to get rows affected. Assuming everything is fine? Error: %v\n", err)
 		} else if rowsAffected == 0 {
 			log.Printf("Song DELETE - No rows were deleted from the database for song id %d\n", song.SongID)
 			SendError(w, `{"error": "No song was found with that ID"}`, http.StatusNotFound)
+			return
+		}
+
+		// Save changes
+		if err = tx.Commit(); err != nil {
+			log.Printf("Song DELETE - Unable to commit database transaction: %v\n", err)
+			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
 		}
 

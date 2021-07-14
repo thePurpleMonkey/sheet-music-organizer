@@ -15,3 +15,6 @@ __debug_bin
 # API keys
 key.txt
 SendGrid_API_key.txt
+
+# Miscellaneous files
+Test Plan.txt
