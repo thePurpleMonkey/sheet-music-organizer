@@ -21,6 +21,21 @@
       <hr>
 
       <div id="alerts"></div>
+      
+      <!-- #region Tutorial alert -->
+      <div class="alert alert-info hidden tutorial" role="alert" id="setlist_tutorial_alert">
+        <strong>Setlists</strong>
+        <div>
+          Setlists are a group of songs that can be shared with others.
+          You can add any songs from your collection and put them in any order.
+          Setlists can be shared with anyone; no account required. 
+          Just go to Options -> Share and choose "Anyone with a link" after creating a setlist.
+          <br>
+          <br>
+          <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
+        </div>
+      </div>
+      <!-- #endregion -->
 
       <!-- Collection list -->
       <div id="setlists_list" class="list-group">
@@ -47,7 +62,7 @@
           <form>
           <div class="form-group">
             <label for="name" class="col-form-label">Name:</label>
-            <input type="text" class="form-control" id="name">
+            <input type="text" class="form-control" id="name" placeholder="(required)">
           </div>
           <div class="form-group">
             <label for="date" class="col-form-label">Date:</label>

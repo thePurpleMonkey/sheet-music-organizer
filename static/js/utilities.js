@@ -182,18 +182,30 @@ export var dates = {
 
 // #region Tutorial
 
-export function disable_tutorial(user_id) {
-	console.log(`Disabling tutorial for user ${user_id}`);
+export function disable_tutorial(user_id, page=undefined) {
+	let key;
+	if (page === undefined) {
+		key = `show_tutorial_user_${user_id}`;
+	} else {
+		key = `show_tutorial_user_${user_id}_${page}`
+	}
+
+	console.log(`Disabling tutorial key: ${key}`);
 	try {
-		window.localStorage.setItem(`show_tutorial_user_${user_id}`, false);
+		window.localStorage.setItem(key, false);
 	} catch (err) {
 		console.warn("Unable to disable tutorial");
 		console.warn(err);
 	}
 }
 
-export function is_tutorial_enabled(user_id) {
-	let key = `show_tutorial_user_${user_id}`;
+export function is_tutorial_enabled(user_id, page=undefined) {
+	let key;
+	if (page === undefined) {
+		key = `show_tutorial_user_${user_id}`;
+	} else {
+		key = `show_tutorial_user_${user_id}_${page}`
+	}
 	console.log("Loading local storage key: " + key);
 	let tutorial = window.localStorage.getItem(key);
 	console.log("Tutorial: " + tutorial);

@@ -1,9 +1,10 @@
 "use strict";
 
-import { add_alert, alert_ajax_failure, get_session_alert, getUrlParameter } from "./utilities.js";
+import { add_alert, alert_ajax_failure, get_session_alert, getUrlParameter, disable_tutorial, is_tutorial_enabled } from "./utilities.js";
 
 let collection_id = getUrlParameter("collection_id");
 let create_setlist = false;
+let user_id;
 
 // Show options in navbar
 $("#navbar_dashboard").removeClass("hidden");
@@ -26,6 +27,10 @@ function refreshSetlists() {
 				.text(setlist.name);
 			$("#setlists_list").append(a);
 		});
+		
+		if (data.length == 0) {
+			show_tutorial();
+		}
 	})
 	.fail(function(data) {
 		alert_ajax_failure("Unable to get setlists.", data);
@@ -43,6 +48,8 @@ $(function() {
 	if (alert) {
 		add_alert(alert.title, alert.message, alert.style);
 	}
+
+	initialize_tutorial();
 });
 
 $("#create_setlist").click(function() {
@@ -92,3 +99,28 @@ $('#wait').on('hidden.bs.modal', function (e) {
 	$("#date").val("");
 	$("#notes").val("");
 });
+
+// #region Tutorial
+function initialize_tutorial() {
+    // Get stored user_id
+    try {
+        user_id = window.localStorage.getItem("user_id");
+        console.log("Retrieved user_id = " + user_id)
+    } catch (err) {
+        console.log("Unable to retrieve localStorage variable 'user_id'");
+        console.log(err);
+    }
+}
+
+function hide_tutorial() {
+	disable_tutorial(user_id, "setlists");
+	$(".tutorial").hide(500);
+}
+
+function show_tutorial() {
+	if (is_tutorial_enabled(user_id, "setlists")) {
+		$("#setlist_tutorial_alert").removeClass("hidden");
+		$(".hide_tutorial").click(hide_tutorial);
+	}
+}
+// #endregion

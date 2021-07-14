@@ -12,7 +12,7 @@ $("#navbar_options").removeClass("hidden");
 // Enable tooltips:
 $("#help").tooltip();
 $("#edit_email").tooltip({
-	title: "Editing your email will require you to verify your account again.",
+	title: "Changing your email will require you verify your account again.",
 	trigger: "focus"
 });
 

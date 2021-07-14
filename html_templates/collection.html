@@ -26,9 +26,9 @@
         <strong>Dashboard</strong>
         <div>
           This is the dashboard for your collection.
-          It is where you can see all the songs and tags in your collection.
+          You can see all the songs and tags in this collection here.
           <br>
-          <span class="Click">Click</span> Add tag to start your collection.
+          <span class="Click">Click</span> "New tag" to start your collection.
           <br>
           <br>
           <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
@@ -39,7 +39,7 @@
         <div>
           Now you can organize your songs with tags.
           <br>
-          <span class="Click">Click</span> Add song to continue.
+          <span class="Click">Click</span> "New song" to continue.
           <br>
           <br>
           <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
@@ -65,7 +65,7 @@
             <li>You can quickly search for a song by keyword using the quick search at the top of the screen at any time.</li>
             <li>Use Advanced Search to search for songs based on keywords, exclude keywords, tags, and last performed date by <span class="clicking">clicking</span> the Advanced Search button in the Options menu of the dashboard or <span class="click">clicking</span> the link in the quick search results page.</li>
           </ul>
-          <p>That's it! If you have any questions, don't hesitate to reach out to <a href="mailto:sheetmusicorganizer@michaelhumphrey.dev">sheetmusicorganizer@michaelhumphrey.dev</a> for assistance.</p>
+          <p>That's it! If you have any questions, don't hesitate to email <a href="mailto:sheetmusicorganizer@michaelhumphrey.dev">sheetmusicorganizer@michaelhumphrey.dev</a> for assistance.</p>
           <a href="javascript:;" class="alert-link hide_tutorial">Close tutorial</a>
         </div>
       </div>
@@ -80,14 +80,14 @@
           </h3>
           
           <div id="songs" class="list-group"></div>
-          <div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_song_modal" id="add_song">Add song</button></div>
+          <div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_song_modal" id="add_song">New song</button></div>
         </div>
   
         <!-- Tags -->
         <div id="all_tags" class="col-sm-6">
           <h3>Tags</h3>
           <div id="tags" class="list-group"></div>
-          <div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_tag_modal" id="add_tag">Add Tag</button></div>
+          <div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_tag_modal" id="add_tag">New Tag</button></div>
         </div>
       </div>
     
@@ -101,7 +101,7 @@
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Add song</h5>
+          <h5 class="modal-title">New song</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
           </button>
@@ -117,7 +117,7 @@
             Links will also be made <span class="click">click</span>able in the Notes field, as well as provide thumbnails for links to YouTube videos.
             You may also select from the available tags at the bottom to create the song with.
             <br><br>
-            Once you have added a name and any other information you wish, <span class="click">click</span> Add song.
+            Once you have added a name and any other information you wish, <span class="click">click</span> "Create song".
             <br><br>
             <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
           </div>
@@ -125,7 +125,7 @@
           <form id="add_song_form">
           <div class="form-group">
             <label for="name" class="col-form-label">Name:</label>
-            <input type="text" class="form-control" id="name" required>
+            <input type="text" class="form-control" id="name" required placeholder="(required)">
           </div>
           <div class="form-group">
             <label for="artist" class="col-form-label">Artist:</label>
@@ -152,7 +152,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="add_song_modal_button">Add song</button>
+          <button type="button" class="btn btn-primary" id="add_song_modal_button">Create song</button>
         </div>
         </div>
       </div>
@@ -166,7 +166,7 @@
           <h5 class="modal-title">Adding song...</h5>
         </div>
         <div class="modal-body">
-          <p>Please wait while we add this song to your collection...</p>
+          <p>Please wait while this song is created...</p>
         </div>
         </div>
       </div>
@@ -179,7 +179,7 @@
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Add Tag</h5>
+          <h5 class="modal-title">New Tag</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
           </button>
@@ -191,7 +191,7 @@
             Choose a name for this tag, and optionally any information you want to include in this tag's description.
             Tag descriptions can be viewed when viewing tag details.
             <br><br>
-            Once you have added a name, <span class="click">click</span> Add tag.
+            Once you have added a name, <span class="click">click</span> "Create tag".
             <br><br>
             <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
           </div>
@@ -209,7 +209,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="add_tag_modal_button">Add Tag</button>
+          <button type="button" class="btn btn-primary" id="add_tag_modal_button">Create tag</button>
         </div>
         </div>
       </div>
@@ -223,7 +223,7 @@
           <h5 class="modal-title">Adding Tag...</h5>
         </div>
         <div class="modal-body">
-          <p>Please wait while we add this tag to your collection...</p>
+          <p>Please wait while this tag is created...</p>
         </div>
         </div>
       </div>
