@@ -52,10 +52,19 @@ $(function() {
 	initialize_tutorial();
 });
 
+$("#new_setlist_form").submit(function() {
+	create_setlist();
+	return false;
+});
+
 $("#create_setlist").click(function() {
+	create_setlist();
+});
+
+function create_setlist() {
 	create_setlist = true;
 	$("#new_setlist_modal").modal("hide");
-});
+}
 
 $('#new_setlist_modal').on('hidden.bs.modal', function (e) {
 	if (create_setlist) {

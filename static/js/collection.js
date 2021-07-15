@@ -319,11 +319,21 @@ $("#add_song_modal").on("show.bs.modal", function() {
     });
 });
 
-$("#add_song_modal_button").click(function() {
+function add_song_submit() {
     if ($("#add_song_form").valid()) {
         add_song = true;
         $("#add_song_modal").modal("hide");
+    } else {
+        console.log("Add song form not valid.");
     }
+}
+$("#add_song_modal_button").click(function() {
+    add_song_submit();
+});
+$("#add_song_form").submit(function() {
+    console.log("Song form submitted");
+    add_song_submit();
+    return false;
 });
 $('#add_song_modal').on('hidden.bs.modal', function (e) {
     if (add_song) {
@@ -470,11 +480,20 @@ $('#delete_collection_wait').on('shown.bs.modal', function (e) {
 
 // #region Add Tag
 $("#add_tag_modal_button").click(function() {
+    add_tag_submit();
+});
+$("#add_tag_form").submit(function() {
+    console.log("Add tag form submitted");
+    add_tag_submit();
+    return false;
+});
+function add_tag_submit() {
     if ($("#add_tag_form").valid()) {
         add_tag = true
         $("#add_tag_modal").modal("hide");
     }
-});
+}
+
 $('#add_tag_modal').on('hidden.bs.modal', function (e) {
     if (add_tag) {
         add_tag = false;

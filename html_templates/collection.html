@@ -123,31 +123,34 @@
           </div>
 
           <form id="add_song_form">
-          <div class="form-group">
-            <label for="name" class="col-form-label">Name:</label>
-            <input type="text" class="form-control" id="name" required placeholder="(required)">
-          </div>
-          <div class="form-group">
-            <label for="artist" class="col-form-label">Artist:</label>
-            <input type="text" class="form-control" id="artist">
-          </div>
-          <div class="form-group">
-            <label for="location" class="col-form-label">Location:</label>
-            <input type="text" class="form-control" id="location">
-          </div>
-          <div class="form-group">
-            <label for="last_performed" class="col-form-label">Last Performed:</label>
-            <input type="date" class="form-control" id="last_performed">
-          </div>
-          <div class="form-group">
-            <label for="notes" class="col-form-label">Notes:</label>
-            <textarea class="form-control" id="notes"></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label for="tags" class="col-form-label">Tags:</label>
-            <div id="tags_list">Loading...</div>
-          </div>
+            <div class="form-group">
+              <label for="name" class="col-form-label">Name:</label>
+              <input type="text" class="form-control" id="name" required placeholder="(required)">
+            </div>
+            <div class="form-group">
+              <label for="artist" class="col-form-label">Artist:</label>
+              <input type="text" class="form-control" id="artist">
+            </div>
+            <div class="form-group">
+              <label for="location" class="col-form-label">Location:</label>
+              <input type="text" class="form-control" id="location">
+            </div>
+            <div class="form-group">
+              <label for="last_performed" class="col-form-label">Last Performed:</label>
+              <input type="date" class="form-control" id="last_performed">
+            </div>
+            <div class="form-group">
+              <label for="notes" class="col-form-label">Notes:</label>
+              <textarea class="form-control" id="notes"></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="tags" class="col-form-label">Tags:</label>
+              <div id="tags_list">Loading...</div>
+            </div>
+
+            <!-- This hidden button is to allow the form to be submitted by pressing enter in any of the text fields. -->
+            <button type="submit" class="hidden"></button>
           </form>
         </div>
         <div class="modal-footer">
@@ -199,7 +202,7 @@
           <form id="add_tag_form">
           <div class="form-group">
             <label for="tag_name" class="col-form-label">Name:</label>
-            <input type="text" class="form-control" id="tag_name" required>
+            <input type="text" class="form-control" id="tag_name" required placeholder="(required)">
           </div>
           <div class="form-group">
             <label for="tag_description" class="col-form-label">Description:</label>
