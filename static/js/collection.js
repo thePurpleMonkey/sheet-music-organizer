@@ -1,6 +1,6 @@
 "use strict";
 
-import { add_alert, getUrlParameter, alert_ajax_failure, get_session_alert, dates } from "./utilities.js";
+import { add_alert, getUrlParameter, alert_ajax_failure, get_session_alert, dates, is_tutorial_enabled, disable_tutorial } from "./utilities.js";
 import "./modernizr-touch.js";
 
 let add_song = false;
@@ -9,6 +9,7 @@ let edit_collection = false;
 let delete_collection = false;
 
 let tutorial = false;
+let user_id;
 
 let collection = {
     // Parse collection ID from URL parameter
@@ -559,20 +560,13 @@ $("#settings_modal").on("hidden.bs.modal", function() {
 
 // #region Tutorial
 function hide_tutorial() {
-	console.log("Hide tutorial clicked.");
-	try {
-		window.localStorage.setItem("show_tutorial", false);
-	} catch (err) {
-		console.warn("Unable to hide tutorial");
-		console.warn(err);
-	} finally {
-		$(".tutorial").hide(500);
-	}
+    console.log("Hiding tutorial");
+    $(".tutorial").hide(500);
+    disable_tutorial(user_id);
 }
 
 function initialize_tutorial() {
     // Get stored user_id
-    let user_id;
     try {
         user_id = window.localStorage.getItem("user_id");
         console.log("Retrieved user_id = " + user_id)
@@ -581,12 +575,9 @@ function initialize_tutorial() {
         console.log(err);
     }
 
-	let key = `show_tutorial_user_${user_id}`;
-	console.log("Loading local storage key: " + key);
-	tutorial = window.localStorage.getItem(key);
-    console.log("Tutorial: " + tutorial);
+    tutorial = is_tutorial_enabled(user_id);
     
-	if (tutorial != "false") {
+	if (tutorial) {
         // Show tutorials
         $("#add_song_tutorial_alert").removeClass("hidden");
         $("#add_tag_tutorial_alert").removeClass("hidden");

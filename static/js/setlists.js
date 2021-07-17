@@ -53,15 +53,15 @@ $(function() {
 });
 
 $("#new_setlist_form").submit(function() {
-	create_setlist();
+	create_setlist_submit();
 	return false;
 });
 
 $("#create_setlist").click(function() {
-	create_setlist();
+	create_setlist_submit();
 });
 
-function create_setlist() {
+function create_setlist_submit() {
 	create_setlist = true;
 	$("#new_setlist_modal").modal("hide");
 }
