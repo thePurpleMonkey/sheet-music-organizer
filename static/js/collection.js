@@ -38,6 +38,9 @@ $("#search_form").removeClass("hidden");
 $("#navbar_settings").removeClass("hidden");
 $("#navbar_setlists").removeClass("hidden");
 
+// Enable tooltips
+$("#location_help").tooltip();
+
 // Get collection info when document becomes ready
 $(function() {
 	// Enable form validation

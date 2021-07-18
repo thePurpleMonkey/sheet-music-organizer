@@ -51,3 +51,19 @@
 	margin-left: .25em;
 	margin-bottom: .25em;
 }
+
+/* Location Help */
+#location {
+	border-radius: .25em;
+}
+#location_help {
+	margin-top: -3px;
+	margin-left: .5em;
+	filter: invert(50%);
+	transition: filter .5s;
+}
+
+#location_help:hover {
+	filter: invert(25%);
+	transition: filter .5s;
+}
