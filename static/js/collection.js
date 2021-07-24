@@ -347,8 +347,11 @@ $('#add_song_modal').on('hidden.bs.modal', function (e) {
 
 // Make Song POST API call after wait dialog is shown
 $('#song_wait').on('shown.bs.modal', function (e) {
+    // Store song name to display to user after song is added
+    let song_name = $("#name").val();
+
     let payload = JSON.stringify({
-        name: $("#name").val(), 
+        name: song_name, 
         artist: $("#artist").val(),
         location: $("#location").val(),
         notes: $("#notes").val(),
@@ -371,7 +374,7 @@ $('#song_wait').on('shown.bs.modal', function (e) {
         $("#last_performed").val("");
         $("#notes").val("");
 
-        add_song_tags(data.song_id);
+        add_song_tags(data.song_id, song_name);
     })
     .fail(function(data) {
         alert_ajax_failure("Unable to add song!", data);
@@ -383,7 +386,7 @@ $('#song_wait').on('shown.bs.modal', function (e) {
         update_tutorial();
     });
 });
-function add_song_tags(song_id) {
+function add_song_tags(song_id, song_name) {
     let requests = [];
 
     $("#tags_list > .btn-dark").each(function() {
@@ -398,7 +401,7 @@ function add_song_tags(song_id) {
                 console.log(data);
             })
             .fail(function(data) {
-                alert_ajax_failure("Unable to add tag to new song.", data);
+                alert_ajax_failure(`Unable to add tag to ${song_name}.`, data);
             })
         );
     });
@@ -406,7 +409,7 @@ function add_song_tags(song_id) {
     $.when(requests)
     .done(function() {
         console.log(`Successfully added tags to song ${song_id}`);
-        add_alert("Song added!", "The song was successfully added to your collection.", "success");
+        add_alert("Song added!", `${song_name} was successfully added to your collection.`, "success", {replace_existing: true});
     })
     .always(function() {
         $("#song_wait").modal("hide");
@@ -506,8 +509,10 @@ $('#add_tag_modal').on('hidden.bs.modal', function (e) {
 });
 // Make tag POST API call after tag wait dialog is shown
 $('#tag_wait').on('shown.bs.modal', function (e) {
+    let tag_name = $("#tag_name").val();
+
     let payload = JSON.stringify({
-        name: $("#tag_name").val(),
+        name: tag_name,
         description: $("#tag_description").val(),
     });
     console.log("Adding tag: " + payload);
@@ -521,10 +526,10 @@ $('#tag_wait').on('shown.bs.modal', function (e) {
         $("#tag_description").val("");
 
         // Display success message
-        add_alert("Tag created!", "The tag was successfully created. You may now start tagging your songs with it.", "success");
+        add_alert("Tag created!", `${tag_name} was successfully created. You may now start tagging your songs with this tag.`, "success", {replace_existing: true});
     })
     .fail(function(data) {
-        alert_ajax_failure("Unable to add tag!", data);
+        alert_ajax_failure(`Unable to add ${tag_name}!`, data);
     })
     .always(function() {
         $("#tag_wait").modal("hide");
@@ -593,21 +598,24 @@ function initialize_tutorial() {
 
 // Updates the tutorial alert on the dashboard
 function update_tutorial() {
-    console.log("Updating tutorial");
-    console.log("Tags: " + $("#tags").children().length);
-    console.log("Songs: " + $("#songs").children().length);
-    if ($("#tags").children().length == 0) {
-        $("#dashboard_add_tag_tutorial_alert").removeClass("hidden");
-        $("#dashboard_add_song_tutorial_alert").addClass("hidden");
-        $("#dashboard_complete_tutorial_alert").addClass("hidden");
-    } else if ($("#songs").children().length == 0) {
-        $("#dashboard_add_song_tutorial_alert").removeClass("hidden");
-        $("#dashboard_add_tag_tutorial_alert").addClass("hidden");
-        $("#dashboard_complete_tutorial_alert").addClass("hidden");
-    } else {
-        $("#dashboard_add_song_tutorial_alert").addClass("hidden");
-        $("#dashboard_add_tag_tutorial_alert").addClass("hidden");
-        $("#dashboard_complete_tutorial_alert").removeClass("hidden");
+    if (tutorial)
+    {
+        console.log("Updating tutorial");
+        console.log("Tags: " + $("#tags").children().length);
+        console.log("Songs: " + $("#songs").children().length);
+        if ($("#tags").children().length == 0) {
+            $("#dashboard_add_tag_tutorial_alert").removeClass("hidden");
+            $("#dashboard_add_song_tutorial_alert").addClass("hidden");
+            $("#dashboard_complete_tutorial_alert").addClass("hidden");
+        } else if ($("#songs").children().length == 0) {
+            $("#dashboard_add_song_tutorial_alert").removeClass("hidden");
+            $("#dashboard_add_tag_tutorial_alert").addClass("hidden");
+            $("#dashboard_complete_tutorial_alert").addClass("hidden");
+        } else {
+            $("#dashboard_add_song_tutorial_alert").addClass("hidden");
+            $("#dashboard_add_tag_tutorial_alert").addClass("hidden");
+            $("#dashboard_complete_tutorial_alert").removeClass("hidden");
+        } 
     }
 }
 // #endregion

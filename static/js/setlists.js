@@ -77,8 +77,9 @@ $('#new_setlist_modal').on('hidden.bs.modal', function (e) {
 });
 
 $('#wait').on('shown.bs.modal', function (e) {
+	let setlist_name = $("#name").val();
 	let payload = {
-		name: $("#name").val(),
+		name: setlist_name,
 		notes: $("#notes").val(),
 	};
 
@@ -91,7 +92,7 @@ $('#wait').on('shown.bs.modal', function (e) {
 	.done(function(data) {
 		console.log("Setlist post response:");
 		console.log(data);
-		add_alert("Setlist created!", "The setlist was successfully created.", "success");
+		add_alert("Setlist created!", `${setlist_name} was successfully created.`, "success");
 	})
 	.fail(function(data) {
 		alert_ajax_failure("Unable to create setlist!", data);

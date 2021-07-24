@@ -378,7 +378,7 @@ $('#edit_song_wait').on('shown.bs.modal', function (e) {
         song.location = $("#song_location").val();
         song.last_performed = $("#song_last_performed").val();
         song.notes = $("#song_notes").val();
-        add_alert("Changes saved!", "Changes to this song have been successfully saved.");
+        add_alert("Changes saved!", "Changes to this song have been successfully saved.", "success");
     })
     .fail(function(data) {
         alert_ajax_failure("Unable to save song.", data);

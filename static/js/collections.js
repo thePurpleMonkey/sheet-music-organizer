@@ -1,6 +1,6 @@
 "use strict";
 
-import { add_alert, alert_ajax_failure, create_alert, get_session_alert, disable_tutorial, is_tutorial_enabled } from "./utilities.js";
+import { add_alert, alert_ajax_failure, get_session_alert, disable_tutorial, is_tutorial_enabled } from "./utilities.js";
 
 let create_collection = false;
 let pending_invitations = [];

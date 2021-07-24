@@ -20,8 +20,23 @@ export function create_alert(title, message, style, id=undefined, custom_class=u
 	return alert;
 }
 
-export function add_alert(title, message, style="info", id=undefined, custom_class=undefined) {
-	$("#alerts").append(create_alert(title, message, style, id, custom_class));
+/**
+ * Create a Bootstrap alert and add it to a #alert div.
+ * @param  {string} title Title of the alert
+ * @param  {string} message Body of the alert
+ * @param  {string} style The name of the Bootstrap style for this alert. Defaults to "info"
+ * @param  {Object} options An object containing extra information for the alert.
+ * @param  {boolean} options.replace_existing If true, this alert will replace other alerts with the .replace class. Defaults to false.
+ * @param  {string} options.id Create the alert with this ID.
+ * @param  {string} options.class Create the alert with this class. Multiple classes can be specified separated by spaces.
+ */
+export function add_alert(title, message, style="info", {id, custom_class, replace_existing=false}) {
+	let alert = create_alert(title, message, style, id, custom_class);
+	if (replace_existing) {
+		$("#alerts").children(".replace").remove();
+		alert.addClass("replace");
+	}
+	$("#alerts").append(alert);
 }
 
 
@@ -181,7 +196,6 @@ export var dates = {
 };
 
 // #region Tutorial
-
 export function disable_tutorial(user_id, page=undefined) {
 	let key;
 	if (page === undefined) {
