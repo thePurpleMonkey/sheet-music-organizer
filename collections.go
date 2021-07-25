@@ -130,7 +130,13 @@ func CollectionsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(struct {
+			CollectionID int64 `json:"collection_id"`
+		}{
+			collection.CollectionID,
+		})
 	}
 }
 

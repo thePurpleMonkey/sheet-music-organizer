@@ -1,6 +1,6 @@
 "use strict";
 
-import { add_alert, alert_ajax_failure, get_session_alert, disable_tutorial, is_tutorial_enabled } from "./utilities.js";
+import { add_alert, alert_ajax_failure, get_session_alert, add_session_alert, disable_tutorial, is_tutorial_enabled } from "./utilities.js";
 
 let create_collection = false;
 let pending_invitations = [];
@@ -92,14 +92,10 @@ $('#wait').on('shown.bs.modal', function (e) {
 	let payload = JSON.stringify({name: $("#name").val(), description: $("#description").val()});
 	$.post("/collections", payload)
 	.done(function(data) {
+		console.log("Create collection server response:");
 		console.log(data);
-		add_alert("Collection created!", "The collection was successfully created.", "success");
-
-		// Show next step of tutorial
-		if(tutorial_enabled) {
-			$("#new_collection_tutorial_alert").addClass("hidden");
-			$("#open_collection_tutorial_alert").removeClass("hidden");
-		}
+		add_session_alert("Collection created!", "The collection was successfully created.", "success");
+		window.location.href = `/collection.html?collection_id=${data.collection_id}`;
 	})
 	.fail(function(data) {
 		alert_ajax_failure("Unable to create collection!", data);

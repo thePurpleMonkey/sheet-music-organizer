@@ -53,6 +53,7 @@ $(function() {
     console.log("Touch enabled: " + Modernizr.touchevents)
     if (Modernizr.touchevents) {
         $(".clicking").text("tapping");
+        $(".clickable").text("tappable");
         $(".click").text("tap");
         $(".Click").text("Tap");
     }
