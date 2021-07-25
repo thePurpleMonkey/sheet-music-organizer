@@ -52,6 +52,10 @@ $(function() {
 	initialize_tutorial();
 });
 
+$('#new_setlist_modal').on('shown.bs.modal', function (e) {
+	$("#name").focus();
+});
+
 $("#new_setlist_form").submit(function() {
 	create_setlist_submit();
 	return false;

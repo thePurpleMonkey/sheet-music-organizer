@@ -61,12 +61,25 @@ $(function() {
 });
 
 // #region Create collection
+
+$('#new_collection_modal').on('shown.bs.modal', function (e) {
+	$("#name").focus();
+});
+
+$("#create_collection_form").submit(function() {
+    console.log("Create collection form submitted");
+    create_collection_submit();
+    return false;
+});
 $("#create_collection").click(function() {
+	create_collection_submit();
+});
+function create_collection_submit() {
 	if ($("#create_collection_form").valid()) {
 		create_collection = true;
 		$("#new_collection_modal").modal("hide");
 	}
-});
+};
 
 $('#new_collection_modal').on('hidden.bs.modal', function (e) {
 	if (create_collection) {
@@ -82,8 +95,10 @@ $('#wait').on('shown.bs.modal', function (e) {
 		add_alert("Collection created!", "The collection was successfully created.", "success");
 
 		// Show next step of tutorial
-		$("#new_collection_tutorial_alert").addClass("hidden");
-		$("#open_collection_tutorial_alert").removeClass("hidden");
+		if(tutorial) {
+			$("#new_collection_tutorial_alert").addClass("hidden");
+			$("#open_collection_tutorial_alert").removeClass("hidden");
+		}
 	})
 	.fail(function(data) {
 		alert_ajax_failure("Unable to create collection!", data);

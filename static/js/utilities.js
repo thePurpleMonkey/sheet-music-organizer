@@ -30,7 +30,7 @@ export function create_alert(title, message, style, id=undefined, custom_class=u
  * @param  {string} options.id Create the alert with this ID.
  * @param  {string} options.class Create the alert with this class. Multiple classes can be specified separated by spaces.
  */
-export function add_alert(title, message, style="info", {id, custom_class, replace_existing=false}) {
+export function add_alert(title, message, style="info", {id, custom_class, replace_existing}={replace_existing: false}) {
 	let alert = create_alert(title, message, style, id, custom_class);
 	if (replace_existing) {
 		$("#alerts").children(".replace").remove();
