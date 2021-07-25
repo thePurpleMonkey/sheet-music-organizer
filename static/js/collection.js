@@ -295,13 +295,19 @@ function saveSettings() {
     }
 }
 
-// #region Add song
 function tag_button_clicked(e) {
     $(this).toggleClass("btn-light");
     $(this).toggleClass("btn-dark");
 }
 
+// #region Add song
+$("#add_song_modal").on("shown.bs.modal", function() {
+    // Focus on the name input so the user can begin typing immediately
+    $("#name").focus();
+});
+
 $("#add_song_modal").on("show.bs.modal", function() {
+    // Load the tags for this collection
     $.get(`/collections/${collection.id}/tags`)
     .done(function(data) {
 
@@ -500,6 +506,11 @@ function add_tag_submit() {
         $("#add_tag_modal").modal("hide");
     }
 }
+
+$("#add_tag_modal").on("shown.bs.modal", function() {
+    // Focus on name input so user can begin typing immediately
+    $("#tag_name").focus();
+});
 
 $('#add_tag_modal').on('hidden.bs.modal', function (e) {
     if (add_tag) {
