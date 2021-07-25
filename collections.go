@@ -204,6 +204,8 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 		return
 
 	} else if r.Method == "DELETE" {
+		log.Printf("Collection DELETE - User %d initiated a delete of collection %d\n", session.Values["user_id"], collection.CollectionID)
+
 		// Verify user is admin of collection
 		if admin, err := checkAdmin(session.Values["user_id"].(int64), collection.CollectionID); err != nil {
 			log.Printf("Collection DELETE - Unable to check admin status for user %d in collection %d: %v\n", session.Values["user_id"], collection.CollectionID, err)
@@ -236,6 +238,7 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		log.Printf("Collection DELETE - User %d successfully deleted collection %d\n", session.Values["user_id"], collection.CollectionID)
 		w.WriteHeader(http.StatusOK)
 		return
 	}
@@ -244,6 +247,18 @@ func CollectionHandler(w http.ResponseWriter, r *http.Request) {
 func deleteCollection(collectionID int64, tx *sql.Tx) error {
 	// Remove tags from songs
 	if _, err := tx.Exec("DELETE FROM tagged_songs WHERE song_id IN (SELECT song_id FROM songs WHERE collection_id = $1)", collectionID); err != nil {
+		log.Printf("deleteCollection - Unable to delete songs from collection: %v\n", err)
+		return err
+	}
+
+	// Remove songs from setlists
+	if _, err := tx.Exec("DELETE FROM setlist_songs WHERE song_id IN (SELECT song_id FROM songs WHERE collection_id = $1)", collectionID); err != nil {
+		log.Printf("deleteCollection - Unable to delete songs from collection: %v\n", err)
+		return err
+	}
+
+	// Remove setlists
+	if _, err := tx.Exec("DELETE FROM setlists WHERE collection_id = $1", collectionID); err != nil {
 		log.Printf("deleteCollection - Unable to delete songs from collection: %v\n", err)
 		return err
 	}
