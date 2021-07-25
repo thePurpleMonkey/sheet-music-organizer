@@ -5,6 +5,7 @@ import { add_alert, alert_ajax_failure, get_session_alert, disable_tutorial, is_
 let create_collection = false;
 let pending_invitations = [];
 let user_id = undefined;
+let tutorial_enabled = false;
 
 function refreshCollections() {
 	$("#collections").empty();
@@ -95,7 +96,7 @@ $('#wait').on('shown.bs.modal', function (e) {
 		add_alert("Collection created!", "The collection was successfully created.", "success");
 
 		// Show next step of tutorial
-		if(tutorial) {
+		if(tutorial_enabled) {
 			$("#new_collection_tutorial_alert").addClass("hidden");
 			$("#open_collection_tutorial_alert").removeClass("hidden");
 		}
@@ -150,7 +151,8 @@ function hide_tutorial() {
 }
 
 function show_tutorial() {
-	if (is_tutorial_enabled(user_id)) {
+	tutorial_enabled = is_tutorial_enabled(user_id);
+	if (tutorial_enabled) {
 		$("#new_collection_tutorial_alert").removeClass("hidden");
 		$("#create_collection_tutorial_alert").removeClass("hidden");
 		$(".hide_tutorial").click(hide_tutorial);
