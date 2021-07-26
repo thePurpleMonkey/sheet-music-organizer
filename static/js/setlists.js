@@ -1,6 +1,6 @@
 "use strict";
 
-import { add_alert, alert_ajax_failure, get_session_alert, getUrlParameter, disable_tutorial, is_tutorial_enabled } from "./utilities.js";
+import { add_alert, alert_ajax_failure, get_session_alert, add_session_alert, getUrlParameter, disable_tutorial, is_tutorial_enabled } from "./utilities.js";
 
 let collection_id = getUrlParameter("collection_id");
 let create_setlist = false;
@@ -96,7 +96,8 @@ $('#wait').on('shown.bs.modal', function (e) {
 	.done(function(data) {
 		console.log("Setlist post response:");
 		console.log(data);
-		add_alert("Setlist created!", `${setlist_name} was successfully created.`, "success");
+		add_session_alert("Setlist created!", `${setlist_name} was successfully created.`, "success");
+		window.location.href = `/setlist.html?collection_id=${collection_id}&setlist_id=${data.setlist_id}`
 	})
 	.fail(function(data) {
 		alert_ajax_failure("Unable to create setlist!", data);

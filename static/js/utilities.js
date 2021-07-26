@@ -77,7 +77,7 @@ export function alert_ajax_failure(title, data) {
 
 export function add_session_alert(title, message, style="info") {
 	try {
-		window.sessionStorage.setItem("pending_invitation", true);
+		window.sessionStorage.setItem("pending_session_alert", true);
 		window.sessionStorage.setItem("title", title);
 		window.sessionStorage.setItem("message", message);
 		window.sessionStorage.setItem("style", style);
@@ -88,9 +88,9 @@ export function add_session_alert(title, message, style="info") {
 };
 
 export function get_session_alert() {
-	if (window.sessionStorage.getItem("pending_invitation") === "true") {
+	if (window.sessionStorage.getItem("pending_session_alert") === "true") {
 		try {
-			window.sessionStorage.setItem("pending_invitation", false);
+			window.sessionStorage.setItem("pending_session_alert", false);
 			return {
 				title: window.sessionStorage.getItem("title"),
 				message: window.sessionStorage.getItem("message"),

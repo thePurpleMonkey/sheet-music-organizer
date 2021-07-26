@@ -1,6 +1,6 @@
 "use strict";
 
-import { add_alert, alert_ajax_failure } from "./utilities.js";
+import { add_alert, alert_ajax_failure, get_session_alert } from "./utilities.js";
 
 const modes = {
     NORMAL: "normal",
@@ -197,6 +197,12 @@ $(function() {
     // Make reorder list sortable
     $("#songs_container_reorder").sortable();
     $("#songs_container_reorder").disableSelection();
+    
+	// Check for any alerts
+	let alert = get_session_alert();
+	if (alert) {
+		add_alert(alert.title, alert.message, alert.style);
+	}
 
     // Load setlist information
     refresh_setlist();

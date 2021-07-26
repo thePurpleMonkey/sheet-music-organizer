@@ -108,7 +108,13 @@ func SetlistsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(struct {
+			SetlistID int64 `json:"setlist_id"`
+		}{
+			setlist.SetlistID,
+		})
 	}
 }
 
