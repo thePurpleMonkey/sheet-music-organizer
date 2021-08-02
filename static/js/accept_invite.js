@@ -27,7 +27,7 @@ $(function() {
 		$("#collection").text(data.collection_name);		
 		$("#admin").text(data.administrator ? "Yes" : "No");
 		collection_id = data.collection_id;		
-		$("#confirm_invite").show(500);
+		$("#confirm_invite").removeClass("hidden");
 	})
 	.fail(function(data) {
 		console.log("Error getting invitation:");
@@ -35,22 +35,22 @@ $(function() {
 		if (data.status === 403) {
 			if (data.responseJSON.code == "wrong_user") {
 				add_alert("Wrong user", "You cannot accept this invitation. Please log out and try again.", "danger");
-				$("#logout").show();
+				$("#logout").removeClass(hidden);
 			} else if (data.responseJSON.code == "retracted") {
 				add_alert("Invitation retracted.", data.responseJSON.error, "danger");
 			} else {
 				add_alert("Unknown error", data.responseJSON, "danger");
 			}
 		} else if (data.status === 401) {
-			$("#unauthorized").show(500);
+			$("#unauthorized").removeClass("hidden");
 			return;
 		} else {
 			alert_ajax_failure("Unable to get invitation.", data);
 		}
-		$("#failed").show(500);
+		$("#failed").removeClass("hidden");
 	})
 	.always(function() {
-		$("#loading").hide(500);
+		$("#loading").addClass("hidden");
 	});
 });
 
@@ -72,6 +72,6 @@ $("#join_wait").on("shown.bs.modal", function() {
 		alert_ajax_failure("Unable to get invitation.", data);
 	})
 	.always(function(data) {
-		$("#join_wait").hide(500);
+		$("#join_wait").addClass("hidden");
 	})
 });
