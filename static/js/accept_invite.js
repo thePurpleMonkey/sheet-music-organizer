@@ -4,6 +4,7 @@ import { add_alert, add_session_alert, alert_ajax_failure, getUrlParameter } fro
 
 var collection_id;
 let token = getUrlParameter("token");
+let recipient_email = getUrlParameter("email");
 
 // Hide options in navbar
 $("#navbar_collections").hide();
@@ -14,19 +15,28 @@ $(function() {
 
 	// Set add redirect to links
 	$(".needs_token").attr("href", function(i, href) {
-		return href + "?redirect=" + redirect_to;
+		return href + "?redirect=" + redirect_to
+					+ "&email=" + recipient_email;
 	});
 
 	// Get invitation
 	$.get(`/invitations`, payload)
 	.done(function(data) {
 		console.log(data);
-		// Do something
+
+		// Load invitation data
 		$("#email").text(data.inviter_email);
 		$("#name").text(data.inviter_name);		
 		$("#collection").text(data.collection_name);		
 		$("#admin").text(data.administrator ? "Yes" : "No");
-		collection_id = data.collection_id;		
+		collection_id = data.collection_id;
+
+		// Add email to login and register links
+		$(".needs_token").attr("href", function(i, href) {
+			return href + "&email=" + data.email;
+		});
+
+		// Show invite
 		$("#confirm_invite").removeClass("hidden");
 	})
 	.fail(function(data) {

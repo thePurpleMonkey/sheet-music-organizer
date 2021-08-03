@@ -337,7 +337,7 @@ func CollectionInvitationsHandler(w http.ResponseWriter, r *http.Request) {
 		textTemplate := template.Must(template.New("invite_email.txt").ParseFiles("email_templates/invite_email.txt"))
 
 		var htmlBuffer, textBuffer bytes.Buffer
-		url := "https://" + os.Getenv("HOST") + "/accept_invite.html?token=" + token
+		url := "https://" + os.Getenv("HOST") + "/accept_invite.html?token=" + token + "&email=" + invite.InviteeEmail
 		data := struct {
 			Href           string
 			InviteeName    string

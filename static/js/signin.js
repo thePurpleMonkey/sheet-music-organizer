@@ -1,12 +1,20 @@
 "use strict";
 
-import { add_alert, alert_ajax_failure } from "./utilities.js";
+import { add_alert, alert_ajax_failure, getUrlParameter } from "./utilities.js";
 
 // Hide options in navbar
 $("#navbar_collections").hide();
 $("#navbar_logout").hide();
 $("#navbar_account").hide();
 
+$(function() {
+	// Get URL parameter
+	let recipient_email = getUrlParameter("email");
+	if (recipient_email) {
+		$("#email").val(recipient_email);
+		$("#password").focus();
+	}
+});
 
 $("#login").click(function() {
 	$("#wait").modal();
