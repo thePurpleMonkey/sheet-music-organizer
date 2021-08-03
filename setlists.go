@@ -51,7 +51,7 @@ func SetlistsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		// Get a list of all user's setlists in this collection
-		rows, err := db.Query("SELECT setlist_id, name, date, notes FROM setlists WHERE user_id = $1 AND collection_id = $2", session.Values["user_id"], collectionID)
+		rows, err := db.Query("SELECT setlist_id, name, date, notes FROM setlists WHERE collection_id = $2 AND (user_id = $1 OR shared = true)", session.Values["user_id"], collectionID)
 		if err != nil {
 			log.Printf("Setlists GET - Unable to retrieve setlists from database: %v\n", err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
@@ -147,7 +147,7 @@ func SetlistHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		// Find the setlist in the database
-		if err := db.QueryRow("SELECT setlist_id, name, date, notes, shared, share_code FROM setlists WHERE setlist_id = $1 AND user_id = $2", setlistID, session.Values["user_id"]).Scan(&setlist.SetlistID, &setlist.Name, &setlist.Date, &setlist.Notes, &setlist.Shared, &setlist.ShareCode); err != nil {
+		if err := db.QueryRow("SELECT setlist_id, name, date, notes, shared, share_code FROM setlists WHERE setlist_id = $1 AND (user_id = $2 OR shared = true)", setlistID, session.Values["user_id"]).Scan(&setlist.SetlistID, &setlist.Name, &setlist.Date, &setlist.Notes, &setlist.Shared, &setlist.ShareCode); err != nil {
 			log.Printf("Setlist GET - Unable to get setlist from database: %v\n", err)
 			SendError(w, DATABASE_ERROR_MESSAGE, http.StatusInternalServerError)
 			return
