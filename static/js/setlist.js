@@ -42,6 +42,9 @@ $("#search_form").removeClass("hidden");
 $("#collection_link").attr("href", "/collection.html?collection_id=" + setlist.collection_id);
 $("#setlists_link").attr("href", "/setlists.html?collection_id=" + setlist.collection_id);
 
+// Enable tooltips
+$(".visibility_icon").tooltip();
+
 function refresh_setlist() {
     $.get(`/collections/${setlist.collection_id}/setlists/${setlist.setlist_id}`)
     .done(function(data) {
@@ -61,6 +64,22 @@ function refresh_setlist() {
         $("#page_header").text(setlist.name);
         setlist.date ? $("#setlist_date").text(setlist.date.toISOString().substring(0, 10)) : $("#setlist_date").html("&nbsp;");
         setlist.notes ? $("#setlist_notes").text(setlist.notes) : $("#setlist_notes").html("&nbsp;");
+
+        $("#visibility_public").addClass("hidden");
+        $("#visibility_collection").addClass("hidden");
+        $("#visibility_private").addClass("hidden");
+        if (setlist.shared) {
+            if (setlist.share_code) {
+                // Public visibility
+                $("#visibility_public").removeClass("hidden");
+            } else {
+                // Collection visibility
+                $("#visibility_collection").removeClass("hidden");
+            }
+        } else {
+            // Private visibility
+            $("#visibility_private").removeClass("hidden");
+        }
     })
     .fail(function(data) {
         alert_ajax_failure("Unable to get setlist information.", data);
