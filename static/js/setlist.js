@@ -43,7 +43,10 @@ $("#collection_link").attr("href", "/collection.html?collection_id=" + setlist.c
 $("#setlists_link").attr("href", "/setlists.html?collection_id=" + setlist.collection_id);
 
 // Enable tooltips
-$(".visibility_icon").tooltip();
+// $(".visibility_icon").tooltip();
+$("#visibility_public").tooltip();
+$("#visibility_collection").tooltip();
+$("#visibility_private").tooltip();
 
 function refresh_setlist() {
     $.get(`/collections/${setlist.collection_id}/setlists/${setlist.setlist_id}`)
