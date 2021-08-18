@@ -1,15 +1,15 @@
 @echo off
 
 echo Building...
-set /P SESSION_KEY=<key.txt
-set /P SENDGRID_API_KEY=<SendGrid_API_key.txt
+set /P SESSION_KEY=
+set /P SENDGRID_API_KEY=
 set HOST=localhost:8000
-set CERT_FILE=C:\Users\mhump\.ssh\localhost.crt
-set KEY_FILE=C:\Users\mhump\.ssh\localhost.key
+set CERT_FILE=
+set KEY_FILE=
 set PORT=8000
-set DB_USERNAME=smo
-set DB_PASSWORD=smo-test
-set ADMIN_EMAIL=sheetmusicorganizer@michaelhumphrey.dev
+set DB_USERNAME=
+set DB_PASSWORD=
+set ADMIN_EMAIL=
 go build -ldflags="-linkmode=internal -extld=none"
 if /I "%ERRORLEVEL%" NEQ "0" (
 	echo Build failed.
