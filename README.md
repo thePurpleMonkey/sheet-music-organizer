@@ -1,7 +1,7 @@
 # Sheet Music Organizer
 
 A web app to categorize and organize sheet music.
-A live version of this website can be found at https://smo.michaelhumphrey.dev.
+A live version of this website can be found at https://sheetmusicorganizer.com.
 
 ## Features
 
