@@ -26,7 +26,7 @@ const PERMISSION_ERROR_MESSAGE string = `{"error": "That action is not permitted
 
 // SendEmail ...
 func SendEmail(name string, address string, subject string, htmlContent string, plainTextContent string) error {
-	from := mail.NewEmail("Sheet Music Organizer", "sheetmusicorganizer@michaelhumphrey.dev")
+	from := mail.NewEmail("Sheet Music Organizer", "support@sheetmusicorganizer.com")
 	to := mail.NewEmail(name, address)
 	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
