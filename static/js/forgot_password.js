@@ -20,8 +20,6 @@ $('#wait').on('shown.bs.modal', function (e) {
 		.fail(function(data) {
 			console.log(data);
 			alert_ajax_failure(data);
-			// $("#reason").text(data.responseJSON.error);
-			// $(".alert").show()
 		})
 		.always(function() {
 			$("#wait").modal("hide")

@@ -310,7 +310,7 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 	var expires time.Time
 	var name, email string
 	var userID int64
-	if err := db.QueryRow("SELECT expires, name, email, user_id FROM password_reset JOIN users ON users.user_id = password_reset.user_id WHERE token = $1", req.Token).Scan(&expires, &name, &email); err != nil {
+	if err := db.QueryRow("SELECT expires, name, email, users.user_id FROM password_reset JOIN users ON users.user_id = password_reset.user_id WHERE token = $1", req.Token).Scan(&expires, &name, &email, &userID); err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("Password reset not found for token %s\n", req.Token)
 			w.WriteHeader(http.StatusNotFound)
