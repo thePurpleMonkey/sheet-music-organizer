@@ -34,6 +34,15 @@ $("#reset").click(function() {
 $('#wait').on('shown.bs.modal', function (e) {
 	$.post("/user/password/reset", JSON.stringify({email: email, password: $("#password").val(), token: token}))
 	.done(function( data ) {
+		// Set the user to be logged in
+		try {
+			window.localStorage.setItem("logged_in", true);
+		} catch (err) {
+			console.log("Unable to set localStorage variable 'logged_in' to true.");
+			console.log(err);
+		}
+
+		// Redirect user to their collections
 		window.location.href = "/collections.html";
 	})
 	.fail(function( data ) {
