@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {{template "header.html"}}
+
+    <!-- jQuery UI libraries -->
+    <link rel="stylesheet" href="/js/jquery-ui.min.css">
+    <script src="/js/jquery-ui.min.js"></script>
+    <script src="/js/jquery.ui.touch-punch.min.js"></script>
+    
+    <title>Setlist - Sheet Music Organizer</title>
+
+    <link href="css/setlist.css" rel="stylesheet">
+  </head>
+
+  <body>
+    {{template "navbar.html"}}
+
+    <div class="container">
+      <!-- Header -->
+      <img src="/img/globe.svg" class="hidden visibility_icon" id="visibility_public" alt="Public setlist" title="Anyone with a link can view this setlist.">
+      <img src="/img/users.svg" class="hidden visibility_icon" id="visibility_collection" alt="Collection setlist" title="Members of this collection can view this setlist.">
+      <img src="/img/lock.svg" class="hidden visibility_icon" id="visibility_private" alt="Private setlist" title="Only you can view this setlist.">
+      <h1 id="page_header">Loading...</h1>
+      <hr>
+
+      <div id="alerts"></div>
+
+      
+      <div>
+        <h5 class="setlist_header">Date</h5>
+        <div class="setlist_value" id="setlist_date"></div>
+      </div>
+      <div>
+        <h5 class="setlist_header">Notes</h5>
+        <div class="setlist_value" id="setlist_notes"></div>
+      </div>
+
+      <h5 class="setlist_header">Songs in this setlist:</h5>
+      <div id="remove_alert" class="alert alert-info hidden" role="alert">
+        <strong>Remove songs</strong>
+        <div>
+          Click on a song to remove it from this setlist. It can always be added again later.
+        </div>
+      </div>
+      <div id="reorder_help" class="alert alert-info hidden" role="alert">
+        <strong>Reorder songs</strong>
+        <div>
+          Click and drag songs into the order you desire.
+          When you are finished, click the "Save order" button to finalize your changes.
+        </div>
+      </div>
+      <div class="list-group" id="songs_container"></div>
+      <div class="list-group hidden" id="songs_container_delete"></div>
+      <div class="list-group hidden" id="songs_container_reorder"></div>
+      
+      <div id="button_toolbar">
+        <h5 class="setlist_header" id="song_tools_label">Song Tools</h5>
+        <button type="button" class="btn btn-primary" id="add_button" data-toggle="modal" data-target="#setlist_add_song_modal">Add</button>
+        <button type="button" class="btn btn-secondary" id="reorder_button">Reorder</button>
+        <button type="button" class="btn btn-secondary" id="remove_button">Remove</button>
+        <button type="button" class="btn btn-primary hidden" id="save_button">Save order</button>
+        <button type="button" class="btn btn-secondary hidden" id="cancel_button">Cancel</button>
+        <button type="button" class="btn btn-secondary hidden" id="back_button">Back</button>
+      </div>
+
+      {{template "footer.html"}}
+    </div>
+
+    <!-- #region Modals -->
+
+    <!-- #region Edit setlist -->
+    <!-- Edit setlist modal -->
+    <div class="modal fade" id="edit_setlist_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Edit Setlist</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+            <div class="form-group">
+              <label for="setlist_name" class="col-form-label">Name:</label>
+              <input type="text" class="form-control" id="setlist_name_input">
+            </div>
+            <div class="form-group">
+              <label for="setlist_date" class="col-form-label">Date:</label>
+              <input type="date" class="form-control" id="setlist_date_input">
+            </div>
+            <div class="form-group">
+              <label for="setlist_description" class="col-form-label">Notes:</label>
+              <textarea class="form-control" id="setlist_notes_input"></textarea>
+            </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="save_setlist_button">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit setlist wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="edit_setlist_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Saving changes...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Please wait while we save your changes to this setlist...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- #endregion -->
+    
+    <!-- #region Delete setlist -->
+    <!-- Delete setlist modal -->
+    <div class="modal fade" id="delete_setlist_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Delete setlist confirmation</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>
+              Are you sure you want to delete this setlist? 
+              The songs in this setlist will remain, but the setlist will be permanently deleted.
+            </p>
+            <p>This CANNOT be undone!</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger" id="delete_setlist">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete setlist wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="delete_setlist_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Deleting setlist...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Please wait while this setlist is deleted...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- #endregion -->
+    
+    <!-- #region Add songs -->
+    <!-- Add songs to setlist modal -->
+    <div class="modal fade" id="setlist_add_song_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add song</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Please select one or more songs to add to this setlist.</p>
+            <div class="input-group">
+              <select class="custom-select" name="song_select" id="song_select">
+                <option style="display:none" value=0>Choose a song...</option>
+              </select>
+            </div>
+            <hr>
+            <p>Songs to be added:</p>
+            <div class="list-group" id="song_list"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="add_song_modal_button" disabled>Add songs</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add songs to setlist wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="setlist_add_song_wait_modal" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Adding song...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Please wait while the songs are added to this setlist...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- #endregion -->
+
+    <!-- #region Share setlist -->
+    <!-- Share setlist modal -->
+    <div class="modal fade" id="share_setlist_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Share Setlist</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <p>Please select the visibility for this setlist:</p>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="visibility_radio" id="private_radio" value="private">
+                <label class="form-check-label" for="private_radio">
+                  Only Me
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="visibility_radio" id="collection_radio" value="collection">
+                <label class="form-check-label" for="collection_radio">
+                  Members of this collection
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="visibility_radio" id="public_radio" value="public">
+                <label class="form-check-label" for="public_radio">
+                  Anyone with a link
+                </label>
+              </div>
+              <div class="form-group" id="share_code_form_group">
+                <h5 class="setlist_header"><label for="share_code_input">Share link</label></h5>
+                <input type="text" class="form-control-plaintext" id="share_link_input" placeholder="" readonly>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="copy_link_button">Copy link</button>
+                <span id="copy_link_success" class="hidden">Link copied to clipboard!</span>
+              </div>
+            </form>
+            <div class="hidden" id="saving"><div id="spinner"></div>Saving...</div>
+            
+            <div id="share_result" class="alert alert-success hidden" role="alert">
+              <strong>Visibility updated</strong>
+              <div id="private_result" class="hidden">
+                This setlist is no longer shared and is only visible to you.
+              </div>
+              <div id="collection_result" class="hidden">
+                This setlist is now visible by anyone in this collection.
+              </div>
+              <div id="public_result" class="hidden">
+                This setlist is now publicly viewable by anyone with the link.
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="save_setlist_visibility_button" disabled>Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Share setlist wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="share_setlist_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Sharing setlist...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Please wait while we save your changes to this setlist...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- #endregion -->
+
+    <!-- Save setlist order wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="setlist_order_wait_modal" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Saving setlist order...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Please wait while your changes are saved...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- #endregion -->
+
+    <!-- Script -->
+    <script src="/js/setlist.js" type="module"></script>
+  </body>
+</html>

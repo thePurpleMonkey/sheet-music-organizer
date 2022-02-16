@@ -81,6 +81,7 @@ func makeRouter() *mux.Router {
 	// })
 
 	// Static files
+	r.HandleFunc("/{language}/{filename}.html", HTMLHandler)
 	r.HandleFunc("/{filename}.html", HTMLHandler)
 	r.HandleFunc("/", HTMLHandler)
 	r.PathPrefix("/").Handler(http.StripPrefix("/", preventDirectoryListing(http.FileServer(http.Dir("static")))))

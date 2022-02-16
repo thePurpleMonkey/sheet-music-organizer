@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+		{{template "header.html"}}
+
+		<title>Sign in - Sheet Music Organizer</title>
+
+		<!-- Custom styles for this template -->
+		<link href="css/signin.css" rel="stylesheet">
+  </head>
+
+	<body>
+		{{template "navbar.html"}}
+
+		<div class="container">
+			<div class="text-center">
+				<!-- Alerts -->
+				<div id="alerts"></div>
+	
+				<!-- Form -->
+				<form class="form-signin">
+					<h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+					<input type="email" id="email" class="form-control" placeholder="Email address" required autofocus>
+					<input type="password" id="password" class="form-control" placeholder="Password" required>
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" value="" id="remember_me">
+						<label class="form-check-label" for="remember_me">Remember me</label>
+						</div>
+					<button class="btn btn-lg btn-primary btn-block" type="button" id="login">Sign in</button>
+					<a href="/register.html" class="links">Register</a>
+					<span class="links">&nbsp;-&nbsp;</span>
+					<a href="/forgot_password.html" id="forgot_password_link" class="links">Forgot password?</a>
+					<p class="mt-5 mb-3 text-muted">&copy; 2020 Michael Humphrey<br>All Rights Reserved</p>
+				</form>
+				
+				<!-- Modal -->
+				<div class="modal fade in" tabindex="-1" role="dialog" id="wait" data-backdrop="static" data-keyboard="false">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Logging in...</h5>
+						</div>
+						<div class="modal-body">
+							<p>Please wait while we authenticate you...</p>
+						</div>
+						</div>
+					</div>
+				</div>
+			</div>
+				
+			{{template "footer.html"}}
+		</div>
+		
+		<!-- Script -->
+		<script src="/js/signin.js" type="module"></script>
+  </body>
+</html>

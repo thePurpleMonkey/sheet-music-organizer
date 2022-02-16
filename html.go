@@ -18,15 +18,21 @@ func HTMLHandler(w http.ResponseWriter, r *http.Request) {
 		filename = "index"
 	}
 
+	language := vars["language"]
+	if language == "" {
+		language = "en"
+	}
+
 	// Load template
-	t, err := template.ParseGlob("html_templates/*.html")
+	template_path := fmt.Sprintf("html_templates/%s/*.html", language)
+	t, err := template.ParseGlob(template_path)
 	if err != nil {
 		log.Printf("HTML Handler - Unable to parse file %s: %v\n", filename, err)
 		SendError(w, SERVER_ERROR_MESSAGE, http.StatusInternalServerError)
 		return
 	}
 
-	log.Printf("HTML Handler - Serving %s.html\n", filename)
+	log.Printf("HTML Handler - Serving %s.html (%s)\n", filename, language)
 	tmpl := t.Lookup(filename + ".html")
 	if tmpl == nil {
 		// The desired template was not found, so present a 404 error

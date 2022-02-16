@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {{template "header.html"}}
+
+    <style>
+      #new_setlist {
+        margin-top: 10px;
+      }
+    </style>
+
+    <title>Setlists - Sheet Music Organizer</title>
+  </head>
+
+  <body>
+    {{template "navbar.html"}}
+
+    <div class="container">
+      <!-- Header -->
+      <h1>Setlists</h1>
+      <hr>
+
+      <div id="alerts"></div>
+      
+      <!-- #region Tutorial alert -->
+      <div class="alert alert-info hidden tutorial" role="alert" id="setlist_tutorial_alert">
+        <strong>Setlists</strong>
+        <div>
+          Setlists are a group of songs that can be shared with others.
+          You can add any songs from your collection and put them in any order.
+          By default, only you can see setlists that you create.
+          You can share setlists with other members of the collection,
+          or you can share them publicly with a link &ndash; no login required.
+          After creating a setlist, go to Options -> Share and choose who to share the setlist with.
+          <br>
+          <br>
+          <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
+        </div>
+      </div>
+      <!-- #endregion -->
+
+      <!-- Collection list -->
+      <div id="setlists_list" class="list-group">
+        <!-- <li id="loading">Loading collections, please wait...</li> -->
+      </div>
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#new_setlist_modal" id="new_setlist">New setlist</button>
+
+      {{template "footer.html"}}
+    </div>
+
+    <!-- #region Modals -->
+
+    <!-- New setlist modal -->
+    <div class="modal fade" id="new_setlist_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="new_setlist_modal_title">New Setlist</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="new_setlist_form">
+          <div class="form-group">
+            <label for="name" class="col-form-label">Name:</label>
+            <input type="text" class="form-control" id="name" required placeholder="(required)">
+          </div>
+          <div class="form-group">
+            <label for="date" class="col-form-label">Date:</label>
+            <input type="date" class="form-control" id="date"></input>
+          </div>
+          <div class="form-group">
+            <label for="notes" class="col-form-label">Notes:</label>
+            <textarea class="form-control" id="notes"></textarea>
+          </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="create_setlist">Create setlist</button>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="wait" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Creating setlist...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Please wait while we create your setlist...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- #endregion Modals -->
+    
+    <script src="/js/setlists.js" type="module"></script>
+  </body>
+</html>

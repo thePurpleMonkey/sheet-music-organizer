@@ -60,7 +60,7 @@ export function alert_ajax_failure(title, data) {
 	console.log("Ajax failure!");
 	console.log(data);
 	if (data.status === 401) {
-		let redirect = "/signin.html?redirect=" + encodeURIComponent(window.location.pathname + window.location.search);
+		let redirect = "signin.html?redirect=" + encodeURIComponent(window.location.pathname + window.location.search);
 		console.log("403 Forbidden response received. Setting 'logged_in' to false.");
 		try { window.localStorage.setItem("logged_in", false); } catch(err) { console.log("Unable to 'logged_in' localStorage variable to false."); console.log(err); }
 		console.log("Redirecting to: " + redirect);

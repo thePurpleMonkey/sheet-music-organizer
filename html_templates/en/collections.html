@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {{template "header.html"}}
+
+    <link href="/css/collections.css" rel="stylesheet">
+    <title>Collections - Sheet Music Organizer</title>
+  </head>
+
+  <body>
+    {{template "navbar.html"}}
+
+    <div class="container">
+      <!-- Header -->
+      <h1>Collections</h1>
+      <hr>
+
+      <div id="alerts"></div>
+
+      <div class="alert alert-info hidden tutorial" role="alert" id="new_collection_tutorial_alert">
+        <strong>Welcome to Sheet Music Organizer!</strong>
+        <div>
+          This page lists all of the collections you are a part of.
+          You can create as many collections as you need to keep your music organized.
+          Collections you have been invited to will also appear in this list.
+          There's nothing here at the moment, so let's create your first collection!
+          Click New collection to begin.
+          <br>
+          <br>
+          <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
+        </div>
+      </div>
+
+      <!-- Collection list -->
+      <div id="collections" class="list-group"></div>
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#new_collection_modal" id="new_collection">New collection</button>
+
+      {{template "footer.html"}}
+    </div>
+
+    <!-- #region Modals -->
+
+    <!-- New collection modal -->
+    <div class="modal fade" id="new_collection_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">New Collection</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+          <!-- Tutorial alerts -->
+          <div class="alert alert-info hidden tutorial" role="alert" id="create_collection_tutorial_alert">
+            <strong>Create a new collection</strong>
+            <div>
+              Choose a name for your collection. 
+              You may also add a description to describe this collection.
+              Collection descriptions are shown in the collection details page,
+              as well as when users are invited to the collection.
+              <br>
+              Once you are finished, click Create collection.
+              <br>
+              <br>
+              <a href="javascript:;" class="alert-link hide_tutorial">Hide tutorial</a>
+            </div>
+          </div>
+
+          <form id="create_collection_form">
+          <div class="form-group">
+            <label for="name" class="col-form-label">Collection name:</label>
+            <input type="text" class="form-control" id="name" required>
+          </div>
+          <div class="form-group">
+            <label for="description" class="col-form-label">Collection description:</label>
+            <textarea class="form-control" id="description"></textarea>
+          </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="create_collection">Create collection</button>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Creating collection...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Please wait while we create your collection...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending invitations modal -->
+    <div class="modal fade" id="pending_invitations_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Pending invitations</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Click on an invitation to view it.</p>
+          <div class="list-group" id="pending_invitations_list"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- #endregion Modals -->
+    
+    <script src="/js/collections.js" type="module"></script>
+  </body>
+</html>
