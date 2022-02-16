@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     {{template "header.html"}}
-    <link href="css/collection.css" rel="stylesheet">
+    <link href="/css/collection.css" rel="stylesheet">
 
-    <title>Dashboard - Sheet Music Organizer</title>
+    <title>Pantalla Principal - Sheet Music Organizer</title>
   </head>
 
   <body>
@@ -12,15 +12,16 @@
 
     <div class="container">
       <!-- Header -->
-      <h1 id="page_header">Loading...</h1>
+      <h1 id="page_header">Cargando...</h1>
       <div id="description_row">
-        <span style="font-weight: bold;">Description:</span>
+        <span style="font-weight: bold;">Descripción:</span>
         <span id="description"></span>
       </div>
       <hr>
 
       <div id="alerts"></div>
 
+      <!-- #region Tutorial -->
       <!-- Tutorial alerts -->
       <div class="alert alert-info hidden tutorial" role="alert" id="dashboard_add_tag_tutorial_alert">
         <strong>Dashboard</strong>
@@ -35,7 +36,7 @@
         </div>
       </div>
       <div class="alert alert-info hidden tutorial" role="alert" id="dashboard_add_song_tutorial_alert">
-        <strong>Dashboard</strong>
+        <strong>Pantalla Principal</strong>
         <div>
           Now you can organize your songs with tags.
           <br>
@@ -69,25 +70,26 @@
           <a href="javascript:;" class="alert-link hide_tutorial">Close tutorial</a>
         </div>
       </div>
+      <!-- #endregion -->
 
       <!-- Main view -->
       <div class="row row-cols-2">
         <!-- All songs list -->
         <div id="all_songs" class="col-sm-6">
           <h3>
-            Songs
+            Canciones
             <!--a href="#" id="filter_link"><img src="/img/filter.svg" id="filter" alt="filter icon" title="Filter song list"></a-->
           </h3>
           
           <div id="songs" class="list-group"></div>
-          <div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_song_modal" id="add_song">New song</button></div>
+          <div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_song_modal" id="add_song">Nueva canción</button></div>
         </div>
   
         <!-- Tags -->
         <div id="all_tags" class="col-sm-6">
-          <h3>Tags</h3>
+          <h3>Etiquetas</h3>
           <div id="tags" class="list-group"></div>
-          <div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_tag_modal" id="add_tag">New Tag</button></div>
+          <div class="text-center"><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_tag_modal" id="add_tag">Nueva etiqueta</button></div>
         </div>
       </div>
     
@@ -101,8 +103,8 @@
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">New song</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <h5 class="modal-title">Nueva Canción</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
           <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -124,34 +126,34 @@
 
           <form id="add_song_form">
             <div class="form-group">
-              <label for="name" class="col-form-label">Name:</label>
-              <input type="text" class="form-control" id="name" required placeholder="(required)">
+              <label for="name" class="col-form-label">Nombre:</label>
+              <input type="text" class="form-control" id="name" required placeholder="(necesario)">
             </div>
             <div class="form-group">
-              <label for="artist" class="col-form-label">Artist:</label>
+              <label for="artist" class="col-form-label">Artista:</label>
               <input type="text" class="form-control" id="artist">
             </div>
             <div class="form-group">
-              <label for="location" class="col-form-label">Location:</label>
+              <label for="location" class="col-form-label">Ubicación:</label>
               <div class="input-group">
                 <input type="text" class="form-control" id="location">
                 <span class="input-group-append">
-                  <img src="/img/help-circle.svg" class="form-control-feedback" id="location_help" alt="location help" title="Use this field to link to the digital copy of the sheet music, or provide a short description of where the physical copy of the sheet music is.">
+                  <img src="/img/help-circle.svg" class="form-control-feedback" id="location_help" alt="Ubicación ayuda" title="Use this field to link to the digital copy of the sheet music, or provide a short description of where the physical copy of the sheet music is.">
                 </span>
               </div>
             </div>
             <div class="form-group">
-              <label for="last_performed" class="col-form-label">Last Performed:</label>
+              <label for="last_performed" class="col-form-label">Ejecutar último:</label>
               <input type="date" class="form-control" id="last_performed">
             </div>
             <div class="form-group">
-              <label for="notes" class="col-form-label">Notes:</label>
+              <label for="notes" class="col-form-label">Notas:</label>
               <textarea class="form-control" id="notes"></textarea>
             </div>
             
             <div class="form-group">
-              <label for="tags" class="col-form-label">Tags:</label>
-              <div id="tags_list">Loading...</div>
+              <label for="tags" class="col-form-label">Etiquetas:</label>
+              <div id="tags_list">Cargando...</div>
             </div>
 
             <!-- This hidden submit button is to allow the form to be submitted by pressing enter in any of the text fields. -->
@@ -159,8 +161,8 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" id="add_song_modal_button">Create song</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="add_song_modal_button">Crear canción</button>
         </div>
         </div>
       </div>
@@ -170,12 +172,12 @@
     <div class="modal fade in" tabindex="-1" role="dialog" id="song_wait" data-backdrop="static" data-keyboard="false">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Adding song...</h5>
-        </div>
-        <div class="modal-body">
-          <p>Please wait while this song is created...</p>
-        </div>
+          <div class="modal-header">
+            <h5 class="modal-title">Creando canción...</h5>
+          </div>
+          <div class="modal-body">
+            <p>Por favor espera mientras esta canción está crear...</p>
+          </div>
         </div>
       </div>
     </div>
@@ -188,7 +190,7 @@
         <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">New Tag</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
           <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -206,18 +208,18 @@
 
           <form id="add_tag_form">
           <div class="form-group">
-            <label for="tag_name" class="col-form-label">Name:</label>
-            <input type="text" class="form-control" id="tag_name" required placeholder="(required)">
+            <label for="tag_name" class="col-form-label">Nombre:</label>
+            <input type="text" class="form-control" id="tag_name" required placeholder="(necesario)">
           </div>
           <div class="form-group">
-            <label for="tag_description" class="col-form-label">Description:</label>
+            <label for="tag_description" class="col-form-label">Descripción:</label>
             <textarea class="form-control" id="tag_description"></textarea>
           </div>
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" id="add_tag_modal_button">Create tag</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="add_tag_modal_button">Crear etiqueta</button>
         </div>
         </div>
       </div>
@@ -228,10 +230,10 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Adding Tag...</h5>
+          <h5 class="modal-title">Creando Etiqueta...</h5>
         </div>
         <div class="modal-body">
-          <p>Please wait while this tag is created...</p>
+          <p>Por favor espera mientras esta etiqueta está crear...</p>
         </div>
         </div>
       </div>
@@ -244,26 +246,26 @@
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Edit Collection</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <h5 class="modal-title">Editar Colección</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
             <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div class="modal-body">
             <form>
             <div class="form-group">
-              <label for="collection_name" class="col-form-label">Collection name:</label>
+              <label for="collection_name" class="col-form-label">Nombre de colección:</label>
               <input type="text" class="form-control" id="collection_name">
             </div>
             <div class="form-group">
-              <label for="collection_description" class="col-form-label">Collection description:</label>
+              <label for="collection_description" class="col-form-label">Descripción de colección:</label>
               <textarea class="form-control" id="collection_description"></textarea>
             </div>
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" id="save_collection">Save</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="save_collection">Guardar</button>
           </div>
         </div>
       </div>
@@ -274,10 +276,10 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Saving changes...</h5>
+          <h5 class="modal-title">Guardando cambios...</h5>
         </div>
         <div class="modal-body">
-          <p>Please wait while we save your changes to this collection...</p>
+          <p>Por favor espera mientras guardamos su cambios...</p>
         </div>
         </div>
       </div>
@@ -290,22 +292,22 @@
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Delete collection confirmation</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <h5 class="modal-title">Eliminar colección confirmación</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
             <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div class="modal-body">
             <p>
-              Are you sure you want to delete this collection? This will remove all users
-              from this collection and  delete all associated songs, tags, attachments, 
-              and everything else in this collection.
+              ¿Está usted seguro quiere eliminar este colección?
+              Esto se quitará todos usuarios de esta colección y 
+              se eliminará todos canciones, etiquetas, y todo lo demás en esta colección.
             </p>
-            <p>This CANNOT be undone!</p>
+            <p>¡Esto NO SE PUEDE deshacer!</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-danger" id="delete_collection">Delete</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-danger" id="delete_collection">Eliminar</button>
           </div>
         </div>
       </div>
@@ -316,10 +318,10 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Deleting collection...</h5>
+          <h5 class="modal-title">Eliminando colección...</h5>
         </div>
         <div class="modal-body">
-          <p>Please wait while we delete this collection...</p>
+          <p>Por favor espera mientras esta colección se eliminar...</p>
         </div>
         </div>
       </div>
@@ -331,59 +333,59 @@
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Collection Settings</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <h5 class="modal-title">Colección Configuración</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
             <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div class="modal-body">
             <div class="alert alert-info">
               <img src="/img/alert-circle-info.svg" alt="Alert circle" id="alert_info_icon">
-              These settings are saved locally on your machine, and will only affect
-              the dashboard for this collection on this device.
-              Clearing your cookies or local storage for this browser will reset your settings.
+              Estas configuraciones se guardan localmente en su computadora,
+              y solo afectaría la pantalla principal para esta colección de esta computadora.
+              Eliminando las cookies o local storage para esto navegador formateará su configuraciones.
             </div>
             <form>
-              <h4>Hide tags</h4>
+              <h4>Esconder Etiquetas</h4>
               <p>
-                Choose which tags to hide from the dashboard.
-                Selected tags and songs with those tags will not be shown on the dashboard.
-                Songs will still appear in search results.
+                Elija cuál etiquetas esconder de la pantalla principal.
+                Las etiquetas y canciones seleccionadas no se mostrarán en la pantalla principal.
+                Las canciones aparecerán en los resultados de búsqueda.
               </p>
               <div id="hide_tag_list"></div>
 
-              <h4>Sort order</h4>
+              <h4>Ordenar</h4>
               <p>
-                Choose the order which tags and songs are displayed on the dashboard.
+                Elija el orden en que se muestran las etiquetas y canciones en la pantalla principal.
               </p>
               <div id="sort_container">
                 <div id="name_sort">
-                  <h5>Songs</h5>
+                  <h5>Canciones</h5>
                   <div class="form-check">
                     <input class="form-check-input" type="radio" name="song_sort_order" id="song_sort_name" value="name">
                     <label class="form-check-label" for="song_sort_name">
-                      Name
+                      Nombre
                     </label>
                   </div>
                   <div class="form-check">
                     <input class="form-check-input" type="radio" name="song_sort_order" id="song_sort_added" value="date_added">
                     <label class="form-check-label" for="song_sort_added">
-                      Date added
+                      Fecha agregada
                     </label>
                   </div>
                 </div>
                 <div id="tag_sort">
-                  <h5>Tags</h5>
+                  <h5>Etiquetas</h5>
                   <div class="form-check">
                     <input class="form-check-input" type="radio" name="tag_sort_order" id="tag_sort_name" value="name">
                     <label class="form-check-label" for="tag_sort_name">
-                      Name
+                      Nombre
                     </label>
                   </div>
                   <div class="form-check">
                     <input class="form-check-input" type="radio" name="tag_sort_order" id="tag_sort_added" value="date_added">
                     <label class="form-check-label" for="tag_sort_added">
-                      Date added
+                      Fecha agregada
                     </label>
                   </div>
                 </div>
@@ -391,8 +393,8 @@
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" id="settings_save_button">Save</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="settings_save_button">Guardar</button>
           </div>
         </div>
       </div>

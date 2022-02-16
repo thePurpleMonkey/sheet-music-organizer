@@ -21,7 +21,7 @@ function refreshCollections() {
 
 		data.collections.forEach(collection => {
 			let a = $("<a>")
-				.attr("href", "/collection.html?collection_id=" + collection.collection_id)
+				.attr("href", "collection.html?collection_id=" + collection.collection_id)
 				.addClass("list-group-item list-group-item-action")
 				.text(collection.name);
 			$("#collections").append(a);
@@ -34,7 +34,7 @@ function refreshCollections() {
 	.fail(function(data) {
 		if (data.status == 403) {
 			console.log("Not authorized to access collections. Redirecting to sign in page...");
-			window.location.replace("/signin.html");
+			window.location.replace("signin.html");
 		}
 
 		alert_ajax_failure("Unable to get collections.", data);
@@ -95,7 +95,7 @@ $('#wait').on('shown.bs.modal', function (e) {
 		console.log("Create collection server response:");
 		console.log(data);
 		add_session_alert("Collection created!", "The collection was successfully created.", "success");
-		window.location.href = `/collection.html?collection_id=${data.collection_id}`;
+		window.location.href = `collection.html?collection_id=${data.collection_id}`;
 	})
 	.fail(function(data) {
 		alert_ajax_failure("Unable to create collection!", data);
@@ -131,7 +131,7 @@ function check_pending_invitations() {
 $("#pending_invitations_modal").on("show.bs.modal", function() {
 	pending_invitations.forEach(function(invitation) {
 		let element = $("<a class='list-group-item list-group-item-action'>")
-		.attr("href", "/accept_invite.html?token=" + invitation.token)
+		.attr("href", "accept_invite.html?token=" + invitation.token)
 		.text(invitation.collection_name)
 
 		$("#pending_invitations_list").append(element);

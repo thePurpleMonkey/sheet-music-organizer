@@ -25,10 +25,10 @@ let settingsKey = `collection_${collection.id}`;
 let settings = undefined;
 
 // Replace links
-$("#members_link").attr("href", "/members.html?collection_id=" + collection.id);
-$("#filter_link").attr("href", "/advanced_search.html?collection_id=" + collection.id);
-$("#setlists_link").attr("href", "/setlists.html?collection_id=" + collection.id);
-$("#advanced_search_dropdown_link").attr("href", "/advanced_search.html?collection_id=" + collection.id);
+$("#members_link").attr("href", "members.html?collection_id=" + collection.id);
+$("#filter_link").attr("href", "advanced_search.html?collection_id=" + collection.id);
+$("#setlists_link").attr("href", "setlists.html?collection_id=" + collection.id);
+$("#advanced_search_dropdown_link").attr("href", "advanced_search.html?collection_id=" + collection.id);
 
 // Show options in navbar
 $("#navbar_options").removeClass("hidden");
@@ -134,7 +134,7 @@ function reloadSongs() {
             let a = $("<a>");
             a.addClass("list-group-item");
             a.addClass("list-group-item-action");
-            a.attr("href", `/song.html?song_id=${encodeURIComponent(song.song_id)}&collection_id=${collection.id}`);
+            a.attr("href", `song.html?song_id=${encodeURIComponent(song.song_id)}&collection_id=${collection.id}`);
             a.text(song.name);
             $("#songs").append(a);
         });
@@ -145,7 +145,7 @@ function reloadSongs() {
     })
     .fail(function(data) {
         if (data.status === 403) {
-            window.location.replace("/404.html");
+            window.location.replace("404.html");
         }
 
         alert_ajax_failure("Unable to get songs!", data);
@@ -187,7 +187,7 @@ function reloadTags() {
                 let a = $("<a>");
                 a.addClass("list-group-item");
                 a.addClass("list-group-item-action");
-                a.attr("href", `/tag.html?tag_id=${encodeURIComponent(tag.tag_id)}&collection_id=${collection.id}`);
+                a.attr("href", `tag.html?tag_id=${encodeURIComponent(tag.tag_id)}&collection_id=${collection.id}`);
                 a.text(tag.name);
                 $("#tags").append(a);
             }
