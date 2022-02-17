@@ -51,7 +51,7 @@ function refresh_tag() {
 // Get tag info when document becomes ready
 $(function() {
     // Replace link for collection
-    $("#collection_link").attr("href", "/collection.html?collection_id=" + tag.collection_id);
+    $("#collection_link").attr("href", "collection.html?collection_id=" + tag.collection_id);
 
     // Load tag information
     refresh_tag();

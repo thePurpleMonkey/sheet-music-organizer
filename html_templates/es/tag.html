@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    {{template "header.html"}}
+
+    <link href="-css/setlist.css" rel="stylesheet">
+
+    <title>Etiqueta - Sheet Music Organizer</title>
+  </head>
+
+  <body>
+    {{template "navbar.html"}}
+
+    <div class="container">
+      <!-- Header -->
+      <h1 id="page_header">Cargando...</h1>
+      <div id="description_row">
+        <span id="description_header">Descripción:</span>
+        <span id="description"></span>
+      </div>
+
+      <hr>
+
+      <div id="alerts"></div>
+
+      <p style="font-weight: bold;">Canciones con esta etiqueta:</p>
+      <div class="list-group" id="songs_container"></div>
+
+      {{template "footer.html"}}
+    </div>
+
+    <!-- #region Modals -->
+
+    <!-- Edit tag modal -->
+    <div class="modal fade" id="edit_tag_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Editar Etiqueta</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+            <div class="form-group">
+              <label for="tag_name" class="col-form-label">Nombre:</label>
+              <input type="text" class="form-control" id="tag_name">
+            </div>
+            <div class="form-group">
+              <label for="tag_description" class="col-form-label">Descripción:</label>
+              <textarea class="form-control" id="tag_description"></textarea>
+            </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="save_tag_button">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit tag wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="edit_tag_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Guardando cambios...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Por favor espera mientras guardamos su cambios...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Delete tag modal -->
+    <div class="modal fade" id="delete_tag_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Eliminar etiqueta confirmación</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>
+              ¿Está usted seguro quiere eliminar este etiqueta?
+              Esta se quitará permanentemente de esta colección,
+              y todas las canciones tendrán esta etiqueta eliminada.
+            </p>
+            <p>¡Esto NO SE PUEDE deshacer!</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-danger" id="delete_tag">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete tag wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="delete_tag_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminando etiqueta...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Por favor espera mientras se elimina esta etiqueta...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- #endregion -->
+
+    <!-- Script -->
+    <script src="/js/tag.js" type="module"></script>
+  </body>
+</html>

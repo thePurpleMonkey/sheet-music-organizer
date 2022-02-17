@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    {{template "header.html"}}
+
+    <title>Canción - Sheet Music Organizer</title>
+
+    <link href="/css/song.css" rel="stylesheet">
+  </head>
+
+  <body>
+    {{template "navbar.html"}}
+
+    <div class="container">
+      <!-- Header -->
+      <h1 id="page_header">Cargando...</h1>
+      <hr>
+
+      <div id="alerts"></div>
+
+      <!-- Main view -->
+      <div id="song_info_container">
+        <div>
+          <h5 class="song_header">Nombre</h5>
+          <div class="song_value" id="song_name"></div>
+          <input class="song_value hidden" id="song_name_input" type="text">
+        </div>
+        <div>
+          <h5 class="song_header">Artista</h5>
+          <div class="song_value" id="song_artist"></div>
+          <input class="song_value hidden" id="song_artist_input" type="text">
+        </div>
+        <div>
+          <h5 class="song_header">Ubicación</h5>
+          <div class="song_value" id="song_location"></div>
+          <input class="song_value hidden" id="song_location_input" type="text">
+          <img src="/img/help-circle.svg"  class="hidden" id="location_help" alt="Ubicación ayuda" title="Use this field to link to the digital copy of the sheet music, or provide a short description of where the physical copy of the sheet music is.">
+        </div>
+        <div>
+          <h5 class="song_header">Ejecutar último</h5>
+          <div class="song_value" id="song_last_performed"></div>
+          <input class="song_value hidden" id="song_last_performed_input" type="date">
+        </div>
+        <div>
+          <h5 class="song_header">Fecha Agregada</h5>
+          <div class="song_value" id="song_date_added"></div>
+        </div>
+        <div>
+          <h5 class="song_header">Añadido por</h5>
+          <div class="song_value" id="song_added_by"></div>
+        </div>
+        <div>
+          <h5 class="song_header">Notas</h5>
+          <div class="song_value" id="song_notes"></div>
+          <textarea class="song_value hidden" id="song_notes_input"></textarea>
+          <div id="thumbnail_container"></div>
+        </div>
+        <div>
+          <h5 class="song_header">Etiquetas</h5>
+          <div class="song_value" id="tag_container">
+            <a data-toggle="modal" href="#add_tag_modal" class="btn btn-success hidden" id="add_tag_button"><img src="/img/plus.svg" id="plus">Añada etiqueta</a>
+          </div>
+        </div>
+      </div>
+
+      <hr class="hidden" id="edit_divider">
+      <div class="clearfix">
+        <div class="float-right row hidden" id="edit_buttons">
+          <button type="button" class="btn btn-secondary" id="edit_cancel">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="song_save">Guardar</button>
+        </div>
+
+      <!-- Clear the floated edit buttons for the footer -->
+      <div class="clearfix"></div>
+      
+      {{template "footer.html"}}
+    </div>
+
+    <!-- #region Modals -->
+
+    <!-- Delete tag wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="delete_tag_wait_modal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminando Etiqueta...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Por favor espera mientras esta etiqueta se eliminar...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit song wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="edit_song_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Guardando Cambios...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Por favor espera mientras guardamos su cambios...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- #region Delete song modal -->
+    <!-- Delete song modal -->
+    <div class="modal fade" id="delete_song_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Eliminar Canción Confirmación</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>
+              ¿Está usted seguro quiere eliminar este canción?
+              Esta se quitará permanentemente de esta colección,
+              y ya nadie podrá acceder a él.
+            </p>
+            <p>¡Esto NO SE PUEDE deshacer!</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-danger" id="delete_song">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete song wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="delete_song_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminando Canción...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Por favor espera mientras se elimina esta canción...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- #endregion -->
+    
+    <!-- #region Add Tag Modals -->
+    <!-- Add tag modal -->
+    <div class="modal fade" id="add_tag_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Añadir Etiquetas</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div>
+              Seleccione etiquetas para añadir:
+              <div id="tag_list"></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="add_tag">Añadir etiquetas</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add tag wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="tag_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Añadiendo Etiquetas...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Por favor espera mientras etiquetamos esta canción...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- #endregion -->
+    
+    <!-- #region Add to setlist -->
+    <!-- Add to setlist modal -->
+    <div class="modal fade" id="add_to_setlist_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Añadir a Una Lista de Canciones</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Elija una lista de canciones para añadir esta canción a:
+            <div class="input-group">
+              <select class="custom-select" name="setlist_select" id="setlist_select">
+                <option style="display:none" value=0>Cargando...</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="add_to_setlist_modal_button" disabled>Añadir a la lista de canciones</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add to setlist wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="add_to_setlist_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Añadiendo a La Lista de Canciones...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Por favor espera mientras se añade esta canción a la lista de canciones...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- #endregion -->
+    
+    <!-- #endregion -->
+  
+    <!-- Script -->
+    <script src="/js/song.js" type="module"></script>
+  </body>
+</html>

@@ -219,7 +219,7 @@ function refresh_song() {
 // Get song info when document becomes ready
 $(function() {
     // Replace link for collection
-    $("#collection_link").attr("href", "/collection.html?collection_id=" + song.collection_id);
+    $("#collection_link").attr("href", "collection.html?collection_id=" + song.collection_id);
 
     refresh_song();
     refresh_tags();
@@ -412,7 +412,7 @@ $('#delete_song_wait').on('shown.bs.modal', function (e) {
     .done(function(data) {
         console.log("Song delete.");
         console.log(data);
-        window.location.replace("/collection.html?collection_id=" + song.collection_id);
+        window.location.replace("collection.html?collection_id=" + song.collection_id);
     })
     .fail(function(data) {
         $("#delete_song_wait").modal("hide");
