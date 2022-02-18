@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    {{template "header.html"}}
+
+    <!-- jQuery UI libraries -->
+    <link rel="stylesheet" href="/js/jquery-ui.min.css">
+    <script src="/js/jquery-ui.min.js"></script>
+    <script src="/js/jquery.ui.touch-punch.min.js"></script>
+    
+    <title>Lista de Canciones - Sheet Music Organizer</title>
+
+    <link href="/css/setlist.css" rel="stylesheet">
+  </head>
+
+  <body>
+    {{template "navbar.html"}}
+
+    <div class="container">
+      <!-- Header -->
+      <img src="/img/globe.svg" class="hidden visibility_icon" id="visibility_public" alt="Public setlist" title="Anyone with a link can view this setlist.">
+      <img src="/img/users.svg" class="hidden visibility_icon" id="visibility_collection" alt="Collection setlist" title="Members of this collection can view this setlist.">
+      <img src="/img/lock.svg" class="hidden visibility_icon" id="visibility_private" alt="Private setlist" title="Only you can view this setlist.">
+      <h1 id="page_header">Cargando...</h1>
+      <hr>
+
+      <div id="alerts"></div>
+
+      
+      <div>
+        <h5 class="setlist_header">Fecha</h5>
+        <div class="setlist_value" id="setlist_date"></div>
+      </div>
+      <div>
+        <h5 class="setlist_header">Notas</h5>
+        <div class="setlist_value" id="setlist_notes"></div>
+      </div>
+
+      <h5 class="setlist_header">Canciones en esta lista de canciones:</h5>
+      <div id="remove_alert" class="alert alert-info hidden" role="alert">
+        <strong>Eliminar canciones</strong>
+        <div>
+          Haga clic en una canción para eliminarla de esta lista de canciones.
+          Se puede añadir de nuevo después.
+        </div>
+      </div>
+      <div id="reorder_help" class="alert alert-info hidden" role="alert">
+        <strong>Reordenar canciones</strong>
+        <div>
+          Haga clic y arrastre canciones en el orden que usted quiere.
+          Cuando termina, haga clic en el botón "Guardar orden" para finalizar sus cambios.
+        </div>
+      </div>
+      <div class="list-group" id="songs_container"></div>
+      <div class="list-group hidden" id="songs_container_delete"></div>
+      <div class="list-group hidden" id="songs_container_reorder"></div>
+      
+      <div id="button_toolbar">
+        <h5 class="setlist_header" id="song_tools_label">Acciones de canciones</h5>
+        <button type="button" class="btn btn-primary" id="add_button" data-toggle="modal" data-target="#setlist_add_song_modal">Añadir</button>
+        <button type="button" class="btn btn-secondary" id="reorder_button">Reordenar</button>
+        <button type="button" class="btn btn-secondary" id="remove_button">Eliminar</button>
+        <button type="button" class="btn btn-primary hidden" id="save_button">Guardar orden</button>
+        <button type="button" class="btn btn-secondary hidden" id="cancel_button">Cancelar</button>
+        <button type="button" class="btn btn-secondary hidden" id="back_button">Volver</button>
+      </div>
+
+      {{template "footer.html"}}
+    </div>
+
+    <!-- #region Modals -->
+
+    <!-- #region Edit setlist -->
+    <!-- Edit setlist modal -->
+    <div class="modal fade" id="edit_setlist_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Editar Lista de Canción</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+            <div class="form-group">
+              <label for="setlist_name" class="col-form-label">Nombre:</label>
+              <input type="text" class="form-control" id="setlist_name_input">
+            </div>
+            <div class="form-group">
+              <label for="setlist_date" class="col-form-label">Fecha:</label>
+              <input type="date" class="form-control" id="setlist_date_input">
+            </div>
+            <div class="form-group">
+              <label for="setlist_description" class="col-form-label">Notas:</label>
+              <textarea class="form-control" id="setlist_notes_input"></textarea>
+            </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="save_setlist_button">Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit setlist wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="edit_setlist_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Guardando cambios...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Por favor espera mientras se guardan sus cambios...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- #endregion -->
+    
+    <!-- #region Delete setlist -->
+    <!-- Delete setlist modal -->
+    <div class="modal fade" id="delete_setlist_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Eliminar Lista de Canciones Confirmación</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>
+              ¿Está usted seguro quiere eliminar este lista de canciones?
+              Las canciones en esta lista de canciones permanecerán,
+              pero la lista de canciones habrá eliminado permanentemente.
+            </p>
+            <p>¡Esto NO SE PUEDE deshacer!</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-danger" id="delete_setlist">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete setlist wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="delete_setlist_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminando la lista de canciones...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Por favor espera mientras se elimina la lista de canciones...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- #endregion -->
+    
+    <!-- #region Add songs -->
+    <!-- Add songs to setlist modal -->
+    <div class="modal fade" id="setlist_add_song_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Añadir canción</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Por favor, seleccione una o más canciones para añadir a esta lista de canciones.</p>
+            <div class="input-group">
+              <select class="custom-select" name="song_select" id="song_select">
+                <option style="display:none" value=0>Elija una canción...</option>
+              </select>
+            </div>
+            <hr>
+            <p>Canciones que se añadiré:</p>
+            <div class="list-group" id="song_list"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="add_song_modal_button" disabled>Añada canciones</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add songs to setlist wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="setlist_add_song_wait_modal" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Añadiendo canción...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Por favor espera mientras se añaden las canciones a esta lista de canciones...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- #endregion -->
+
+    <!-- #region Share setlist -->
+    <!-- Share setlist modal -->
+    <div class="modal fade" id="share_setlist_modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Compartir Lista de Canciones</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+            <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <p>Por favor, seleccione la visibilidad de esta lista de canciones:</p>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="visibility_radio" id="private_radio" value="private">
+                <label class="form-check-label" for="private_radio">
+                  Sólo yo
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="visibility_radio" id="collection_radio" value="collection">
+                <label class="form-check-label" for="collection_radio">
+                  Miembros de esta colección
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="visibility_radio" id="public_radio" value="public">
+                <label class="form-check-label" for="public_radio">
+                  Cualquiera con un enlace
+                </label>
+              </div>
+              <div class="form-group" id="share_code_form_group">
+                <h5 class="setlist_header"><label for="share_code_input">Compartir enlace</label></h5>
+                <input type="text" class="form-control-plaintext" id="share_link_input" placeholder="" readonly>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="copy_link_button">Copiar enlace</button>
+                <span id="copy_link_success" class="hidden">¡Enlace se copia al portapapeles!</span>
+              </div>
+            </form>
+            <div class="hidden" id="saving"><div id="spinner"></div>Guardando...</div>
+            
+            <div id="share_result" class="alert alert-success hidden" role="alert">
+              <strong>Visibilidad actualizada</strong>
+              <div id="private_result" class="hidden">
+                Esta lista de canciones ya no se comparte y solo está visible a usted.
+              </div>
+              <div id="collection_result" class="hidden">
+                Esta lista de canciones ahora que está visible de cualquiera en esta colección.
+              </div>
+              <div id="public_result" class="hidden">
+                Esta lista de canciones ahora que está visible de cualquiera con el enlace.
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            <button type="button" class="btn btn-primary" id="save_setlist_visibility_button" disabled>Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Share setlist wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="share_setlist_wait">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Compartiendo la Lista de Canciones...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Por favor espera mientras se guardan sus cambios de esta lista de canciones...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    <!-- #endregion -->
+
+    <!-- Save setlist order wait modal -->
+    <div class="modal fade in" tabindex="-1" role="dialog" id="setlist_order_wait_modal" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Guardando la Orden de Esta Lista de Canciones...</h5>
+        </div>
+        <div class="modal-body">
+          <p>Por favor espera mientras se guardan sus cambios...</p>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- #endregion -->
+
+    <!-- Script -->
+    <script src="/js/setlist.js" type="module"></script>
+  </body>
+</html>

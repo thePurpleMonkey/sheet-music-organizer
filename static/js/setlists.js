@@ -10,7 +10,7 @@ let user_id;
 $("#navbar_dashboard").removeClass("hidden");
 
 // Update links
-$("#collection_link").attr("href", "/collection.html?collection_id=" + collection_id);
+$("#collection_link").attr("href", "collection.html?collection_id=" + collection_id);
 
 function refreshSetlists() {
 	$("#setlists_list").empty();
@@ -22,7 +22,7 @@ function refreshSetlists() {
 
 		data.forEach(setlist => {
 			let a = $("<a>")
-				.attr("href", "/setlist.html?collection_id=" + collection_id + "&setlist_id=" + setlist.setlist_id)
+				.attr("href", "setlist.html?collection_id=" + collection_id + "&setlist_id=" + setlist.setlist_id)
 				.addClass("list-group-item list-group-item-action")
 				.text(setlist.name);
 			$("#setlists_list").append(a);
@@ -97,7 +97,7 @@ $('#wait').on('shown.bs.modal', function (e) {
 		console.log("Setlist post response:");
 		console.log(data);
 		add_session_alert("Setlist created!", `${setlist_name} was successfully created.`, "success");
-		window.location.href = `/setlist.html?collection_id=${collection_id}&setlist_id=${data.setlist_id}`
+		window.location.href = `setlist.html?collection_id=${collection_id}&setlist_id=${data.setlist_id}`
 	})
 	.fail(function(data) {
 		alert_ajax_failure("Unable to create setlist!", data);

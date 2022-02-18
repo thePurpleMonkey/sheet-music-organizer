@@ -39,8 +39,8 @@ $("#navbar_setlist_share").removeClass("hidden");
 $("#search_form").removeClass("hidden");
 
 // Replace link for collection
-$("#collection_link").attr("href", "/collection.html?collection_id=" + setlist.collection_id);
-$("#setlists_link").attr("href", "/setlists.html?collection_id=" + setlist.collection_id);
+$("#collection_link").attr("href", "collection.html?collection_id=" + setlist.collection_id);
+$("#setlists_link").attr("href", "setlists.html?collection_id=" + setlist.collection_id);
 
 // Enable tooltips
 // $(".visibility_icon").tooltip();
@@ -315,7 +315,7 @@ $('#delete_setlist_wait').on('shown.bs.modal', function (e) {
     .done(function(data) {
         console.log("Setlist delete.");
         console.log(data);
-        window.location.replace("/setlists.html?collection_id=" + setlist.collection_id);
+        window.location.replace("setlists.html?collection_id=" + setlist.collection_id);
     })
     .fail(function(data) {
         $("#delete_setlist_wait").modal("hide");
