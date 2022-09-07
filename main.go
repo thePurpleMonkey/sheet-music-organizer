@@ -134,6 +134,9 @@ func main() {
 	}
 	defer db.Close()
 
+	// Configure cookie store
+	store.MaxAge(86400 * 30) // 30 days
+
 	// Launch server
 	log.Printf("Running on port %s\n", port)
 	log.Fatal(http.ListenAndServeTLS(":"+port, os.Getenv("CERT_FILE"), os.Getenv("KEY_FILE"), handlers.RecoveryHandler()(r)))
