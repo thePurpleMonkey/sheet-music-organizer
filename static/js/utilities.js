@@ -65,15 +65,31 @@ export function alert_ajax_failure(title, data) {
 		try { window.localStorage.setItem("logged_in", false); } catch(err) { console.log("Unable to 'logged_in' localStorage variable to false."); console.log(err); }
 		console.log("Redirecting to: " + redirect);
 		window.location.href = redirect;
-	}
-	let alert_text = "";
-	if (data.responseJSON) {
-		alert_text = data.responseJSON.error;
+	} else if (data.status === 500) {
+		console.log("Recieved 500 response. Deleting all cookies.");
+		delete_all_cookies();
+		add_alert("Unknown error", "There was a problem handling this request. Please try reloading the page or trying again later.", "danger");
 	} else {
-		alert_text = "Unknown error. Status code: " + data.status;
+		let alert_text = "";
+		if (data.responseJSON) {
+			alert_text = data.responseJSON.error;
+		} else {
+			alert_text = "Unknown error. Status code: " + data.status;
+		}
+		add_alert(title, alert_text, "danger");
 	}
-	add_alert(title, alert_text, "danger");
 };
+
+export function delete_all_cookies() {
+	const cookies = document.cookie.split(";");
+
+	for (let i = 0; i < cookies.length; i++) {
+		const cookie = cookies[i].trim();
+		const eqPos = cookie.indexOf("=");
+		const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+		document.cookie = name + ";expires=Thu, 01 Jan 1970 00:00:00 GMT";
+	}
+}
 
 export function add_session_alert(title, message, style="info") {
 	try {
